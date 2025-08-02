@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Volume2, VolumeX, Mail, Check } from "lucide-react";
+import { Volume2, VolumeX, Mail } from "lucide-react";
 
 export default function Home() {
   const [isMuted, setIsMuted] = useState(true);
-  const [showNotification, setShowNotification] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const toggleAudio = () => {
@@ -25,15 +24,11 @@ export default function Home() {
     }
   };
 
-  const copyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText('hey@heybristol.com');
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
-    } catch (err) {
-      console.error('Error al copiar email:', err);
-    }
+  const openEmail = () => {
+    window.location.href = 'mailto:hey@heybristol.com';
   };
+
+
 
   return (
     <>
@@ -62,7 +57,7 @@ export default function Home() {
       
       {/* Logo y botón de email en el centro de la pantalla */}
       <div className="fixed inset-0 flex flex-col items-center justify-center z-40 pointer-events-none gap-2">
-        <div className="w-[60vw] max-w-[500px] min-w-[300px] h-auto mb-8">
+        <div className="w-[51vw] max-w-[425px] min-w-[255px] h-auto mb-8">
           <svg 
             id="Layer_2" 
             data-name="Layer 2" 
@@ -125,7 +120,7 @@ export default function Home() {
         
         {/* Botón del email */}
         <button
-          onClick={copyEmail}
+          onClick={openEmail}
           className="bg-white/10 backdrop-blur-md hover:bg-white/20 px-6 py-3 rounded-lg transition-all duration-300 shadow-lg flex items-center pointer-events-auto cursor-pointer"
         >
           <Mail className="w-5 h-5 text-white" />
@@ -133,13 +128,7 @@ export default function Home() {
         </button>
       </div>
       
-      {/* Notificación de email copiado */}
-      {showNotification && (
-  <div className="fixed top-4 right-4 md:top-6 md:right-6 bg-green-300/30  backdrop-blur-md text-green-100 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-in slide-in-from-top-2 duration-300 pointer-events-auto">
-    <Check className="w-5 h-5" />
-    <span className="font-medium text-sm md:text-base">E-mail copiado al portapapeles</span>
-  </div>
-)}
+
 
       
       {/* Botón de audio en la esquina inferior derecha - Versión Minimal */}

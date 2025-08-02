@@ -61,7 +61,7 @@ export default function Home() {
       </div>
       
       {/* Logo y botón de email en el centro de la pantalla */}
-      <div className="fixed inset-0 flex flex-col items-center justify-center z-40 pointer-events-none gap-8">
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-40 pointer-events-none gap-2">
         <div className="w-[60vw] max-w-[500px] min-w-[300px] h-auto mb-8">
           <svg 
             id="Layer_2" 
@@ -126,32 +126,33 @@ export default function Home() {
         {/* Botón del email */}
         <button
           onClick={copyEmail}
-          className="bg-white/10 backdrop-blur-md hover:bg-white/20 px-6 py-3 rounded-lg transition-all duration-300 shadow-lg flex items-center gap-3 pointer-events-auto"
+          className="bg-white/10 backdrop-blur-md hover:bg-white/20 px-6 py-3 rounded-lg transition-all duration-300 shadow-lg flex items-center pointer-events-auto cursor-pointer"
         >
           <Mail className="w-5 h-5 text-white" />
-          <span className="text-white font-medium text-sm md:text-base">hey@heybristol.com</span>
+          <span className="text-white font-medium text-sm md:text-base pl-6">hey@heybristol.com</span>
         </button>
       </div>
       
       {/* Notificación de email copiado */}
       {showNotification && (
-        <div className="fixed top-4 right-4 md:top-6 md:right-6 bg-green-500/90 backdrop-blur-md text-white px-8 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-in slide-in-from-top-2 duration-300">
-          <Check className="w-5 h-5" />
-          <span className="font-medium">E-mail copiado al portapapeles</span>
-        </div>
-      )}
+  <div className="fixed top-4 right-4 md:top-6 md:right-6 bg-green-300/30  backdrop-blur-md text-green-100 px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50 animate-in slide-in-from-top-2 duration-300 pointer-events-auto">
+    <Check className="w-5 h-5" />
+    <span className="font-medium text-sm md:text-base">E-mail copiado al portapapeles</span>
+  </div>
+)}
+
       
       {/* Botón de audio en la esquina inferior derecha - Versión Minimal */}
       <button
         onClick={toggleAudio}
-        className="fixed bottom-4 right-8 md:bottom-6 md:right-8 w-16 h-16 rounded-lg transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center z-50 touch-manipulation"
+        className="fixed bottom-4 right-8 md:bottom-6 md:right-8 w-14 h-14 rounded-lg transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center z-50 touch-manipulation cursor-pointer"
         style={{ zIndex: 9999 }}
         aria-label={isMuted ? "Activar audio" : "Silenciar audio"}
       >
         {isMuted ? (
-          <VolumeX className="w-7 h-7 text-white" />
+          <VolumeX className="w-6 h-6 text-white" />
         ) : (
-          <Volume2 className="w-7 h-7 text-white" />
+          <Volume2 className="w-6 h-6 text-white" />
         )}
       </button>
     </>

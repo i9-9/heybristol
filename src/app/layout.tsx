@@ -3,7 +3,29 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Bristol",
-  description: "Bristol",
+  description: "Bristol es una productora de contenido audiovisual",
+  metadataBase: new URL('https://heybristol.com'),
+  openGraph: {
+    title: "Bristol",
+    description: "Bristol es una productora de contenido audiovisual",
+    url: 'https://heybristol.com',
+    siteName: 'Bristol',
+    type: 'website',
+    images: [
+      {
+        url: '/opengraph-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Bristol TOL - Productora audiovisual',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Bristol",
+    description: "Bristol es una productora de contenido audiovisual",
+    images: ['/opengraph-image.svg'],
+  },
   icons: {
     icon: [
       {

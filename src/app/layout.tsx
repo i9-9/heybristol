@@ -16,7 +16,7 @@ export const metadata: Metadata = {
         url: '/opengraph-image.svg',
         width: 1200,
         height: 630,
-        alt: 'Bristol TOL - Productora audiovisual',
+        alt: 'Bristol - Productora de contenido audiovisual',
       },
     ],
   },

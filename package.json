@@ -7,7 +7,8 @@
     "build": "next build",
     "export": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-og-image": "npm install canvas && node scripts/generate-og-image.js && npm uninstall canvas"
   },
   "dependencies": {
     "lucide-react": "^0.536.0",

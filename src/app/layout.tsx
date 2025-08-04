@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/opengraph-image.svg',
+        url: '/opengraph-image.png',
         width: 1200,
         height: 630,
         alt: 'Bristol - Productora de contenido audiovisual',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "Bristol",
     description: "Bristol es una productora de contenido audiovisual",
-    images: ['/opengraph-image.svg'],
+    images: ['/opengraph-image.png'],
   },
   icons: {
     icon: [
@@ -46,11 +46,13 @@ export default function RootLayout({
   return (
     <html lang="es" className="w-full h-full">
       <head>
-        <link rel="dns-prefetch" href="https://player.vimeo.com" />
-        <link rel="preconnect" href="https://player.vimeo.com" />
-        <link rel="preconnect" href="https://vimeo.com" />
-        <link rel="dns-prefetch" href="https://f.vimeocdn.com" />
-        <link rel="preconnect" href="https://f.vimeocdn.com" crossOrigin="" />
+        {/* Meta tags para optimización de carga */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+        
+        {/* Preload de videos optimizados */}
+        <link rel="preload" href="/videos/under_construction.webm" as="video" type="video/webm" />
+        <link rel="preload" href="/videos/under_construction_optimized.mp4" as="video" type="video/mp4" />
       </head>
       <body className="w-full h-full m-0 p-0 overflow-hidden">
         {children}

@@ -7,6 +7,7 @@ import BristolLogo from "@/components/BristolLogo";
 export default function Home() {
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const toggleAudio = () => {
@@ -71,7 +72,7 @@ export default function Home() {
       </div>
       
       {/* Logo y botón de email centrados */}
-      <div className="fixed inset-0 flex flex-col items-center justify-center z-40 pointer-events-none gap-6 md:gap-8">
+      <div className="fixed inset-0 flex flex-col items-center justify-center z-40 pointer-events-none gap-6 md:gap-8" style={{ paddingTop: '6vh' }}>
         <div className="w-[40.8vw] max-w-[340px] min-w-[204px] h-auto">
           <BristolLogo />
         </div>
@@ -82,7 +83,6 @@ export default function Home() {
           className="bg-white/10 backdrop-blur-md hover:bg-white/20 px-6 py-3 rounded-lg transition-all duration-300 shadow-lg flex items-center pointer-events-auto cursor-pointer"
         >
           <Mail className="w-5 h-5 text-white" />
-          <span className="text-white font-medium text-sm md:text-base pl-6">hey@heybristol.com</span>
         </button>
       </div>
       

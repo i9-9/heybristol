@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import Image from "next/image";
 import LogoB from "@/components/LogoB";
 
 const years = ["2025", "2024", "2023", "2022", "2021", "2020"];
@@ -38,12 +39,12 @@ export default function Directors() {
 
   return (
     <section className="relative bg-[#e2e2e2] w-full h-screen pt-12">
-      <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-3 border-[#f31014] ">
-        <div className="w-24 h-auto text-[#f31014] self-start">
+      <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-2 border-[#f31014] ">
+        <div className="w-10 md:w-24 h-auto text-[#f31014] self-start">
           <LogoB />
         </div>
-        <div onWheel={handleWheel} className="h-60 overflow-y-auto select-none">
-          <ul className="flex flex-col gap-y-3 font-medium font-ordinary list-none select-none">
+        <div onWheel={handleWheel} className="h-48 md:h-60 overflow-y-auto select-none">
+          <ul className="flex flex-col gap-y-1.5 md:gap-y-3 font-medium font-ordinary list-none select-none">
             {years.map((year, index) => (
               <li
                 key={year}
@@ -63,21 +64,58 @@ export default function Directors() {
           </ul>
         </div>
         <div>
-          <h2 className="text-[#f31014] font-tusker text-[clamp(1.5rem,30vw,14rem)] md:text-[clamp(1.5rem,130vw,14rem)] leading-none">
+          <h2 className="text-[#f31014] font-tusker text-[clamp(1.5rem,33vw,14rem)] md:text-[clamp(2rem,22vw,14rem)] leading-none tracking-tight">
             DIRECTORS
           </h2>
         </div>
       </div>
-      <div className="mx-app py-4">
-        <ul className="text-[#f31014] text-md md:text-3xl font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-300 ease-in-out">
+      <div className="mx-app py-6 grid grid-cols-12 gap-4 md:gap-6 items-start">
+        {/* Lista de directores (izquierda) */}
+        <ul className="col-span-12 md:col-span-4 text-[#f31014] text-md md:text-2xl font-hagrid-text flex flex-col font-normal uppercase md:gap-y-1 transition-all duration-300 ease-in-out">
           {directors.map((director, index) => (
-            <li 
-                className={director === selectedDirector ? "font-bold" : "font-normal cursor-pointer"}
-                onClick={() => setSelectedDirector(director)}
-                key={index}>{director}
+            <li
+              className={director === selectedDirector ? "font-bold" : "font-normal cursor-pointer"}
+              onClick={() => setSelectedDirector(director)}
+              key={index}
+            >
+              {director}
             </li>
           ))}
         </ul>
+
+        {/* Contenedor de imágenes (derecha) */}
+        <div className="col-span-12 md:col-span-8">
+          {/* Mobile: apiladas */}
+          <div className="grid grid-cols-1 gap-4 md:hidden">
+            <div className="relative w-full  overflow-hidden" style={{ aspectRatio: "16/9" }}>
+              <Image src="/images/ojos.jpg" alt="Detalle ojos" fill sizes="100vw" className="object-cover" />
+            </div>
+            <div className="relative w-full overflow-hidden" style={{ aspectRatio: "9/16" }}>
+              <Image src="/images/alta.jpg" alt="Retrato jugador" fill sizes="100vw" className="object-cover" />
+            </div>
+            <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1/1" }}>
+              <Image src="/images/alta.jpg" alt="Perro" fill sizes="100vw" className="object-cover" />
+            </div>
+          </div>
+
+          {/* Desktop: composición absoluta */}
+          <div className="hidden md:block relative h-[520px] lg:h-[600px]">
+            {/* Ojo: centrado arriba */}
+            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[50%] lg:w-[42%] h-[20%]  overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
+              <Image src="/images/ojos.jpg" alt="Detalle ojos" fill sizes="(min-width: 1024px) 58vw, 62vw" className="object-cover" />
+            </div>
+
+            {/* Jugador: alto a la derecha */}
+            <div className="absolute top-0 right-0 w-[28%] lg:w-[28%] h-[78%] overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
+              <Image src="/images/alta.jpg" alt="Retrato jugador" fill sizes="(min-width: 1024px) 36vw, 34vw" className="object-cover" />
+            </div>
+
+            {/* Perro: abajo izquierda */}
+            <div className="absolute bottom-0 left-6 w-[27%] lg:w-[26%] h-[38%]  overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
+              <Image src="/images/perro.jpg" alt="Perro" fill sizes="(min-width: 1024px) 32vw, 34vw" className="object-cover" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Lema (abajo izquierda) */}

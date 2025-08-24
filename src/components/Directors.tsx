@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
+import DirectorModal from "@/components/DirectorModal";
 
 const years = ["2025", "2024", "2023", "2022", "2021", "2020"];
 
@@ -16,6 +17,8 @@ const directors = [
 export default function Directors() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedDirector, setSelectedDirector] = useState(directors[0]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalDirector, setModalDirector] = useState("");
   const canScroll = useRef(true);
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -35,6 +38,15 @@ export default function Directors() {
     setTimeout(() => {
       canScroll.current = true;
     }, 500); // 500ms cooldown
+  };
+
+  const handleDirectorClick = (director: string) => {
+    setModalDirector(director);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -74,8 +86,11 @@ export default function Directors() {
         <ul className="col-span-12 md:col-span-4 text-[#f31014] text-md md:text-2xl font-hagrid-text flex flex-col font-normal uppercase md:gap-y-1 transition-all duration-300 ease-in-out">
           {directors.map((director, index) => (
             <li
-              className={director === selectedDirector ? "font-bold" : "font-normal cursor-pointer"}
-              onClick={() => setSelectedDirector(director)}
+              className={`${director === selectedDirector ? "font-bold" : "font-normal cursor-pointer"} hover:opacity-80 transition-opacity`}
+              onClick={() => {
+                setSelectedDirector(director);
+                handleDirectorClick(director);
+              }}
               key={index}
             >
               {director}
@@ -85,16 +100,21 @@ export default function Directors() {
 
         {/* Contenedor de imágenes (derecha) */}
         <div className="col-span-12 md:col-span-8">
-          {/* Mobile: apiladas */}
-          <div className="grid grid-cols-1 gap-4 md:hidden">
-            <div className="relative w-full  overflow-hidden" style={{ aspectRatio: "16/9" }}>
+          {/* Mobile: layout similar a desktop */}
+          <div className="md:hidden relative h-[300px]">
+            {/* Ojo: debajo de la lista de directores, pegado al margen izquierdo */}
+            <div className="absolute top-0 left-0 w-[35%] h-[18%] overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
               <Image src="/images/ojos.jpg" alt="Detalle ojos" fill sizes="100vw" className="object-cover" />
             </div>
-            <div className="relative w-full overflow-hidden" style={{ aspectRatio: "9/16" }}>
+
+            {/* Jugador: más arriba y sin recortar */}
+            <div className="absolute -top-38 right-0 w-[22%] h-[50%] overflow-visible shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
               <Image src="/images/alta.jpg" alt="Retrato jugador" fill sizes="100vw" className="object-cover" />
             </div>
-            <div className="relative w-full overflow-hidden" style={{ aspectRatio: "1/1" }}>
-              <Image src="/images/alta.jpg" alt="Perro" fill sizes="100vw" className="object-cover" />
+
+            {/* Perro: centrado, más pequeño y más arriba */}
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[18%] h-[25%] overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
+              <Image src="/images/perro.jpg" alt="Perro" fill sizes="100vw" className="object-cover" />
             </div>
           </div>
 
@@ -110,8 +130,8 @@ export default function Directors() {
               <Image src="/images/alta.jpg" alt="Retrato jugador" fill sizes="(min-width: 1024px) 36vw, 34vw" className="object-cover" />
             </div>
 
-            {/* Perro: abajo izquierda */}
-            <div className="absolute bottom-0 left-6 w-[27%] lg:w-[26%] h-[38%]  overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
+            {/* Perro: abajo izquierda (elevado) */}
+            <div className="absolute bottom-32 left-2 w-[27%] lg:w-[26%] h-[38%]  overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
               <Image src="/images/perro.jpg" alt="Perro" fill sizes="(min-width: 1024px) 32vw, 34vw" className="object-cover" />
             </div>
           </div>
@@ -134,6 +154,13 @@ export default function Directors() {
           BRISTOL
         </p>
       </div>
+
+      {/* Director Modal */}
+      <DirectorModal 
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        directorName={modalDirector}
+      />
     </section>
   );
 }

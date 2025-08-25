@@ -32,6 +32,16 @@ export default function Hero() {
     }
   };
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
   useEffect(() => {
     const bestFormat = detectVideoSupport();
     setVideoSource(bestFormat);
@@ -85,8 +95,8 @@ export default function Hero() {
       {/* Botones centrados, más abajo */}
       <div className="absolute inset-0 flex items-center justify-center z-10">
         <div className="w-full px-[20px] md:px-[50px] mt-[clamp(12rem,34vh,22rem)] flex justify-center gap-x-[clamp(6rem,42vw,9.25rem)] lg:gap-x-[clamp(24rem,24vw,24rem)] xl:gap-x-[clamp(16rem,22vw,28rem)] font-hagrid-text font-medium text-white text-[clamp(1rem,2.2vw,1.875rem)]">
-          <button>DIRECTORS</button>
-          <button>CONTACT</button>
+          <button onClick={() => scrollToSection('directors')} className="cursor-pointer hover:opacity-80 transition-opacity">DIRECTORS</button>
+          <button onClick={() => scrollToSection('contact')} className="cursor-pointer hover:opacity-80 transition-opacity">CONTACT</button>
         </div>
       </div>
 

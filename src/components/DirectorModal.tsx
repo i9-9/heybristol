@@ -77,7 +77,7 @@ export default function DirectorModal({ isOpen, onClose, directorName }: Directo
       </div>
 
       {/* Back to Directors Button */}
-      <div className={`absolute top-6 right-6 z-10 transition-all duration-300 ease-in-out ${
+      <div className={`absolute top-6 right-6 z-10 transition-all duration-500 ease-in-out ${
         isClosing ? 'delay-0' : 'delay-300'
       } ${
         showContent && !isClosing
@@ -89,36 +89,30 @@ export default function DirectorModal({ isOpen, onClose, directorName }: Directo
           className="flex items-center space-x-2 text-white hover:opacity-80 transition-opacity"
         >
           <span className="font-raleway text-sm md:text-base">DIRECTORS</span>
-          <svg 
-            className="w-4 h-4 transform rotate-180" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M19 9l-7 7-7-7" 
-            />
-          </svg>
+          <Image 
+            src="/images/icons/arrow.png" 
+            alt="Arrow Down" 
+            width={16} 
+            height={16} 
+            className="w-4 h-4 transform rotate-180"
+          />
         </button>
       </div>
 
       {/* Main Content Area */}
-      <div className={`flex flex-col items-start justify-center h-full px-6 transition-all duration-300 ease-in-out ${
-        isClosing ? 'delay-0' : 'delay-400'
+      <div className={`flex flex-col items-start justify-center h-full px-6 transition-all duration-500 ease-in-out ${
+        isClosing ? 'delay-100' : 'delay-400'
       } ${
         showContent && !isClosing
           ? 'translate-x-0 translate-y-0 opacity-100' 
           : 'translate-x-12 translate-y-12 opacity-0'
       }`}>
-        <h1 className="text-6xl md:text-8xl font-tusker font-bold text-white text-left mb-12">
+        <h1 className="text-6xl md:text-8xl font-tusker font-bold text-white text-center mb-12">
           {directorName}
         </h1>
         
         {/* Placeholder for director content */}
-        <div className="text-white text-left max-w-2xl">
+        <div className="text-white text-center max-w-2xl">
           <p className="text-lg md:text-xl mb-6">
             Director content will go here...
           </p>
@@ -126,8 +120,8 @@ export default function DirectorModal({ isOpen, onClose, directorName }: Directo
       </div>
 
       {/* Footer - Latin Creative Production */}
-      <div className={`absolute bottom-6 left-6 z-10 transition-all duration-300 ease-in-out ${
-        isClosing ? 'delay-0' : 'delay-500'
+      <div className={`absolute bottom-6 left-6 z-10 transition-all duration-500 ease-in-out ${
+        isClosing ? 'delay-200' : 'delay-500'
       } ${
         showContent && !isClosing
           ? 'translate-x-0 translate-y-0 opacity-100' 
@@ -143,8 +137,8 @@ export default function DirectorModal({ isOpen, onClose, directorName }: Directo
       </div>
 
       {/* Footer - Bristol with Arrow */}
-      <div className={`absolute bottom-6 right-6 z-10 transition-all duration-300 ease-in-out ${
-        isClosing ? 'delay-0' : 'delay-500'
+      <div className={`absolute bottom-6 right-6 z-10 transition-all duration-500 ease-in-out ${
+        isClosing ? 'delay-200' : 'delay-500'
       } ${
         showContent && !isClosing
           ? 'translate-x-0 translate-y-0 opacity-100' 
@@ -152,19 +146,16 @@ export default function DirectorModal({ isOpen, onClose, directorName }: Directo
       }`}>
         <button 
           onClick={handleClose}
-          className="flex items-center space-x-2 text-white hover:opacity-80 transition-opacity"
+          className="flex flex-col items-end space-y-2 text-white hover:opacity-80 transition-opacity"
         >
+          <Image 
+            src="/images/icons/arrow.png" 
+            alt="Arrow Up" 
+            width={32} 
+            height={32} 
+            className="w-8 h-8"
+          />
           <span className="font-ordinary text-sm md:text-xl">BRISTOL</span>
-          <svg 
-            className="w-4 h-4" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-          >
-            <path d="M12 4L20 12L12 20" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M20 12H4" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
         </button>
       </div>
     </div>

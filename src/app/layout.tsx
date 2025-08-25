@@ -49,10 +49,6 @@ export default function RootLayout({
         {/* Meta tags para optimización de carga */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        
-        {/* Preload de videos optimizados */}
-        <link rel="preload" href="/videos/under_construction.webm" as="video" type="video/webm" />
-        <link rel="preload" href="/videos/under_construction_optimized.mp4" as="video" type="video/mp4" />
       </head>
       <body className="w-full h-full m-0 p-0 overflow-hidden">
         {children}

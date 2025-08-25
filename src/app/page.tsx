@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { Volume2, VolumeX, Mail } from "lucide-react";
 import BristolLogo from "@/components/BristolLogo";
 
-export default function Home() {
+
+export default async function Home() {
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [videoSource, setVideoSource] = useState<string | null>(null);
@@ -46,9 +47,8 @@ export default function Home() {
   };
 
   useEffect(() => {
-    // Detectar el mejor formato para el navegador
-    const bestFormat = detectVideoSupport();
-    setVideoSource(bestFormat);
+    // Usar MP4 directamente para evitar problemas de compatibilidad
+    setVideoSource('/videos/under_construction_optimized.mp4');
 
     // Timer de seguridad - ocultar loading después de 3 segundos máximo
     setTimeout(() => {
@@ -83,16 +83,8 @@ export default function Home() {
             }}
             onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
-            onError={() => {
-              console.log('Error cargando video, intentando fallback...');
-              // Si falla WebM, intentar MP4
-              if (videoSource.includes('.webm')) {
-                setVideoSource('/videos/under_construction_optimized.mp4');
-              }
-              setIsVideoLoaded(true);
-            }}
           >
-            <source src={videoSource} type={videoSource.includes('.webm') ? 'video/webm' : 'video/mp4'} />
+            <source src={videoSource} type="video/mp4" />
             Tu navegador no soporta el elemento de video.
           </video>
         )}

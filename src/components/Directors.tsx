@@ -50,7 +50,7 @@ export default function Directors() {
   };
 
   return (
-    <section className="relative bg-[#e2e2e2] w-full h-screen pt-12">
+    <section id="directors" className="relative bg-[#e2e2e2] w-full h-screen pt-12">
       <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-2 border-[#f31014] ">
         <div className="w-10 md:w-24 h-auto text-[#f31014] self-start">
           <LogoB />

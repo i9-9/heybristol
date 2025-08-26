@@ -4,31 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { Volume2, VolumeX, Mail } from "lucide-react";
 import BristolLogo from "@/components/BristolLogo";
 
-
-export default async function Home() {
+export default function Home() {
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [videoSource, setVideoSource] = useState<string | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Detectar soporte de formatos de video
-  const detectVideoSupport = () => {
-    const video = document.createElement('video');
-    
-    // Verificar soporte de WebM
-    if (video.canPlayType('video/webm; codecs="vp9"').replace(/no/, '')) {
-      return '/videos/under_construction.webm';
-    }
-    
-    // Verificar soporte de MP4
-    if (video.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/no/, '')) {
-      return '/videos/under_construction_optimized.mp4';
-    }
-    
-    // Fallback a MP4
-    return '/videos/under_construction_optimized.mp4';
-  };
 
   const toggleAudio = () => {
     if (videoRef.current) {

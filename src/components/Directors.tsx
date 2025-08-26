@@ -1,9 +1,13 @@
-import { useState, useRef } from "react";
+"use client"
+
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
-import DirectorModal from "@/components/DirectorModal";
+import DirectorServer from "./DirectorServer";
+import DirectorModal from "./DirectorModal";
+import type { VideoItem } from "@/lib/types";
 
-const years = ["2025", "2024", "2023", "2022", "2021", "2020"];
+// const years = ["2025", "2024", "2023", "2022", "2021", "2020"];
 
 const directors = [
   "Lemon",
@@ -19,26 +23,28 @@ export default function Directors() {
   const [selectedDirector, setSelectedDirector] = useState(directors[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalDirector, setModalDirector] = useState("");
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const canScroll = useRef(true);
 
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
+  // const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+  //   e.preventDefault();
 
-    if (!canScroll.current) return;
+  //   if (!canScroll.current) return;
 
-    if (e.deltaY > 0) {
-      // scroll hacia abajo
-      setSelectedIndex((prev) => Math.min(prev + 1, years.length - 1));
-    } else if (e.deltaY < 0) {
-      // scroll hacia arriba
-      setSelectedIndex((prev) => Math.max(prev - 1, 0));
-    }
+  //   if (e.deltaY > 0) {
+  //     // scroll hacia abajo
+  //     setSelectedIndex((prev) => Math.min(prev + 1, years.length - 1));
+  //   } else if (e.deltaY < 0) {
+  //     // scroll hacia arriba
+  //     setSelectedIndex((prev) => Math.max(prev - 1, 0));
+  //   }
 
-    canScroll.current = false;
-    setTimeout(() => {
-      canScroll.current = true;
-    }, 500); // 500ms cooldown
-  };
+  //   canScroll.current = false;
+  //   setTimeout(() => {
+  //     canScroll.current = true;
+  //   }, 500); // 500ms cooldown
+  // };
 
   const handleDirectorClick = (director: string) => {
     setModalDirector(director);
@@ -49,13 +55,32 @@ export default function Directors() {
     setIsModalOpen(false);
   };
 
+  useEffect(() => {
+    if (isModalOpen && modalDirector) {
+      const fetchVideos = async () => {
+        setIsLoading(true);
+        try {
+          const videosData = await DirectorServer({ directorName: modalDirector });
+          setVideos(videosData);
+        } catch (error) {
+          console.error('Error fetching videos:', error);
+          setVideos([]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchVideos();
+    }
+  }, [isModalOpen, modalDirector]);
+
   return (
     <section id="directors" className="relative bg-[#e2e2e2] w-full h-screen pt-12">
       <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-2 border-[#f31014] ">
-        <div className="w-10 md:w-24 h-auto text-[#f31014] self-start">
+        <div className="ml-2 w-10 md:w-24 h-auto text-[#f31014] self-start mb-24">
           <LogoB />
         </div>
-        <div onWheel={handleWheel} className="h-48 md:h-60 overflow-y-auto select-none">
+        {/* <div onWheel={handleWheel} className="h-48 md:h-60 overflow-y-auto select-none">
           <ul className="flex flex-col gap-y-1.5 md:gap-y-3 font-medium font-ordinary list-none select-none">
             {years.map((year, index) => (
               <li
@@ -74,7 +99,7 @@ export default function Directors() {
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
         <div>
           <h2 className="text-[#f31014] font-tusker text-[clamp(1.5rem,33vw,14rem)] md:text-[clamp(2rem,22vw,14rem)] leading-none tracking-tight">
             DIRECTORS
@@ -156,11 +181,14 @@ export default function Directors() {
       </div>
 
       {/* Director Modal */}
-      <DirectorModal 
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        directorName={modalDirector}
-      />
+      {isModalOpen && (
+        <DirectorModal
+          directorName={modalDirector}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          videos={videos}
+        />
+      )}
     </section>
   );
 }

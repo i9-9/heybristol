@@ -3,13 +3,21 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
+import DirectorServer from "./DirectorServer";
 import DirectorModal from "./DirectorModal";
-import { getVideosAsVideoItems, getDirectorNames } from "@/data/directors";
 import type { VideoItem } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 // const years = ["2025", "2024", "2023", "2022", "2021", "2020"];
 
-const directors = getDirectorNames();
+const directors = [
+  "Lemon",
+  "Luciano Urbani",
+  "Iván Jurado",
+  "Paloma Rincón",
+  "Tigre Escobar",
+  "China Pequenino",
+];
 
 export default function Directors() {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -19,6 +27,7 @@ export default function Directors() {
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const canScroll = useRef(true);
+  const router = useRouter();
 
   // const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
   //   e.preventDefault();
@@ -40,8 +49,18 @@ export default function Directors() {
   // };
 
   const handleDirectorClick = (director: string) => {
-    setModalDirector(director);
-    setIsModalOpen(true);
+    // Cambiar para navegar a la página del director en lugar de abrir modal
+    const directorSlugs = [
+      "lemon",
+      "luciano-urbani", 
+      "ivan-jurado",
+      "paloma-rincon",
+      "tigre-escobar",
+      "china-pequenino"
+    ];
+    const directorIndex = directors.indexOf(director);
+    const slug = directorSlugs[directorIndex];
+    router.push(`/directors/${slug}`);
   };
 
   const closeModal = () => {
@@ -50,15 +69,13 @@ export default function Directors() {
 
   useEffect(() => {
     if (isModalOpen && modalDirector) {
-      setIsLoading(true);
-      
       const fetchVideos = async () => {
+        setIsLoading(true);
         try {
-          // Usar datos estáticos convertidos a formato VideoItem con thumbnails
-          const videosData = await getVideosAsVideoItems(modalDirector);
+          const videosData = await DirectorServer({ directorName: modalDirector });
           setVideos(videosData);
         } catch (error) {
-          console.error('Error getting videos:', error);
+          console.error('Error fetching videos:', error);
           setVideos([]);
         } finally {
           setIsLoading(false);
@@ -175,7 +192,7 @@ export default function Directors() {
         </p>
       </div>
 
-      {/* Director Modal */}
+      {/* Director Modal - Mantenido para compatibilidad pero ya no se usa */}
       {isModalOpen && (
         <DirectorModal
           directorName={modalDirector}

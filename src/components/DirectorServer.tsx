@@ -3,13 +3,9 @@
 import getVimeoVideosByDirector from "@/lib/getVimeoVideosByDirector";
 import type { VideoItem } from "@/lib/types";
 
-interface Props {
-  directorName: string;
-}
-
-export default async function DirectorServer({ directorName }: Props) {
+export default async function DirectorServer() {
   try {
-    const videos: VideoItem[] = await getVimeoVideosByDirector(directorName);
+    const videos: VideoItem[] = await getVimeoVideosByDirector();
     return videos;
   } catch (error) {
     console.error('Error fetching videos:', error);

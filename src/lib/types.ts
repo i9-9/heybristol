@@ -25,6 +25,7 @@ export interface VideoItem {
     pageUrl?: string;
     embedUrl: string;
     thumb?: string | null;
+    thumbnailId?: string; // ID del video de thumbnail/preview
     width?: number;
     height?: number;
     duration?: number;

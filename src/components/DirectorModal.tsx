@@ -3,6 +3,7 @@
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
 import { useEffect, useState, useRef } from "react";
+import { useInView } from "react-intersection-observer";
 import type { VideoItem } from "@/lib/types";
 
 interface DirectorModalProps {
@@ -12,6 +13,90 @@ interface DirectorModalProps {
   videos: VideoItem[];
   loading?: boolean;
   error?: string | null;
+}
+
+// Componente para el card de video con lazy loading
+function VideoCard({ video, onClick }: { video: VideoItem; onClick: () => void }) {
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isLoadingVideo, setIsLoadingVideo] = useState(false);
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+
+  const handleVideoLoad = () => {
+    setIsVideoLoaded(true);
+    setIsLoadingVideo(false);
+  };
+
+  const handleVideoError = () => {
+    setIsLoadingVideo(false);
+    // Fallback a imagen si falla el video
+  };
+
+  // Construir URL de thumbnail estático de Vimeo
+  const getThumbnailUrl = (thumbnailId: string) => {
+    return `https://i.vimeocdn.com/video/${thumbnailId}_640.jpg`;
+  };
+
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      className="relative group block overflow-hidden cursor-pointer"
+    >
+      <div className="w-full aspect-video bg-black overflow-hidden">
+        {/* Imagen estática de thumbnail - siempre visible */}
+        <Image
+          src={getThumbnailUrl(video.thumbnailId || video.id)}
+          alt={video.title}
+          width={640}
+          height={360}
+          className={`w-full h-full object-cover transition-opacity duration-500 ${
+            isVideoLoaded ? 'opacity-0' : 'opacity-100'
+          }`}
+        />
+
+        {/* Spinner de carga - solo cuando se está cargando el video */}
+        {inView && isLoadingVideo && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          </div>
+        )}
+
+        {/* Iframe de Vimeo - solo cuando está en viewport y cargado */}
+        {inView && (
+          <iframe
+            src={`https://player.vimeo.com/video/${video.thumbnailId || video.id}?h=hash&title=0&byline=0&portrait=0&autoplay=1&loop=1&muted=1&controls=0&background=1&dnt=1`}
+            className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
+              isVideoLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            allow="autoplay; fullscreen; picture-in-picture"
+            title={video.title}
+            frameBorder="0"
+            onLoad={handleVideoLoad}
+            onError={handleVideoError}
+            style={{ display: isVideoLoaded ? 'block' : 'none' }}
+          />
+        )}
+      </div>
+      
+      {/* Overlay con título */}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <span className="text-white text-center px-3 font-medium">{video.title}</span>
+      </div>
+
+      {/* Indicador de carga inicial */}
+      {inView && !isVideoLoaded && !isLoadingVideo && (
+        <div 
+          className="absolute inset-0 bg-black/40 flex items-center justify-center"
+          onTransitionEnd={() => setIsLoadingVideo(true)}
+        >
+          <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+        </div>
+      )}
+    </button>
+  );
 }
 
 export default function DirectorModal({
@@ -102,14 +187,14 @@ export default function DirectorModal({
 
       {/* Contenido */}
       <div
-        className={`flex flex-col items-start justify-center h-full px-6 transition-all duration-500 ease-in-out ${
+        className={`flex flex-col items-start justify-start h-full px-6 pt-[150px] md:pt-[150px] overflow-y-auto transition-all duration-500 ease-in-out ${
           showContent && !isClosing ? "opacity-100" : "opacity-0 translate-x-12 translate-y-12"
         }`}
       >
         {!selectedVideo ? (
           // Layout original: lista de videos
           <>
-            <h1 className="text-4xl md:text-7xl font-tusker font-bold text-white mb-8 md:mb-16 pl-6 md:pl-0">{directorName}</h1>
+            <h1 className="text-4xl md:text-7xl font-tusker font-bold text-white mb-8 md:mb-16 pl-6 md:pl-0 pb-10!">{directorName}</h1>
 
             {/* Espaciador para desktop */}
             <div className="hidden md:block h-16"></div>
@@ -118,7 +203,7 @@ export default function DirectorModal({
             {loading && (
               <div className="grid grid-cols-3 gap-6 w-full">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="aspect-video w-full  bg-white/10 animate-pulse" />
+                  <div key={i} className="aspect-video w-full bg-white/10 animate-pulse" />
                 ))}
               </div>
             )}
@@ -131,33 +216,15 @@ export default function DirectorModal({
               <p className="text-white/80 text-lg">No hay videos disponibles.</p>
             )}
 
-            {/* Grid de videos */}
+            {/* Grid de videos con lazy loading */}
             {!loading && !error && videos.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 w-full px-6 md:px-0 max-w-sm md:max-w-none mx-auto md:mx-0">
-                {videos.slice(0, 3).map((video) => (
-                  <button
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 w-full px-6 md:px-0 max-w-sm md:max-w-none mx-auto md:mx-0 pb-8">
+                {videos.map((video) => (
+                  <VideoCard
                     key={video.id}
+                    video={video}
                     onClick={() => handleVideoSelect(video)}
-                    className="relative group block overflow-hidden cursor-pointer"
-                  >
-                    {video.thumb ? (
-                      <Image
-                        src={video.thumb}
-                        alt={video.title}
-                        width={800}
-                        height={450}
-                        className="w-full aspect-video object-cover"
-                      />
-                    ) : (
-                      <div className="w-full aspect-video bg-gray-800 flex items-center justify-center">
-                        <span className="text-white text-center px-3">No thumbnail</span>
-                      </div>
-                    )}
-                    {/* Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-white text-center px-3">{video.title}</span>
-                </div>
-                  </button>
+                  />
                 ))}
               </div>
             )}

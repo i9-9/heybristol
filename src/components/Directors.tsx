@@ -3,20 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
-import DirectorServer from "./DirectorServer";
 import DirectorModal from "./DirectorModal";
+import { getVideosAsVideoItems, getDirectorNames } from "@/data/directors";
 import type { VideoItem } from "@/lib/types";
 
 // const years = ["2025", "2024", "2023", "2022", "2021", "2020"];
 
-const directors = [
-  "Lemon",
-  "Luciano Urbani",
-  "Iván Jurado",
-  "Paloma Rincón",
-  "Tigre Escobar",
-  "China Pequenino",
-];
+const directors = getDirectorNames();
 
 export default function Directors() {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -57,13 +50,15 @@ export default function Directors() {
 
   useEffect(() => {
     if (isModalOpen && modalDirector) {
+      setIsLoading(true);
+      
       const fetchVideos = async () => {
-        setIsLoading(true);
         try {
-          const videosData = await DirectorServer({ directorName: modalDirector });
+          // Usar datos estáticos convertidos a formato VideoItem con thumbnails
+          const videosData = await getVideosAsVideoItems(modalDirector);
           setVideos(videosData);
         } catch (error) {
-          console.error('Error fetching videos:', error);
+          console.error('Error getting videos:', error);
           setVideos([]);
         } finally {
           setIsLoading(false);

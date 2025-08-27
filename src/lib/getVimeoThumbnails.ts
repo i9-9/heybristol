@@ -19,7 +19,7 @@ export async function getVimeoThumbnail(vimeoId: string): Promise<string | null>
       const preferredSizes = ['1280x720', '960x540', '640x360'];
       
       for (const size of preferredSizes) {
-        const foundSize = sizes.find((s: any) => s.dimensions === size);
+        const foundSize = sizes.find((s: { dimensions: string; link?: string }) => s.dimensions === size);
         if (foundSize && foundSize.link) {
           return foundSize.link;
         }

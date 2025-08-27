@@ -5,6 +5,7 @@ import LogoB from "@/components/LogoB";
 import { useEffect, useState, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import type { VideoItem } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 interface DirectorModalProps {
   isOpen: boolean;
@@ -112,6 +113,7 @@ export default function DirectorModal({
   const [isClosing, setIsClosing] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (isOpen) {
@@ -152,6 +154,22 @@ export default function DirectorModal({
     setSelectedVideo(null);
   };
 
+  const handleDirectorsClick = () => {
+    // Cerrar modal y navegar a la sección Directors del home
+    handleClose();
+    // Usar setTimeout para esperar a que se cierre el modal
+    setTimeout(() => {
+      // Navegar al home y luego scroll a la sección Directors
+      router.push('/');
+      setTimeout(() => {
+        const directorsSection = document.getElementById('directors');
+        if (directorsSection) {
+          directorsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }, 500);
+  };
+
   if (!isOpen && !isAnimating) return null;
 
   return (
@@ -180,7 +198,7 @@ export default function DirectorModal({
           showContent && !isClosing ? "opacity-100" : "opacity-0 translate-x-8 translate-y-8"
         }`}
       >
-        <button onClick={handleClose} className="flex items-center space-x-2 text-white hover:opacity-80">
+        <button onClick={handleDirectorsClick} className="flex items-center space-x-2 text-white hover:opacity-80">
           <span className="font-raleway text-sm md:text-base font-light">DIRECTORS</span>
         </button>
       </div>
@@ -292,7 +310,13 @@ export default function DirectorModal({
           showContent && !isClosing ? "opacity-100" : "opacity-0 translate-x-8 translate-y-8"
         }`}
       >
-        <button onClick={handleClose} className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer">
+        <button onClick={() => {
+          handleClose();
+          // Navegar al home
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 500); // Esperar a que se cierre el modal
+        }} className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer">
           <Image src="/images/icons/arrow.png" alt="Arrow Up" width={32} height={32} className="w-8 h-8" />
           <span className="font-ordinary text-sm md:text-xl">BRISTOL</span>
         </button>

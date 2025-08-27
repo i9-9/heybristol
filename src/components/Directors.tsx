@@ -1,11 +1,8 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
-import DirectorServer from "./DirectorServer";
-import DirectorModal from "./DirectorModal";
-import type { VideoItem } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 // const years = ["2025", "2024", "2023", "2022", "2021", "2020"];
@@ -20,13 +17,7 @@ const directors = [
 ];
 
 export default function Directors() {
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedDirector, setSelectedDirector] = useState(directors[0]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalDirector, setModalDirector] = useState("");
-  const [videos, setVideos] = useState<VideoItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const canScroll = useRef(true);
   const router = useRouter();
 
   // const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -49,7 +40,7 @@ export default function Directors() {
   // };
 
   const handleDirectorClick = (director: string) => {
-    // Cambiar para navegar a la página del director en lugar de abrir modal
+    // Navegar directamente a la página del director
     const directorSlugs = [
       "lemon",
       "luciano-urbani", 
@@ -63,28 +54,7 @@ export default function Directors() {
     router.push(`/directors/${slug}`);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
 
-  useEffect(() => {
-    if (isModalOpen && modalDirector) {
-      const fetchVideos = async () => {
-        setIsLoading(true);
-        try {
-          const videosData = await DirectorServer({ directorName: modalDirector });
-          setVideos(videosData);
-        } catch (error) {
-          console.error('Error fetching videos:', error);
-          setVideos([]);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      
-      fetchVideos();
-    }
-  }, [isModalOpen, modalDirector]);
 
   return (
     <section id="directors" className="relative bg-[#e2e2e2] w-full h-screen pt-12">
@@ -192,15 +162,7 @@ export default function Directors() {
         </p>
       </div>
 
-      {/* Director Modal - Mantenido para compatibilidad pero ya no se usa */}
-      {isModalOpen && (
-        <DirectorModal
-          directorName={modalDirector}
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          videos={videos}
-        />
-      )}
+
     </section>
   );
 }

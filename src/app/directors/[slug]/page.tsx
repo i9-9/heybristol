@@ -6,8 +6,7 @@ import { useEffect, useState, use } from "react";
 import { useInView } from "react-intersection-observer";
 import { getDirectorBySlug, getVideosAsVideoItems } from "@/data/directors";
 import type { VideoItem } from "@/lib/types";
-import { notFound } from "next/navigation";
-import Link from "next/link";
+import { notFound, useRouter } from "next/navigation";
 
 interface PageProps {
   params: Promise<{
@@ -104,6 +103,7 @@ export default function DirectorPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   // Obtener datos del director usando React.use() para Next.js 15
   const { slug } = use(params);
@@ -149,9 +149,18 @@ export default function DirectorPage({ params }: PageProps) {
 
       {/* Botón back */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10">
-        <Link href="/directors" className="flex items-center space-x-2 text-white hover:opacity-80">
+        <button onClick={() => {
+          // Navegar al home y luego scroll a la sección Directors
+          router.push('/');
+          setTimeout(() => {
+            const directorsSection = document.getElementById('director');
+            if (directorsSection) {
+              directorsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }, 100);
+        }} className="flex items-center space-x-2 text-white hover:opacity-80 cursor-pointer">
           <span className="font-raleway text-sm md:text-base font-light">DIRECTORS</span>
-        </Link>
+        </button>
       </div>
 
       {/* Contenido */}
@@ -249,10 +258,13 @@ export default function DirectorPage({ params }: PageProps) {
       </div>
 
       <div className="absolute bottom-6 right-6 z-10">
-        <Link href="/" className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer">
+        <button onClick={() => {
+          // Navegar al home
+          router.push('/');
+        }} className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer">
           <Image src="/images/icons/arrow.png" alt="Arrow Up" width={32} height={32} className="w-8 h-8" />
           <span className="font-ordinary text-sm md:text-xl">BRISTOL</span>
-        </Link>
+        </button>
       </div>
     </div>
   );

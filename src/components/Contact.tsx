@@ -52,7 +52,7 @@ export default function Contact() {
       </div>
 
       {/* Lema (a la mitad izquierda) */}
-      <div className="absolute bottom-4 left-4 md:top-1/2 md:bottom-auto md:left-8 z-10 pointer-events-none transform -translate-y-1/2 md:transform-none md:translate-y-0">
+{/*       <div className="absolute bottom-4 left-4 md:top-1/2 md:bottom-auto md:left-8 z-10 pointer-events-none transform -translate-y-1/2 md:transform-none md:translate-y-0">
         <p className="font-ordinary text-white text-sm md:text-xl leading-3 md:leading-4 text-left">
           LATIN
           <br />
@@ -60,27 +60,25 @@ export default function Contact() {
           <br />
           PRODUCTION
         </p>
-      </div>
+      </div> */}
 
       {/* BRISTOL alineado al baseline de PRODUCTION */}
-      <div className="absolute bottom-4 right-4 md:top-1/2 md:bottom-auto md:right-8 z-10 pointer-events-none transform -translate-y-1/2 md:transform-none md:translate-y-0">
+{/*       <div className="absolute bottom-4 right-4 md:top-1/2 md:bottom-auto md:right-8 z-10 pointer-events-none transform -translate-y-1/2 md:transform-none md:translate-y-0">
         <p className="text-white font-ordinary text-sm md:text-xl leading-3 md:leading-4 text-left">
           BRISTOL
         </p>
-      </div>
+      </div> */}
 
       {/* Footer */}
       <div className="absolute bottom-0 left-0 right-0 z-30">
         <div className="bg-transparent py-40 md:py-14 px-4 md:px-8">
           {/* Mobile: Links y Privacy Policy arriba */}
-          <div className="md:hidden flex flex-wrap justify-center space-x-2 text-black font-raleway text-xs mb-6">
-            <a href="https://vimeo.com/user244363787" className="hover:opacity-80 transition-opacity">VIMEO</a>
+          <div className="md:hidden flex flex-wrap justify-center space-x-2 text-black font-raleway text-[10px] mb-6">
             <a href="https://instagram.com/heybristol" className="hover:opacity-80 transition-opacity">INSTAGRAM</a>
-            <a href="#" className="hover:opacity-80 transition-opacity">LINKEDIN</a>
             <span className="mx-1">•</span>
-            <span>PRIVACY POLICY</span>
+            <span className="font-light">PRIVACY POLICY</span>
             <span className="mx-1">•</span>
-            <span>© 2025 BRISTOL</span>
+            <span className="font-light">© 2025 BRISTOL</span>
           </div>
           
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
@@ -96,14 +94,12 @@ export default function Contact() {
             </div>
             
             {/* Desktop: Center social media */}
-            <div className="hidden md:flex justify-center space-x-8 text-black font-raleway text-base">
-              <a href="#" className="hover:opacity-80 transition-opacity">VIMEO</a>
-              <a href="#" className="hover:opacity-80 transition-opacity">INSTAGRAM</a>
-              <a href="#" className="hover:opacity-80 transition-opacity">LINKEDIN</a>
+            <div className="hidden md:flex justify-center text-black font-raleway text-base">
+              <a href="https://instagram.com/heybristol" className="hover:opacity-80 transition-opacity">INSTAGRAM</a>
             </div>
             
             {/* Desktop: Privacy Policy & Copyright */}
-            <div className="hidden md:block text-black text-base font-raleway">
+            <div className="hidden md:block text-black text-sm font-raleway">
               <span className="mr-4">PRIVACY POLICY</span>
               <span>© 2025 BRISTOL</span>
             </div>

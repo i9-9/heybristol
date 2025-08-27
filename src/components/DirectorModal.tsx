@@ -252,7 +252,7 @@ export default function DirectorModal({
           <>
             {/* Nombre del director arriba a la derecha, más pequeño */}
             <div className="absolute top-6 right-6 z-20">
-              <h2 className="text-xl md:text-2xl font-tusker font-bold text-white text-right">
+              <h2 className="text-xl md:text-2xl font-tusker font-bold text-white text-right uppercase">
                 {directorName}
               </h2>
             </div>

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -17,7 +17,7 @@ const directors = [
 ];
 
 export default function Directors() {
-  const [selectedDirector, setSelectedDirector] = useState(directors[0]);
+  const [selectedDirector, setSelectedDirector] = useState();
   const router = useRouter();
 
   // const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -43,21 +43,22 @@ export default function Directors() {
     // Navegar directamente a la página del director
     const directorSlugs = [
       "lemon",
-      "luciano-urbani", 
+      "luciano-urbani",
       "ivan-jurado",
       "paloma-rincon",
       "tigre-escobar",
-      "china-pequenino"
+      "china-pequenino",
     ];
     const directorIndex = directors.indexOf(director);
     const slug = directorSlugs[directorIndex];
     router.push(`/directors/${slug}`);
   };
 
-
-
   return (
-    <section id="directors" className="relative bg-[#e2e2e2] w-full h-screen pt-12">
+    <section
+      id="directors"
+      className="relative bg-[#e2e2e2] w-full h-screen pt-12"
+    >
       <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-2 border-[#f31014] ">
         <div className="ml-2 w-10 md:w-24 h-auto text-[#f31014] self-start mb-24">
           <LogoB />
@@ -93,7 +94,11 @@ export default function Directors() {
         <ul className="col-span-12 md:col-span-4 text-[#f31014] text-md md:text-2xl font-hagrid-text flex flex-col font-normal uppercase md:gap-y-1 transition-all duration-300 ease-in-out">
           {directors.map((director, index) => (
             <li
-              className={`${director === selectedDirector ? "font-bold" : "font-normal cursor-pointer"} hover:opacity-80 transition-opacity`}
+              className={`${
+                director === selectedDirector
+                  ? "font-bold"
+                  : "font-normal cursor-pointer"
+              } hover:opacity-80 transition-opacity`}
               onClick={() => {
                 setSelectedDirector(director);
                 handleDirectorClick(director);
@@ -109,44 +114,36 @@ export default function Directors() {
         <div className="col-span-12 md:col-span-8">
           {/* Mobile: layout similar a desktop */}
           <div className="md:hidden relative h-[300px]">
-            {/* Ojo: debajo de la lista de directores, pegado al margen izquierdo */}
-            <div className="absolute top-0 left-0 w-[35%] h-[18%] overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
-              <Image src="/images/ojos.jpg" alt="Detalle ojos" fill sizes="100vw" className="object-cover" />
-            </div>
-
             {/* Jugador: más arriba y sin recortar */}
             <div className="absolute -top-38 right-0 w-[22%] h-[50%] overflow-visible shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
-              <Image src="/images/alta.jpg" alt="Retrato jugador" fill sizes="100vw" className="object-cover" />
-            </div>
-
-            {/* Perro: centrado, más pequeño y más arriba */}
-            <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[18%] h-[25%] overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
-              <Image src="/images/perro.jpg" alt="Perro" fill sizes="100vw" className="object-cover" />
+              <Image
+                src="/images/alta.jpg"
+                alt="Retrato jugador"
+                fill
+                sizes="100vw"
+                className="object-cover"
+              />
             </div>
           </div>
 
           {/* Desktop: composición absoluta */}
           <div className="hidden md:block relative h-[520px] lg:h-[600px]">
-            {/* Ojo: centrado arriba */}
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[50%] lg:w-[42%] h-[20%]  overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
-              <Image src="/images/ojos.jpg" alt="Detalle ojos" fill sizes="(min-width: 1024px) 58vw, 62vw" className="object-cover" />
-            </div>
-
             {/* Jugador: alto a la derecha */}
             <div className="absolute top-0 right-0 w-[28%] lg:w-[28%] h-[78%] overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
-              <Image src="/images/alta.jpg" alt="Retrato jugador" fill sizes="(min-width: 1024px) 36vw, 34vw" className="object-cover" />
-            </div>
-
-            {/* Perro: abajo izquierda (elevado) */}
-            <div className="absolute bottom-32 left-2 w-[27%] lg:w-[26%] h-[38%]  overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
-              <Image src="/images/perro.jpg" alt="Perro" fill sizes="(min-width: 1024px) 32vw, 34vw" className="object-cover" />
+              <Image
+                src="/images/alta.jpg"
+                alt="Retrato jugador"
+                fill
+                sizes="(min-width: 1024px) 36vw, 34vw"
+                className="object-cover"
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* Lema (abajo izquierda) */}
-      <div className="absolute bottom-4 left-4 md:bottom-6 md:left-8 z-10 pointer-events-none">
+      {/*       <div className="absolute bottom-4 left-4 md:bottom-6 md:left-8 z-10 pointer-events-none">
         <p className="font-ordinary text-[#f31014] text-sm md:text-xl leading-5 text-left">
           LATIN
           <br />
@@ -154,15 +151,13 @@ export default function Directors() {
           <br />
           PRODUCTION
         </p>
-      </div>
+      </div> */}
 
       <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10 pointer-events-none">
         <p className="font-ordinary text-[#f31014] text-sm md:text-xl leading-5 text-left">
           BRISTOL
         </p>
       </div>
-
-
     </section>
   );
 }

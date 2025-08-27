@@ -15,7 +15,9 @@ export default function Hero() {
     if (video.canPlayType('video/webm; codecs="vp9"').replace(/no/, "")) {
       return "/videos/under_construction.webm";
     }
-    if (video.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/no/, "")) {
+    if (
+      video.canPlayType('video/mp4; codecs="avc1.42E01E"').replace(/no/, "")
+    ) {
       return "/videos/under_construction_optimized.mp4";
     }
     return "/videos/under_construction_optimized.mp4";
@@ -36,8 +38,8 @@ export default function Hero() {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
+        behavior: "smooth",
+        block: "start",
       });
     }
   };
@@ -69,7 +71,10 @@ export default function Hero() {
             loop
             playsInline
             preload="auto"
-            style={{ opacity: isVideoLoaded ? 1 : 0, transition: "opacity 0.8s ease-in-out" }}
+            style={{
+              opacity: isVideoLoaded ? 1 : 0,
+              transition: "opacity 0.8s ease-in-out",
+            }}
             onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
             onError={() => {
@@ -79,7 +84,10 @@ export default function Hero() {
               setIsVideoLoaded(true);
             }}
           >
-            <source src={videoSource} type={videoSource.includes(".webm") ? "video/webm" : "video/mp4"} />
+            <source
+              src={videoSource}
+              type={videoSource.includes(".webm") ? "video/webm" : "video/mp4"}
+            />
             Tu navegador no soporta el elemento de video.
           </video>
         )}
@@ -94,9 +102,19 @@ export default function Hero() {
 
       {/* Botones centrados, más abajo */}
       <div className="absolute inset-0 flex items-center justify-center z-10">
-        <div className="w-full px-[20px] md:px-[50px] mt-[clamp(12rem,34vh,22rem)] flex justify-center gap-x-[clamp(6rem,42vw,9.25rem)] lg:gap-x-[clamp(24rem,24vw,24rem)] xl:gap-x-[clamp(16rem,22vw,28rem)] font-hagrid-text font-medium text-white text-[clamp(1rem,2.2vw,1.875rem)]">
-          <button onClick={() => scrollToSection('directors')} className="cursor-pointer hover:opacity-80 transition-opacity">DIRECTORS</button>
-          <button onClick={() => scrollToSection('contact')} className="cursor-pointer hover:opacity-80 transition-opacity">CONTACT</button>
+        <div className="w-full px-[20px] md:px-[50px] mt-[clamp(12rem,34vh,22rem)] flex justify-center gap-x-[clamp(8rem,45vw,16rem)] lg:gap-x-[clamp(52rem,40vw,56rem)] xl:gap-x-[clamp(44rem,38vw,64rem)] font-hagrid-text font-medium text-white text-[clamp(1rem,2.2vw,1.125rem)]">
+          <button
+            onClick={() => scrollToSection("directors")}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            DIRECTORS
+          </button>
+          <button
+            onClick={() => scrollToSection("contact")}
+            className="cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            CONTACT
+          </button>
         </div>
       </div>
 
@@ -107,21 +125,23 @@ export default function Hero() {
           className="w-12 h-12 md:w-14 md:h-14 rounded-lg transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center"
           aria-label={isMuted ? "Activar audio" : "Silenciar audio"}
         >
-          {isMuted ? <VolumeX className="w-6 h-6 text-white" /> : <Volume2 className="w-6 h-6 text-white" />}
+          {isMuted ? (
+            <VolumeX className="w-6 h-6 text-white" />
+          ) : (
+            <Volume2 className="w-6 h-6 text-white" />
+          )}
         </button>
       </div>
 
       {/* Año (arriba derecha) */}
-      <div className="absolute top-4 right-4 md:top-6 md:right-8 z-10 pointer-events-none">
+      {/*       <div className="absolute top-4 right-4 md:top-6 md:right-8 z-10 pointer-events-none">
         <p className="font-ordinary text-white text-sm md:text-xl">2025©</p>
-      </div>
+      </div> */}
 
       {/* Lema (abajo izquierda) */}
-      <div className="absolute bottom-4 left-4 md:bottom-6 md:left-8 z-10 pointer-events-none">
+      {/*       <div className="absolute bottom-4 left-4 md:bottom-6 md:left-8 z-10 pointer-events-none">
         <p className="font-ordinary text-white text-sm md:text-xl leading-5 text-left">LATIN<br/>CREATIVE<br/>PRODUCTION</p>
-      </div>
+      </div> */}
     </section>
   );
 }
-
-

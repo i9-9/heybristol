@@ -100,8 +100,8 @@ export default function Contact() {
             
             {/* Desktop: Privacy Policy & Copyright */}
             <div className="hidden md:block text-black text-sm font-raleway">
-              <span className="mr-4">PRIVACY POLICY</span>
-              <span>© 2025 BRISTOL</span>
+              <span className="mr-4 font-light">PRIVACY POLICY</span>
+              <span className="font-light">© 2025 BRISTOL</span>
             </div>
           </div>
         </div>

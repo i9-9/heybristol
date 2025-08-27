@@ -81,9 +81,9 @@ export default function Contact() {
             <span className="font-light">© 2025 BRISTOL</span>
           </div>
           
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 relative">
             {/* Left - Bristol Logo (hidden on mobile) */}
-            <div className="hidden md:flex flex-shrink-0">
+            <div className="hidden md:flex flex-shrink-0 absolute left-0">
               <Image 
                 src="/logo/bristol_2.png" 
                 alt="Bristol Logo" 
@@ -99,8 +99,8 @@ export default function Contact() {
             </div>
             
             {/* Desktop: Privacy Policy & Copyright */}
-            <div className="hidden md:block text-black text-sm font-raleway">
-              <span className="mr-4 font-light">PRIVACY POLICY</span>
+            <div className="hidden md:block text-black text-[9px] font-raleway absolute right-0">
+              <span className="mr-2 font-light">PRIVACY POLICY</span>
               <span className="font-light">© 2025 BRISTOL</span>
             </div>
           </div>

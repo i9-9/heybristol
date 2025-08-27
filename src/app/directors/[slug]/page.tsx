@@ -44,7 +44,7 @@ function VideoCard({ video, onClick }: { video: VideoItem; onClick: () => void }
       onClick={onClick}
       className="relative group block overflow-hidden cursor-pointer"
     >
-      <div className="w-full aspect-video bg-black overflow-hidden">
+      <div className="w-full h-80 md:aspect-video md:h-auto bg-black overflow-hidden">
         {/* Imagen estática de thumbnail - siempre visible */}
         <Image
           src={getThumbnailUrl(video.thumbnailId || video.id)}

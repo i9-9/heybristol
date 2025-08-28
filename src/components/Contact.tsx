@@ -74,7 +74,7 @@ export default function Contact() {
         <div className="bg-transparent py-40 md:py-14 px-4 md:px-8">
           {/* Mobile: Links y Privacy Policy arriba */}
           <div className="md:hidden flex flex-wrap justify-center space-x-2 text-black font-raleway text-[10px] mb-6">
-            <a href="https://instagram.com/heybristol" className="hover:opacity-80 transition-opacity">INSTAGRAM</a>
+            <a href="https://www.instagram.com/bristol________/" className="hover:opacity-80 transition-opacity">INSTAGRAM</a>
             <span className="mx-1">•</span>
             <span className="font-light">PRIVACY POLICY</span>
             <span className="mx-1">•</span>
@@ -95,7 +95,7 @@ export default function Contact() {
             
             {/* Desktop: Center social media */}
             <div className="hidden md:flex justify-center text-black font-raleway text-base">
-              <a href="https://instagram.com/heybristol" className="hover:opacity-80 transition-opacity">INSTAGRAM</a>
+              <a href="https://www.instagram.com/bristol________/" className="hover:opacity-80 transition-opacity">INSTAGRAM</a>
             </div>
             
             {/* Desktop: Privacy Policy & Copyright */}

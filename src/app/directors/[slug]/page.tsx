@@ -247,9 +247,8 @@ export default function DirectorPage({ params }: PageProps) {
                   height={32} 
                   className="w-8 h-8 rotate-180 hover:opacity-80 transition-opacity" 
                 />
-                <span className="font-ordinary text-sm md:text-xl uppercase leading-tight text-left">
-                  BACK TO<br />
-                  {director.name}
+                <span className="font-ordinary text-sm md:text-xl uppercase leading-tight text-left whitespace-nowrap">
+                  BACK TO {director.name}
                 </span>
               </button>
             </div>

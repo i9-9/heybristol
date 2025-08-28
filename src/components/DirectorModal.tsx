@@ -257,7 +257,7 @@ export default function DirectorModal({
               </h2>
             </div>
 
-            {/* Video grande centrado - optimizado para mobile */}
+                        {/* Video grande centrado - optimizado para mobile */}
             <div className="w-full max-w-5xl mx-auto mt-16 md:mt-20 animate-fadeIn px-4 md:px-0 video-container-mobile mobile-video-selected">
               <div className="aspect-video w-full bg-black overflow-hidden video-aspect-mobile">
                 <iframe
@@ -275,16 +275,23 @@ export default function DirectorModal({
               <h3 className="text-white text-lg md:text-2xl font-medium text-center animate-slideUp px-2">
                 {selectedVideo.title}
               </h3>
-              
-              {/* Botón para volver a la lista */}
-              <div className="flex justify-center mt-6 md:mt-8 animate-slideUp">
-                <button
-                  onClick={handleBackToVideos}
-                  className="flex items-center space-x-2 text-white hover:opacity-80 transition-opacity px-4 py-2 border border-white/30 rounded-lg text-sm md:text-base"
-                >
-                  <span className="font-raleway">← Volver a videos de {directorName}</span>
-                </button>
-              </div>
+            </div>
+            
+            {/* Botón para volver a la lista - Fixed to prevent wrapping */}
+            <div className="flex justify-center mt-6 md:mt-8 animate-slideUp w-full">
+              <button
+                onClick={handleBackToVideos}
+                className="inline-flex items-center space-x-2 text-white hover:opacity-80 transition-opacity px-4 py-2 border border-white/30 rounded-lg text-sm md:text-base"
+                style={{ 
+                  whiteSpace: 'nowrap', 
+                  minWidth: 'max-content',
+                  wordBreak: 'keep-all',
+                  overflowWrap: 'normal',
+                  maxWidth: 'none'
+                }}
+              >
+                <span className="font-raleway" style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>← Volver a {directorName}</span>
+              </button>
             </div>
           </>
         )}

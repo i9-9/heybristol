@@ -60,7 +60,7 @@ export default function Directors() {
                     director === selectedDirector
                       ? "font-bold"
                       : "font-normal cursor-pointer"
-                  } hover:opacity-80 transition-opacity`}
+                  } hover:font-bold transition-all`}
                   onClick={() => {
                     setSelectedDirector(director);
                     handleDirectorClick(director);
@@ -122,7 +122,7 @@ export default function Directors() {
                   director === selectedDirector
                     ? "font-bold"
                     : "font-normal cursor-pointer"
-                } hover:opacity-80 transition-opacity`}
+                } hover:font-bold transition-all`}
                 onClick={() => {
                   setSelectedDirector(director);
                   handleDirectorClick(director);

@@ -83,8 +83,8 @@ function VideoCard({ video, onClick }: { video: VideoItem; onClick: () => void }
       </div>
       
       {/* Overlay con título */}
-      <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <span className="text-white text-center px-3 font-medium">{video.title}</span>
+      <div className="absolute inset-0 flex items-center justify-center bg-black/60 md:bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 mobile-video-overlay">
+        <span className="text-white text-center px-3 font-medium text-sm md:text-base mobile-video-title">{video.title}</span>
       </div>
 
       {/* Indicador de carga inicial */}
@@ -257,9 +257,9 @@ export default function DirectorModal({
               </h2>
             </div>
 
-            {/* Video grande centrado */}
-            <div className="w-full max-w-5xl mx-auto mt-20 animate-fadeIn">
-              <div className="aspect-video w-full bg-black overflow-hidden">
+            {/* Video grande centrado - optimizado para mobile */}
+            <div className="w-full max-w-5xl mx-auto mt-16 md:mt-20 animate-fadeIn px-4 md:px-0 video-container-mobile mobile-video-selected">
+              <div className="aspect-video w-full bg-black overflow-hidden video-aspect-mobile">
                 <iframe
                   src={selectedVideo.embedUrl}
                   className="w-full h-full"
@@ -269,20 +269,20 @@ export default function DirectorModal({
               </div>
               
               {/* Espaciador para crear distancia */}
-              <div className="h-4"></div>
+              <div className="h-4 md:h-4 mobile-video-spacing"></div>
               
               {/* Título del video debajo */}
-              <h3 className="text-white text-xl md:text-2xl font-medium text-center animate-slideUp">
+              <h3 className="text-white text-lg md:text-2xl font-medium text-center animate-slideUp px-2">
                 {selectedVideo.title}
               </h3>
               
               {/* Botón para volver a la lista */}
-              <div className="flex justify-center mt-8 animate-slideUp">
+              <div className="flex justify-center mt-6 md:mt-8 animate-slideUp">
                 <button
                   onClick={handleBackToVideos}
-                  className="flex items-center space-x-2 text-white hover:opacity-80 transition-opacity px-4 py-2 border border-white/30 rounded-lg"
+                  className="flex items-center space-x-2 text-white hover:opacity-80 transition-opacity px-4 py-2 border border-white/30 rounded-lg text-sm md:text-base"
                 >
-                  <span className="font-raleway text-sm">← Volver a videos de {directorName}</span>
+                  <span className="font-raleway">← Volver a videos de {directorName}</span>
                 </button>
               </div>
             </div>

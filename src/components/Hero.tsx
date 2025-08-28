@@ -122,7 +122,7 @@ export default function Hero() {
       <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10">
         <button
           onClick={toggleAudio}
-          className="w-12 h-12 md:w-14 md:h-14 rounded-lg transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center"
+          className="w-12 h-12 md:w-14 md:h-14 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center"
           aria-label={isMuted ? "Activar audio" : "Silenciar audio"}
         >
           {isMuted ? (

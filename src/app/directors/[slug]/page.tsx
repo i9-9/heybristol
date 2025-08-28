@@ -81,8 +81,8 @@ function VideoCard({ video, onClick }: { video: VideoItem; onClick: () => void }
       </div>
       
       {/* Overlay con título */}
-      <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <span className="text-white text-center px-3 font-medium uppercase">
+      <div className="absolute inset-0 flex items-center justify-center bg-black/60 md:bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 mobile-video-overlay">
+        <span className="text-white text-center px-3 font-medium uppercase text-sm md:text-base mobile-video-title">
           {video.tags?.[0] || 'CLIENTE'} | {video.title}
         </span>
       </div>
@@ -214,8 +214,8 @@ export default function DirectorPage({ params }: PageProps) {
             </div>
 
             {/* Video grande centrado */}
-            <div className="w-full max-w-5xl mx-auto -mt-4 animate-fadeIn">
-              <div className="aspect-video w-full bg-black overflow-hidden">
+            <div className="w-full max-w-5xl mx-auto mt-8 md:-mt-4 animate-fadeIn px-4 md:px-0 video-container-mobile mobile-video-selected">
+              <div className="aspect-video w-full bg-black overflow-hidden rounded-lg video-aspect-mobile">
                 <iframe
                   src={selectedVideo.embedUrl}
                   className="w-full h-full"
@@ -225,10 +225,10 @@ export default function DirectorPage({ params }: PageProps) {
               </div>
               
               {/* Espaciador para crear distancia */}
-              <div className="h-4"></div>
+              <div className="h-4 mobile-video-spacing"></div>
               
               {/* Título del video debajo */}
-              <h3 className="text-white text-xl md:text-2xl font-medium text-center animate-slideUp uppercase">
+              <h3 className="text-white text-lg md:text-2xl font-medium text-center animate-slideUp uppercase px-2">
                 {selectedVideo.tags?.[0] || 'CLIENTE'} | {selectedVideo.title}
               </h3>
               

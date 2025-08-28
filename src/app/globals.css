@@ -169,3 +169,56 @@ html::-webkit-scrollbar {
   animation: slideUp 0.5s ease-out 0.2s forwards;
   opacity: 0;
 }
+
+/* --- Mobile video centering optimizations --- */
+@media (max-width: 767px) {
+  /* Ensure video container is perfectly centered on mobile */
+  .video-container-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1rem;
+    margin: 0 auto;
+    min-height: 60vh;
+  }
+  
+  /* Optimize video aspect ratio for mobile */
+  .video-aspect-mobile {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Ensure proper spacing on mobile */
+  .mobile-video-spacing {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Mobile video title overlay optimizations */
+  .mobile-video-overlay {
+    background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.3) 100%);
+    backdrop-filter: blur(2px);
+  }
+  
+  .mobile-video-title {
+    font-size: 0.875rem;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+  }
+  
+  /* Additional mobile video centering */
+  .mobile-video-selected {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+  }
+}

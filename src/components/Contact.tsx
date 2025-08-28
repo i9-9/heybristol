@@ -22,15 +22,19 @@ export default function Contact() {
           <div className="mt-8 md:mt-16 space-y-4 md:space-y-8 text-black">
             <div>
               <p className="font-extrabold text-lg md:text-2xl lg:text-3xl mb-1 md:mb-2 font-hagrid">MARTÍN GIUDICESSI</p>
-              <a href="mailto:MARTIN@HEYBRISTOL.COM" className="text-sm md:text-lg lg:text-xl hover:opacity-80 transition-opacity">MARTIN@HEYBRISTOL.COM</a>
+              <a href="mailto:martin@heybristol.com" className="text-sm md:text-lg lg:text-xl hover:opacity-80 transition-opacity">martin@heybristol.com</a>
             </div>
             <div>
               <p className="font-extrabold text-lg md:text-2xl lg:text-3xl mb-1 md:mb-2 font-hagrid">AZUL CRESPO</p>
-              <a href="mailto:AZUL@HEYBRISTOL.COM" className="text-sm md:text-lg lg:text-xl hover:opacity-80 transition-opacity">AZUL@HEYBRISTOL.COM</a>
+              <a href="mailto:blue@heybristol.com" className="text-sm md:text-lg lg:text-xl hover:opacity-80 transition-opacity">blue@heybristol.com</a>
             </div>
             <div>
               <p className="font-extrabold text-lg md:text-2xl lg:text-3xl mb-1 md:mb-2 font-hagrid">JORGE LARRAIN</p>
-              <a href="mailto:JORGE@HEYBRISTOL.COM" className="text-sm md:text-lg lg:text-xl hover:opacity-80 transition-opacity">JORGE@HEYBRISTOL.COM</a>
+              <a href="mailto:jorge@heybristol.com" className="text-sm md:text-lg lg:text-xl hover:opacity-80 transition-opacity">jorge@heybristol.com</a>
+            </div>
+            <div>
+              <p className="font-extrabold text-lg md:text-2xl lg:text-3xl mb-1 md:mb-2 font-hagrid">ENRIQUE NAVA</p>
+              <a href="mailto:direccion@heybristol.com" className="text-sm md:text-lg lg:text-xl hover:opacity-80 transition-opacity">direccion@heybristol.com</a>
             </div>
           </div>
         </div>

@@ -53,14 +53,14 @@ export default function Directors() {
         <div className="md:hidden flex gap-6 items-start">
           {/* Lista de directores (izquierda) */}
           <div className="flex-1">
-            <ul className="text-[#f31014] text-lg font-hagrid-text flex flex-col font-normal uppercase gap-y-2 transition-all duration-300 ease-in-out">
+            <ul className="text-[#f31014] text-lg font-hagrid-text flex flex-col font-normal uppercase gap-y-2 transition-all duration-1000 ease-in-out">
               {directors.map((director, index) => (
                 <li
                   className={`${
                     director === selectedDirector
                       ? "font-bold"
                       : "font-normal cursor-pointer"
-                  } hover:font-bold transition-all`}
+                  } hover:font-bold transition-all duration-1000`}
                   onClick={() => {
                     setSelectedDirector(director);
                     handleDirectorClick(director);
@@ -122,7 +122,7 @@ export default function Directors() {
                   director === selectedDirector
                     ? "font-bold"
                     : "font-normal cursor-pointer"
-                } hover:font-bold transition-all`}
+                } hover:font-bold transition-all duration-500`}
                 onClick={() => {
                   setSelectedDirector(director);
                   handleDirectorClick(director);

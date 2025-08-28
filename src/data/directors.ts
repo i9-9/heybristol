@@ -34,7 +34,7 @@ export const directors: Director[] = [
     slug: "lemon",
     videos: [
       {
-        id: "1107773548",
+        id: "lemon-rexona-1",
         order: 1,
         title: "Purpose",
         client: "Rexona",
@@ -44,7 +44,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107776159",
+        id: "lemon-pepsodent-2",
         order: 2,
         title: "100 years",
         client: "Pepsodent",
@@ -54,7 +54,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107772381",
+        id: "lemon-pepsi-3",
         order: 3,
         title: "Si a todo",
         client: "Pepsi",
@@ -64,7 +64,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107821981",
+        id: "lemon-lavirginia-4",
         order: 4,
         title: "Borderline",
         client: "La Virginia",
@@ -74,7 +74,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107774921",
+        id: "lemon-uber-5",
         order: 5,
         title: "Become Independent",
         client: "Uber",
@@ -84,7 +84,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107804840",
+        id: "lemon-sadia-6",
         order: 6,
         title: "Aces",
         client: "Sadia",
@@ -94,7 +94,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107827209",
+        id: "lemon-movistar-7",
         order: 7,
         title: "Amor ciego",
         client: "Movistar",
@@ -104,7 +104,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107794150",
+        id: "lemon-sprite-8",
         order: 8,
         title: "Facing the hater",
         client: "Sprite",
@@ -114,7 +114,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107796368",
+        id: "lemon-h2o-9",
         order: 9,
         title: "Bomba",
         client: "H2O",
@@ -124,7 +124,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1113296421",
+        id: "lemon-signal-10",
         order: 10,
         title: "Tatoo",
         client: "Signal",
@@ -134,7 +134,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107777162",
+        id: "lemon-panamericanos-11",
         order: 11,
         title: "Santiago",
         client: "Panamericanos",
@@ -144,7 +144,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107805748",
+        id: "lemon-oldspice-12",
         order: 12,
         title: "Terry",
         client: "Old Spice",
@@ -154,7 +154,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107798538",
+        id: "lemon-zonajobs-13",
         order: 13,
         title: "Cuervos",
         client: "Zona Jobs",
@@ -164,7 +164,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107797972",
+        id: "lemon-axe-14",
         order: 14,
         title: "Wasabi",
         client: "Axe",
@@ -180,7 +180,7 @@ export const directors: Director[] = [
     slug: "ivan-jurado",
     videos: [
       {
-        id: "1107757619",
+        id: "ivan-jurado-ag1-1",
         order: 1,
         title: "Athletic Greens (DC)",
         client: "Ag1",
@@ -190,7 +190,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107759493",
+        id: "ivan-jurado-valneva-2",
         order: 2,
         title: "Ixchiq (DC)",
         client: "Valneva",
@@ -200,7 +200,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107758028",
+        id: "ivan-jurado-decathlon-3",
         order: 3,
         title: "Sport is back",
         client: "Decathlon",
@@ -210,7 +210,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107760003",
+        id: "ivan-jurado-wayfair-4",
         order: 4,
         title: "Living with Wayfair",
         client: "Wayfair",
@@ -220,7 +220,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107760354",
+        id: "ivan-jurado-weightwatchers-5",
         order: 5,
         title: "Wellbeing",
         client: "Weight Watchers",
@@ -230,7 +230,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107759126",
+        id: "ivan-jurado-phillips-6",
         order: 6,
         title: "Hue Secure",
         client: "Phillips",
@@ -246,7 +246,7 @@ export const directors: Director[] = [
     slug: "paloma-rincon",
     videos: [
       {
-        id: "1107751189",
+        id: "paloma-rincon-ntt-1",
         order: 1,
         title: "Diamonds",
         client: "NTT",
@@ -256,7 +256,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107749399",
+        id: "paloma-rincon-heinekensilver-2",
         order: 2,
         title: "Textil",
         client: "Heineken Silver",
@@ -266,7 +266,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107745371",
+        id: "paloma-rincon-fn-3",
         order: 3,
         title: "Summer Baking",
         client: "FN",
@@ -276,7 +276,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1112927162",
+        id: "paloma-rincon-michelobultra-4",
         order: 4,
         title: "Mix",
         client: "Michelob Ultra Seltzer",
@@ -286,7 +286,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107751794",
+        id: "paloma-rincon-earthsown-5",
         order: 5,
         title: "Oat",
         client: "Earth's Own",
@@ -296,7 +296,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107749963",
+        id: "paloma-rincon-papajohns-6",
         order: 6,
         title: "Big",
         client: "Papa John's",
@@ -312,7 +312,7 @@ export const directors: Director[] = [
     slug: "luciano-urbani",
     videos: [
       {
-        id: "1107778294",
+        id: "luciano-urbani-dubai-1",
         order: 1,
         title: "Nakheel",
         client: "Dubai",
@@ -322,7 +322,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107777537",
+        id: "luciano-urbani-toyota-2",
         order: 2,
         title: "Race in Monaco",
         client: "Toyota",
@@ -332,7 +332,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107776881",
+        id: "luciano-urbani-sprite-3",
         order: 3,
         title: "Evolución",
         client: "Sprite",
@@ -342,7 +342,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1112933584",
+        id: "luciano-urbani-kfc-4",
         order: 4,
         title: "Mother",
         client: "KFC",
@@ -352,7 +352,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107774267",
+        id: "luciano-urbani-millerlite-5",
         order: 5,
         title: "Bell",
         client: "Miller Lite",
@@ -362,7 +362,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107771138",
+        id: "luciano-urbani-ford-6",
         order: 6,
         title: "New Ranger",
         client: "Ford",
@@ -378,7 +378,7 @@ export const directors: Director[] = [
     slug: "china-pequenino",
     videos: [
       {
-        id: "1107753409",
+        id: "china-pequenino-reebok-1",
         order: 1,
         title: "ft Maria Becerra",
         client: "Reebok",
@@ -388,7 +388,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107755107",
+        id: "china-pequenino-movistar-2",
         order: 2,
         title: "Ivom",
         client: "Movistar",
@@ -398,17 +398,17 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "ciudadela-pending",
+        id: "china-pequenino-ciudadela-3",
         order: 3,
         title: "75 años",
         client: "Ciudadela",
-        vimeoId: "",
+        vimeoId: "1113289841",
         thumbnailId: "1113571389",
-        isPlaceholder: true,
-        status: 'pending'
+        isPlaceholder: false,
+        status: 'published'
       },
       {
-        id: "1107755680",
+        id: "china-pequenino-nym-4",
         order: 4,
         title: "New Year Party",
         client: "NYM",
@@ -418,7 +418,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107753947",
+        id: "china-pequenino-bees-5",
         order: 5,
         title: "Desafio",
         client: "Bees",
@@ -428,7 +428,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1113394660",
+        id: "china-pequenino-oldi-6",
         order: 6,
         title: "Wondrous Time",
         client: "Oldi",
@@ -452,7 +452,7 @@ export const directors: Director[] = [
         status: 'pending'
       },
       {
-        id: "1107801604",
+        id: "tigre-escobar-lafayette-2",
         order: 2,
         title: "Las Américas",
         client: "Lafayette",
@@ -462,7 +462,7 @@ export const directors: Director[] = [
         status: 'published'
       },
       {
-        id: "1107803062",
+        id: "tigre-escobar-paulamendoza-3",
         order: 3,
         title: "Eyewear Paris",
         client: "Paula Mendoza",

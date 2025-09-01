@@ -5,7 +5,11 @@ import { Volume2, VolumeX } from "lucide-react";
 import LogoMain from "@/components/LogoMain";
 import { getRandomHeroVideo, getBestVideoSource, type HeroVideo } from "@/lib/contentful";
 
-export default function Hero() {
+interface HeroProps {
+  initialHeroVideo?: HeroVideo | null;
+}
+
+export default function Hero({ initialHeroVideo }: HeroProps) {
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [videoSource, setVideoSource] = useState<string | null>(null);
@@ -56,8 +60,8 @@ export default function Hero() {
   useEffect(() => {
     const loadHeroVideo = async () => {
       try {
-        // Intentar obtener video de Contentful
-        const randomVideo = await getRandomHeroVideo();
+        // Usar video inicial si está disponible (SSG), sino obtener uno aleatorio
+        const randomVideo = initialHeroVideo || await getRandomHeroVideo();
         
         if (randomVideo) {
           setHeroVideo(randomVideo);
@@ -102,7 +106,7 @@ export default function Hero() {
     const timer = setTimeout(() => setIsVideoLoaded(true), 3000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [initialHeroVideo]);
 
   return (
     <section className="relative z-10 h-screen">

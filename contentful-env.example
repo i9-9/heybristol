@@ -1,8 +1,15 @@
 # Contentful Configuration
 # Copy this file to .env.local and fill in your actual values
 
+# Server-side variables (for SSG/SSR)
+CONTENTFUL_SPACE_ID=your_space_id_here
+CONTENTFUL_ACCESS_TOKEN=your_access_token_here
+
+# Client-side variables (for browser)
 NEXT_PUBLIC_CONTENTFUL_SPACE_ID=your_space_id_here
 NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN=your_access_token_here
+
+# Management token (for scripts)
 CONTENTFUL_MANAGEMENT_TOKEN=your_management_token_here
 
 # Vercel Deploy Hook (for automatic deployments)

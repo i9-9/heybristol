@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Contact() {
   return (
-    <section id="contact" className="relative bg-[#fa1016] w-full py-32 md:py-[600px] pb-48 md:pb-64">
+    <section id="contact" className="relative bg-[#fa1016] w-full py-32 min-h-[100vh] md:py-[600px] pb-48 md:pb-64">
       {/* Logo B de Bristol arriba a la izquierda */}
       <div className="absolute top-6 left-6 md:top-8 md:left-8 z-30">
         <div className="w-10 md:w-24 h-auto text-[#e2e2e2]">

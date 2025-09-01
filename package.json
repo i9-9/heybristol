@@ -8,9 +8,21 @@
     "export": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-og-image": "npm install canvas && node scripts/generate-og-image.js && npm uninstall canvas"
+    "generate-og-image": "npm install canvas && node scripts/generate-og-image.js && npm uninstall canvas",
+    "setup-contentful": "node scripts/setup-contentful.js",
+    "migrate-contentful": "node scripts/migrate-to-contentful.js",
+    "fix-display-fields": "node scripts/fix-display-fields.js",
+    "fix-entry-titles": "node scripts/fix-entry-titles.js",
+    "force-refresh-entries": "node scripts/force-refresh-entries.js",
+    "recreate-content-types": "node scripts/recreate-content-types.js",
+    "reset-display-fields": "node scripts/reset-display-fields.js",
+    "setup-webhook": "node scripts/setup-webhook.js",
+    "cleanup-migration": "node scripts/cleanup-after-migration.js"
   },
   "dependencies": {
+    "contentful": "^11.7.15",
+    "contentful-management": "^11.54.4",
+    "dotenv": "^17.2.1",
     "lucide-react": "^0.536.0",
     "next": "15.4.5",
     "react": "19.1.0",

@@ -3,11 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import LogoMain from "@/components/LogoMain";
+import { getRandomHeroVideo, getBestVideoSource, type HeroVideo } from "@/lib/contentful";
 
 export default function Hero() {
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [videoSource, setVideoSource] = useState<string | null>(null);
+  const [heroVideo, setHeroVideo] = useState<HeroVideo | null>(null);
+  const [isVimeoVideo, setIsVimeoVideo] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const detectVideoSupport = () => {
@@ -24,6 +27,12 @@ export default function Hero() {
   };
 
   const toggleAudio = () => {
+    // Solo funciona con videos locales, no con Vimeo iframes
+    if (isVimeoVideo) {
+      console.log('Audio control not available for Vimeo videos');
+      return;
+    }
+    
     if (!videoRef.current) return;
     if (isMuted) {
       videoRef.current.muted = false;
@@ -45,16 +54,53 @@ export default function Hero() {
   };
 
   useEffect(() => {
-    const bestFormat = detectVideoSupport();
-    setVideoSource(bestFormat);
+    const loadHeroVideo = async () => {
+      try {
+        // Intentar obtener video de Contentful
+        const randomVideo = await getRandomHeroVideo();
+        
+        if (randomVideo) {
+          setHeroVideo(randomVideo);
+          
+          // Detectar dispositivo móvil
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          
+          // Obtener la mejor fuente de video
+          const bestSource = getBestVideoSource(randomVideo, isMobile);
+          
+          if (bestSource) {
+            if (bestSource.type === 'vimeo') {
+              setIsVimeoVideo(true);
+              setVideoSource(bestSource.src);
+            } else {
+              setIsVimeoVideo(false);
+              setVideoSource(bestSource.src);
+            }
+          } else {
+            // Fallback a video local si no hay fuente válida
+            fallbackToLocal();
+          }
+        } else {
+          // Fallback a video local si no hay videos en Contentful
+          fallbackToLocal();
+        }
+      } catch (error) {
+        console.error('Error loading hero video from Contentful:', error);
+        // Fallback a video local en caso de error
+        fallbackToLocal();
+      }
+    };
+
+    const fallbackToLocal = () => {
+      const bestFormat = detectVideoSupport();
+      setVideoSource(bestFormat);
+      setIsVimeoVideo(false);
+    };
+
+    loadHeroVideo();
 
     const timer = setTimeout(() => setIsVideoLoaded(true), 3000);
 
-    const videoElement = videoRef.current;
-    if (videoElement) {
-      videoElement.preload = "auto";
-      videoElement.load();
-    }
     return () => clearTimeout(timer);
   }, []);
 
@@ -62,7 +108,7 @@ export default function Hero() {
     <section className="relative z-10 h-screen">
       {/* Video de fondo dentro del hero */}
       <div className="absolute inset-0 w-full h-full overflow-hidden bg-black pointer-events-none z-0">
-        {videoSource && (
+        {videoSource && !isVimeoVideo && (
           <video
             ref={videoRef}
             className="absolute top-0 left-1/2 transform -translate-x-1/2 w-auto h-full min-w-full min-h-full object-cover"
@@ -79,7 +125,8 @@ export default function Hero() {
             onCanPlay={() => setIsVideoLoaded(true)}
             onError={() => {
               if (videoSource?.includes(".webm")) {
-                setVideoSource("/videos/under_construction_optimized.mp4");
+                const fallbackFormat = detectVideoSupport();
+                setVideoSource(fallbackFormat);
               }
               setIsVideoLoaded(true);
             }}
@@ -90,6 +137,29 @@ export default function Hero() {
             />
             Tu navegador no soporta el elemento de video.
           </video>
+        )}
+
+        {videoSource && isVimeoVideo && (
+          <iframe
+            className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-full min-w-full min-h-full"
+            src={videoSource}
+            style={{
+              opacity: isVideoLoaded ? 1 : 0,
+              transition: "opacity 0.8s ease-in-out",
+              transform: "translateX(-50%) scale(1.2)", // Scale to fill and center
+            }}
+            allow="autoplay; fullscreen; picture-in-picture"
+            title={heroVideo?.title || "Hero Video"}
+            frameBorder="0"
+            onLoad={() => setIsVideoLoaded(true)}
+            onError={() => {
+              // Fallback to local video if Vimeo fails
+              const fallbackFormat = detectVideoSupport();
+              setVideoSource(fallbackFormat);
+              setIsVimeoVideo(false);
+              setIsVideoLoaded(true);
+            }}
+          />
         )}
       </div>
 
@@ -118,20 +188,22 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Botón de audio dentro del hero (abajo derecha) */}
-      <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10">
-        <button
-          onClick={toggleAudio}
-          className="w-12 h-12 md:w-14 md:h-14 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer"
-          aria-label={isMuted ? "Activar audio" : "Silenciar audio"}
-        >
-          {isMuted ? (
-            <VolumeX className="w-6 h-6 text-white" />
-          ) : (
-            <Volume2 className="w-6 h-6 text-white" />
-          )}
-        </button>
-      </div>
+      {/* Botón de audio dentro del hero (abajo derecha) - Solo para videos locales */}
+      {!isVimeoVideo && (
+        <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10">
+          <button
+            onClick={toggleAudio}
+            className="w-12 h-12 md:w-14 md:h-14 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer"
+            aria-label={isMuted ? "Activar audio" : "Silenciar audio"}
+          >
+            {isMuted ? (
+              <VolumeX className="w-6 h-6 text-white" />
+            ) : (
+              <Volume2 className="w-6 h-6 text-white" />
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Año (arriba derecha) */}
       {/*       <div className="absolute top-4 right-4 md:top-6 md:right-8 z-10 pointer-events-none">

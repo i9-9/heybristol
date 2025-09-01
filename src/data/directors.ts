@@ -5,8 +5,6 @@ export interface DirectorVideo {
   client: string;
   vimeoId: string;
   thumbnailId?: string; // ID del video loop/thumbnail
-  isPlaceholder: boolean;
-  status: 'published' | 'pending' | 'draft';
 }
 
 export interface Director {
@@ -39,9 +37,7 @@ export const directors: Director[] = [
         title: "Purpose",
         client: "Rexona",
         vimeoId: "1107773548",
-        thumbnailId: "1111389219",
-        isPlaceholder: false,
-        status: 'published'
+        thumbnailId: "1111389219"
       },
       {
         id: "lemon-pepsodent-2",
@@ -50,8 +46,7 @@ export const directors: Director[] = [
         client: "Pepsodent",
         vimeoId: "1107776159",
         thumbnailId: "1111389173",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-pepsi-3",
@@ -60,8 +55,7 @@ export const directors: Director[] = [
         client: "Pepsi",
         vimeoId: "1107772381",
         thumbnailId: "1111389121",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-lavirginia-4",
@@ -70,8 +64,7 @@ export const directors: Director[] = [
         client: "La Virginia",
         vimeoId: "1107821981",
         thumbnailId: "1111389005",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-uber-5",
@@ -80,8 +73,7 @@ export const directors: Director[] = [
         client: "Uber",
         vimeoId: "1107774921",
         thumbnailId: "1111389319",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-sadia-6",
@@ -90,8 +82,7 @@ export const directors: Director[] = [
         client: "Sadia",
         vimeoId: "1107804840",
         thumbnailId: "1111389249",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-movistar-7",
@@ -100,8 +91,7 @@ export const directors: Director[] = [
         client: "Movistar",
         vimeoId: "1107827209",
         thumbnailId: "1111389038",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-sprite-8",
@@ -110,8 +100,7 @@ export const directors: Director[] = [
         client: "Sprite",
         vimeoId: "1107794150",
         thumbnailId: "1111389296",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-h2o-9",
@@ -120,8 +109,7 @@ export const directors: Director[] = [
         client: "H2O",
         vimeoId: "1107796368",
         thumbnailId: "1111388971",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-signal-10",
@@ -130,8 +118,7 @@ export const directors: Director[] = [
         client: "Signal",
         vimeoId: "1113296421",
         thumbnailId: "1113558740",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-panamericanos-11",
@@ -140,8 +127,7 @@ export const directors: Director[] = [
         client: "Panamericanos",
         vimeoId: "1107777162",
         thumbnailId: "1111389092",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-oldspice-12",
@@ -150,8 +136,7 @@ export const directors: Director[] = [
         client: "Old Spice",
         vimeoId: "1107805748",
         thumbnailId: "1111389063",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-zonajobs-13",
@@ -160,8 +145,7 @@ export const directors: Director[] = [
         client: "Zona Jobs",
         vimeoId: "1107798538",
         thumbnailId: "1111388895",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "lemon-axe-14",
@@ -170,8 +154,7 @@ export const directors: Director[] = [
         client: "Axe",
         vimeoId: "1107797972",
         thumbnailId: "1111388867",
-        isPlaceholder: false,
-        status: 'published'
+
       }
     ]
   },
@@ -186,8 +169,7 @@ export const directors: Director[] = [
         client: "Ag1",
         vimeoId: "1107757619",
         thumbnailId: "1111388191",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "ivan-jurado-valneva-2",
@@ -196,8 +178,7 @@ export const directors: Director[] = [
         client: "Valneva",
         vimeoId: "1107759493",
         thumbnailId: "1111388300",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "ivan-jurado-decathlon-3",
@@ -206,8 +187,7 @@ export const directors: Director[] = [
         client: "Decathlon",
         vimeoId: "1107758028",
         thumbnailId: "1111388227",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "ivan-jurado-wayfair-4",
@@ -216,8 +196,7 @@ export const directors: Director[] = [
         client: "Wayfair",
         vimeoId: "1107760003",
         thumbnailId: "1111388324",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "ivan-jurado-weightwatchers-5",
@@ -226,8 +205,7 @@ export const directors: Director[] = [
         client: "Weight Watchers",
         vimeoId: "1107760354",
         thumbnailId: "1111388364",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "ivan-jurado-phillips-6",
@@ -236,8 +214,7 @@ export const directors: Director[] = [
         client: "Phillips",
         vimeoId: "1107759126",
         thumbnailId: "1111388266",
-        isPlaceholder: false,
-        status: 'published'
+
       }
     ]
   },
@@ -252,8 +229,7 @@ export const directors: Director[] = [
         client: "NTT",
         vimeoId: "1107751189",
         thumbnailId: "1111390506",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "paloma-rincon-heinekensilver-2",
@@ -262,8 +238,7 @@ export const directors: Director[] = [
         client: "Heineken Silver",
         vimeoId: "1107749399",
         thumbnailId: "1113560033",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "paloma-rincon-fn-3",
@@ -272,8 +247,7 @@ export const directors: Director[] = [
         client: "FN",
         vimeoId: "1107745371",
         thumbnailId: "1113559984",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "paloma-rincon-michelobultra-4",
@@ -282,8 +256,7 @@ export const directors: Director[] = [
         client: "Michelob Ultra Seltzer",
         vimeoId: "1112927162",
         thumbnailId: "1113561175",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "paloma-rincon-earthsown-5",
@@ -292,8 +265,7 @@ export const directors: Director[] = [
         client: "Earth's Own",
         vimeoId: "1107751794",
         thumbnailId: "1113559863",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "paloma-rincon-papajohns-6",
@@ -302,8 +274,7 @@ export const directors: Director[] = [
         client: "Papa John's",
         vimeoId: "1107749963",
         thumbnailId: "1111390531",
-        isPlaceholder: false,
-        status: 'published'
+
       }
     ]
   },
@@ -318,8 +289,7 @@ export const directors: Director[] = [
         client: "Dubai",
         vimeoId: "1107778294",
         thumbnailId: "1113559248",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "luciano-urbani-toyota-2",
@@ -328,8 +298,7 @@ export const directors: Director[] = [
         client: "Toyota",
         vimeoId: "1107777537",
         thumbnailId: "1111389879",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "luciano-urbani-sprite-3",
@@ -338,8 +307,7 @@ export const directors: Director[] = [
         client: "Sprite",
         vimeoId: "1107776881",
         thumbnailId: "1111390080",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "luciano-urbani-kfc-4",
@@ -348,8 +316,7 @@ export const directors: Director[] = [
         client: "KFC",
         vimeoId: "1112933584",
         thumbnailId: "1111389988",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "luciano-urbani-millerlite-5",
@@ -358,8 +325,7 @@ export const directors: Director[] = [
         client: "Miller Lite",
         vimeoId: "1107774267",
         thumbnailId: "1111390024",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "luciano-urbani-ford-6",
@@ -368,8 +334,7 @@ export const directors: Director[] = [
         client: "Ford",
         vimeoId: "1107771138",
         thumbnailId: "1111389917",
-        isPlaceholder: false,
-        status: 'published'
+
       }
     ]
   },
@@ -384,8 +349,7 @@ export const directors: Director[] = [
         client: "Reebok",
         vimeoId: "1107753409",
         thumbnailId: "1111387659",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "china-pequenino-movistar-2",
@@ -394,8 +358,7 @@ export const directors: Director[] = [
         client: "Movistar",
         vimeoId: "1107755107",
         thumbnailId: "1111387585",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "china-pequenino-ciudadela-3",
@@ -404,8 +367,7 @@ export const directors: Director[] = [
         client: "Ciudadela",
         vimeoId: "1113289841",
         thumbnailId: "1113571389",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "china-pequenino-nym-4",
@@ -414,8 +376,7 @@ export const directors: Director[] = [
         client: "NYM",
         vimeoId: "1107755680",
         thumbnailId: "1111387628",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "china-pequenino-bees-5",
@@ -424,8 +385,7 @@ export const directors: Director[] = [
         client: "Bees",
         vimeoId: "1107753947",
         thumbnailId: "1111387526",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
         id: "china-pequenino-oldi-6",
@@ -433,8 +393,7 @@ export const directors: Director[] = [
         title: "Wondrous Time",
         client: "Oldi",
         vimeoId: "1113394660",
-        isPlaceholder: false,
-        status: 'published'
+
       }
     ]
   },
@@ -442,54 +401,42 @@ export const directors: Director[] = [
     name: "Tigre Escobar",
     slug: "tigre-escobar",
     videos: [
+
       {
-        id: "porsche-pending",
+        id: "tigre-escobar-lafayette-1",
         order: 1,
-        title: "Próximamente",
-        client: "Porsche",
-        vimeoId: "",
-        isPlaceholder: true,
-        status: 'pending'
-      },
-      {
-        id: "tigre-escobar-lafayette-2",
-        order: 2,
         title: "Las Américas",
         client: "Lafayette",
         vimeoId: "1107801604",
         thumbnailId: "1111390727",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
-        id: "tigre-escobar-paulamendoza-3",
-        order: 3,
+        id: "tigre-escobar-paulamendoza-2",
+        order: 2,
         title: "Eyewear Paris",
         client: "Paula Mendoza",
         vimeoId: "1107803062",
         thumbnailId: "1113560358",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
-        id: "1107802342",
-        order: 4,
+        id: "tigre-escobar-lafayette-3",
+        order: 3,
         title: "Our Mutual Friend",
         client: "Lafayette",
         vimeoId: "1107802342",
         thumbnailId: "1113560243",
-        isPlaceholder: false,
-        status: 'published'
+
       },
       {
-        id: "1107803512",
-        order: 5,
+        id: "tigre-escobar-sandraweil-4",
+        order: 4,
         title: "Kintsugi",
         client: "Sandra Weil",
         vimeoId: "1107803512",
         thumbnailId: "1113560532",
-        isPlaceholder: false,
-        status: 'published'
+
       }
     ]
   }
@@ -521,12 +468,12 @@ export function getDirectorSlugs(): string[] {
 
 export function getPublishedVideosByDirector(directorName: string): DirectorVideo[] {
   const director = directors.find(d => d.name === directorName);
-  return director ? director.videos.filter(v => !v.isPlaceholder && v.status === 'published') : [];
+  return director ? director.videos.filter(v => v.vimeoId) : [];
 }
 
 export function getPublishedVideosByDirectorSlug(directorSlug: string): DirectorVideo[] {
   const director = directors.find(d => d.slug === directorSlug);
-  return director ? director.videos.filter(v => !v.isPlaceholder && v.status === 'published') : [];
+  return director ? director.videos.filter(v => v.vimeoId) : [];
 }
 
 // Función simplificada que solo usa thumbnailId
@@ -552,7 +499,7 @@ export async function getVideosAsVideoItems(directorName: string) {
   const director = directors.find(d => d.name === directorName);
   if (!director) return [];
   
-  const publishedVideos = director.videos.filter(v => !v.isPlaceholder && v.vimeoId);
+  const publishedVideos = director.videos.filter(v => v.vimeoId);
   
   // Ya no necesitamos llamar a la API de Vimeo porque tenemos thumbnailId para todos
   const videoItems = await Promise.all(

@@ -1,35 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
 import { useRouter } from "next/navigation";
-
-const directors = [
-  "Lemon",
-  "Luciano Urbani",
-  "Iván Jurado",
-  "Paloma Rincón",
-  "Tigre Escobar",
-  "China Pequenino",
-];
+import { getDirectorNames, getDirectorSlugs } from "@/lib/directors-api";
 
 export default function Directors() {
   const [selectedDirector, setSelectedDirector] = useState<string | undefined>();
+  const [directors, setDirectors] = useState<string[]>([]);
+  const [directorSlugs, setDirectorSlugs] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  useEffect(() => {
+    const fetchDirectors = async () => {
+      try {
+        const [names, slugs] = await Promise.all([
+          getDirectorNames(),
+          getDirectorSlugs()
+        ]);
+        setDirectors(names);
+        setDirectorSlugs(slugs);
+      } catch (error) {
+        console.error('Error fetching directors:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDirectors();
+  }, []);
+
   const handleDirectorClick = (director: string) => {
-    const directorSlugs = [
-      "lemon",
-      "luciano-urbani",
-      "ivan-jurado",
-      "paloma-rincon",
-      "tigre-escobar",
-      "china-pequenino",
-    ];
     const directorIndex = directors.indexOf(director);
     const slug = directorSlugs[directorIndex];
-    router.push(`/directors/${slug}`);
+    if (slug) {
+      router.push(`/directors/${slug}`);
+    }
   };
 
   return (

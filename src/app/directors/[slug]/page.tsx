@@ -4,7 +4,7 @@ import Image from "next/image";
 import LogoB from "@/components/LogoB";
 import { useEffect, useState, use } from "react";
 import { useInView } from "react-intersection-observer";
-import { getDirectorBySlug, getVideosAsVideoItems } from "@/data/directors";
+import { getDirectorBySlug, getVideosAsVideoItems } from "@/lib/directors-api";
 import type { VideoItem } from "@/lib/types";
 import { notFound, useRouter } from "next/navigation";
 
@@ -109,13 +109,32 @@ export default function DirectorPage({ params }: PageProps) {
 
   // Obtener datos del director usando React.use() para Next.js 15
   const { slug } = use(params);
-  const director = getDirectorBySlug(slug);
-  
-  if (!director) {
-    notFound();
-  }
+  const [director, setDirector] = useState<any>(null);
+  const [directorLoading, setDirectorLoading] = useState(true);
 
   useEffect(() => {
+    const fetchDirector = async () => {
+      try {
+        setDirectorLoading(true);
+        const directorData = await getDirectorBySlug(slug);
+        if (!directorData) {
+          notFound();
+        }
+        setDirector(directorData);
+      } catch (error) {
+        console.error('Error getting director:', error);
+        notFound();
+      } finally {
+        setDirectorLoading(false);
+      }
+    };
+
+    fetchDirector();
+  }, [slug]);
+
+  useEffect(() => {
+    if (!director) return;
+
     const fetchVideos = async () => {
       try {
         setIsLoading(true);
@@ -130,7 +149,7 @@ export default function DirectorPage({ params }: PageProps) {
     };
     
     fetchVideos();
-  }, [director.name]);
+  }, [director]);
 
   const handleVideoSelect = (video: VideoItem) => {
     setSelectedVideo(video);
@@ -139,6 +158,11 @@ export default function DirectorPage({ params }: PageProps) {
   const handleBackToVideos = () => {
     setSelectedVideo(null);
   };
+
+  // Si no hay director después de cargar, no mostrar nada (notFound ya se ejecutó)
+  if (!director) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-black">

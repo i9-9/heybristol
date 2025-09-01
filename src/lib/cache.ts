@@ -6,7 +6,7 @@ interface CacheEntry<T> {
 }
 
 class SimpleCache {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private defaultTTL = 5 * 60 * 1000; // 5 minutos por defecto
 
   set<T>(key: string, data: T, ttl?: number): void {
@@ -63,7 +63,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Función helper para wrap funciones async con cache
-export function withCache<T extends any[], R>(
+export function withCache<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
   keyGenerator: (...args: T) => string,
   ttl?: number

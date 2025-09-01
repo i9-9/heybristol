@@ -10,8 +10,6 @@ export interface ContentfulDirectorVideo {
     vimeoId: string;
     thumbnailId?: string;
     order: number;
-    isPlaceholder: boolean;
-    status: 'published' | 'pending' | 'draft';
   };
 }
 
@@ -22,6 +20,36 @@ export interface ContentfulDirector {
     slug: string;
     videos: ContentfulDirectorVideo[];
   };
+}
+
+export interface ContentfulHeroVideo {
+  contentTypeId: 'heroVideo';
+  fields: {
+    id: string;
+    title: string;
+    description?: string;
+    webmUrl?: string;
+    mp4Url?: string;
+    mobileUrl?: string;
+    vimeoId?: string;
+    order: number;
+  };
+}
+
+export interface HeroVideo {
+  id: string;
+  title: string;
+  description?: string;
+  webmUrl?: string;
+  mp4Url?: string;
+  mobileUrl?: string;
+  vimeoId?: string;
+  order: number;
+}
+
+export interface VideoSource {
+  src: string;
+  type: 'webm' | 'mp4' | 'vimeo';
 }
 
 const client = createClient({
@@ -37,20 +65,24 @@ async function _getDirectorsFromContentful() {
       include: 2, // Include referenced entries (videos)
     });
 
-    return response.items.map((item: any) => ({
-      name: item.fields.name,
-      slug: item.fields.slug,
-      videos: item.fields.videos?.map((video: any) => ({
-        id: video.fields.id,
-        title: video.fields.title,
-        client: video.fields.client,
-        vimeoId: video.fields.vimeoId,
-        thumbnailId: video.fields.thumbnailId,
-        order: video.fields.order,
-        isPlaceholder: video.fields.isPlaceholder || false,
-        status: video.fields.status || 'published',
-      })) || [],
-    }));
+    return response.items.map((item: unknown) => {
+      const director = item as { fields: { name: string; slug: string; videos?: unknown[] } };
+      return {
+        name: director.fields.name,
+        slug: director.fields.slug,
+        videos: director.fields.videos?.map((video: unknown) => {
+          const directorVideo = video as { fields: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
+          return {
+            id: directorVideo.fields.id,
+            title: directorVideo.fields.title,
+            client: directorVideo.fields.client,
+            vimeoId: directorVideo.fields.vimeoId,
+            thumbnailId: directorVideo.fields.thumbnailId,
+            order: directorVideo.fields.order,
+          };
+        }) || [],
+      };
+    });
   } catch (error) {
     console.error('Error fetching directors from Contentful:', error);
     return [];
@@ -76,20 +108,21 @@ async function _getDirectorBySlugFromContentful(slug: string) {
       return null;
     }
 
-    const item = response.items[0] as any;
+    const item = response.items[0] as unknown as { fields: { name: string; slug: string; videos?: unknown[] } };
     return {
       name: item.fields.name,
       slug: item.fields.slug,
-      videos: item.fields.videos?.map((video: any) => ({
-        id: video.fields.id,
-        title: video.fields.title,
-        client: video.fields.client,
-        vimeoId: video.fields.vimeoId,
-        thumbnailId: video.fields.thumbnailId,
-        order: video.fields.order,
-        isPlaceholder: video.fields.isPlaceholder || false,
-        status: video.fields.status || 'published',
-      })) || [],
+      videos: item.fields.videos?.map((video: unknown) => {
+        const directorVideo = video as { fields: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
+        return {
+          id: directorVideo.fields.id,
+          title: directorVideo.fields.title,
+          client: directorVideo.fields.client,
+          vimeoId: directorVideo.fields.vimeoId,
+          thumbnailId: directorVideo.fields.thumbnailId,
+          order: directorVideo.fields.order,
+        };
+      }) || [],
     };
   } catch (error) {
     console.error('Error fetching director from Contentful:', error);
@@ -109,18 +142,114 @@ export async function getVideosFromContentful() {
       content_type: 'directorVideo',
     });
 
-    return response.items.map((item: any) => ({
-      id: item.fields.id,
-      title: item.fields.title,
-      client: item.fields.client,
-      vimeoId: item.fields.vimeoId,
-      thumbnailId: item.fields.thumbnailId,
-      order: item.fields.order,
-      isPlaceholder: item.fields.isPlaceholder || false,
-      status: item.fields.status || 'published',
-    }));
+    return response.items.map((item: unknown) => {
+      const video = item as { fields: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
+      return {
+        id: video.fields.id,
+        title: video.fields.title,
+        client: video.fields.client,
+        vimeoId: video.fields.vimeoId,
+        thumbnailId: video.fields.thumbnailId,
+        order: video.fields.order,
+      };
+    });
   } catch (error) {
     console.error('Error fetching videos from Contentful:', error);
     return [];
   }
+}
+
+// Función interna sin cache para hero videos
+async function _getHeroVideosFromContentful(): Promise<HeroVideo[]> {
+  try {
+    const response = await client.getEntries({
+      content_type: 'heroVideo',
+      order: ['fields.order'],
+    });
+
+    return response.items.map((item: unknown) => {
+      const heroVideo = item as { fields: { id: string; title: string; description?: string; webmUrl?: string; mp4Url?: string; mobileUrl?: string; vimeoId?: string; order: number } };
+      return {
+        id: heroVideo.fields.id,
+        title: heroVideo.fields.title,
+        description: heroVideo.fields.description,
+        webmUrl: heroVideo.fields.webmUrl,
+        mp4Url: heroVideo.fields.mp4Url,
+        mobileUrl: heroVideo.fields.mobileUrl,
+        vimeoId: heroVideo.fields.vimeoId,
+        order: heroVideo.fields.order,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching hero videos from Contentful:', error);
+    return [];
+  }
+}
+
+// Función con cache para hero videos
+export const getHeroVideosFromContentful = withCache(
+  _getHeroVideosFromContentful,
+  () => 'hero-videos-all',
+  5 * 60 * 1000 // 5 minutos
+);
+
+// Función para obtener un video hero aleatorio
+export async function getRandomHeroVideo(): Promise<HeroVideo | null> {
+  try {
+    const heroVideos = await getHeroVideosFromContentful();
+    
+    if (heroVideos.length === 0) {
+      return null;
+    }
+    
+    // Seleccionar un video aleatorio
+    const randomIndex = Math.floor(Math.random() * heroVideos.length);
+    return heroVideos[randomIndex];
+  } catch (error) {
+    console.error('Error getting random hero video:', error);
+    return null;
+  }
+}
+
+// Función para obtener la mejor fuente de video
+export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = false): VideoSource | null {
+  // Prioridad: WebM > MP4 > Vimeo
+  
+  // Detectar soporte de WebM
+  const video = document.createElement('video');
+  const supportsWebM = video.canPlayType('video/webm; codecs="vp9"').replace(/no/, '') !== '';
+  
+  // En móvil, usar mobileUrl si está disponible
+  if (isMobile && heroVideo.mobileUrl) {
+    return {
+      src: heroVideo.mobileUrl,
+      type: heroVideo.mobileUrl.includes('.webm') ? 'webm' : 'mp4'
+    };
+  }
+  
+  // Prioridad 1: WebM (si es soportado)
+  if (supportsWebM && heroVideo.webmUrl) {
+    return {
+      src: heroVideo.webmUrl,
+      type: 'webm'
+    };
+  }
+  
+  // Prioridad 2: MP4
+  if (heroVideo.mp4Url) {
+    return {
+      src: heroVideo.mp4Url,
+      type: 'mp4'
+    };
+  }
+  
+  // Prioridad 3: Vimeo
+  if (heroVideo.vimeoId) {
+    return {
+      src: `https://player.vimeo.com/video/${heroVideo.vimeoId}?autoplay=1&loop=1&muted=1&controls=0&background=1`,
+      type: 'vimeo'
+    };
+  }
+  
+  return null;
 }

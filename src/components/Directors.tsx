@@ -10,7 +10,6 @@ export default function Directors() {
   const [selectedDirector, setSelectedDirector] = useState<string | undefined>();
   const [directors, setDirectors] = useState<string[]>([]);
   const [directorSlugs, setDirectorSlugs] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -24,8 +23,6 @@ export default function Directors() {
         setDirectorSlugs(slugs);
       } catch (error) {
         console.error('Error fetching directors:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 

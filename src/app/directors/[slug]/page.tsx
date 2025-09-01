@@ -109,13 +109,11 @@ export default function DirectorPage({ params }: PageProps) {
 
   // Obtener datos del director usando React.use() para Next.js 15
   const { slug } = use(params);
-  const [director, setDirector] = useState<any>(null);
-  const [directorLoading, setDirectorLoading] = useState(true);
+  const [director, setDirector] = useState<{ name: string } | null>(null);
 
   useEffect(() => {
     const fetchDirector = async () => {
       try {
-        setDirectorLoading(true);
         const directorData = await getDirectorBySlug(slug);
         if (!directorData) {
           notFound();
@@ -124,8 +122,6 @@ export default function DirectorPage({ params }: PageProps) {
       } catch (error) {
         console.error('Error getting director:', error);
         notFound();
-      } finally {
-        setDirectorLoading(false);
       }
     };
 

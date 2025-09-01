@@ -70,7 +70,7 @@ export async function getDirectorSlugs(): Promise<string[]> {
 export async function getPublishedVideosByDirectorName(directorName: string): Promise<DirectorVideo[]> {
   const directors = await getDirectors();
   const director = directors.find(d => d.name === directorName);
-  return director ? director.videos.filter(v => !v.isPlaceholder && v.status === 'published') : [];
+  return director ? director.videos.filter(v => v.vimeoId) : [];
 }
 
 /**
@@ -78,7 +78,7 @@ export async function getPublishedVideosByDirectorName(directorName: string): Pr
  */
 export async function getPublishedVideosByDirectorSlug(directorSlug: string): Promise<DirectorVideo[]> {
   const director = await getDirectorBySlug(directorSlug);
-  return director ? director.videos.filter(v => !v.isPlaceholder && v.status === 'published') : [];
+  return director ? director.videos.filter(v => v.vimeoId) : [];
 }
 
 /**
@@ -88,7 +88,7 @@ export async function getVideosAsVideoItems(directorName: string): Promise<Video
   const director = (await getDirectors()).find(d => d.name === directorName);
   if (!director) return [];
   
-  const publishedVideos = director.videos.filter(v => !v.isPlaceholder && v.vimeoId);
+  const publishedVideos = director.videos.filter(v => v.vimeoId);
   
   const videoItems = await Promise.all(
     publishedVideos.map(video => convertToVideoItem(video))

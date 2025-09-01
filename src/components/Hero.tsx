@@ -144,26 +144,36 @@ export default function Hero({ initialHeroVideo }: HeroProps) {
         )}
 
         {videoSource && isVimeoVideo && (
-          <iframe
-            className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-full min-w-full min-h-full"
-            src={videoSource}
+          <div 
+            className="absolute inset-0 w-full h-full"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
               transition: "opacity 0.8s ease-in-out",
-              transform: "translateX(-50%) scale(1.2)", // Scale to fill and center
             }}
-            allow="autoplay; fullscreen; picture-in-picture"
-            title={heroVideo?.title || "Hero Video"}
-            frameBorder="0"
-            onLoad={() => setIsVideoLoaded(true)}
-            onError={() => {
-              // Fallback to local video if Vimeo fails
-              const fallbackFormat = detectVideoSupport();
-              setVideoSource(fallbackFormat);
-              setIsVimeoVideo(false);
-              setIsVideoLoaded(true);
-            }}
-          />
+          >
+            <iframe
+              className="w-full h-full"
+              src={videoSource}
+              style={{
+                width: "100%",
+                height: "100%",
+                border: "none",
+                transform: "scale(1.1)",
+                transformOrigin: "center center",
+              }}
+              allow="autoplay; fullscreen; picture-in-picture"
+              title={heroVideo?.title || "Hero Video"}
+              frameBorder="0"
+              onLoad={() => setIsVideoLoaded(true)}
+              onError={() => {
+                // Fallback to local video if Vimeo fails
+                const fallbackFormat = detectVideoSupport();
+                setVideoSource(fallbackFormat);
+                setIsVimeoVideo(false);
+                setIsVideoLoaded(true);
+              }}
+            />
+          </div>
         )}
       </div>
 

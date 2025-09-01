@@ -17,7 +17,8 @@
     "recreate-content-types": "node scripts/recreate-content-types.js",
     "reset-display-fields": "node scripts/reset-display-fields.js",
     "setup-webhook": "node scripts/setup-webhook.js",
-    "cleanup-migration": "node scripts/cleanup-after-migration.js"
+    "cleanup-migration": "node scripts/cleanup-after-migration.js",
+    "update-hero-video-content-type": "node scripts/update-hero-video-content-type.js"
   },
   "dependencies": {
     "contentful": "^11.7.15",

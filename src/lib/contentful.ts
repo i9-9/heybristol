@@ -28,9 +28,18 @@ export interface ContentfulHeroVideo {
     id: string;
     title: string;
     description?: string;
-    webmUrl?: string;
-    mp4Url?: string;
-    mobileUrl?: string;
+    webmVideo?: { 
+      sys: { id: string };
+      fields: { file: { url: string; contentType: string } };
+    };
+    mp4Video?: { 
+      sys: { id: string };
+      fields: { file: { url: string; contentType: string } };
+    };
+    mobileVideo?: { 
+      sys: { id: string };
+      fields: { file: { url: string; contentType: string } };
+    };
     vimeoId?: string;
     order: number;
   };
@@ -40,9 +49,18 @@ export interface HeroVideo {
   id: string;
   title: string;
   description?: string;
-  webmUrl?: string;
-  mp4Url?: string;
-  mobileUrl?: string;
+  webmVideo?: { 
+    sys: { id: string };
+    fields: { file: { url: string; contentType: string } };
+  };
+  mp4Video?: { 
+    sys: { id: string };
+    fields: { file: { url: string; contentType: string } };
+  };
+  mobileVideo?: { 
+    sys: { id: string };
+    fields: { file: { url: string; contentType: string } };
+  };
   vimeoId?: string;
   order: number;
 }
@@ -165,17 +183,38 @@ async function _getHeroVideosFromContentful(): Promise<HeroVideo[]> {
     const response = await client.getEntries({
       content_type: 'heroVideo',
       order: ['fields.order'],
+      include: 2, // Include referenced assets
     });
 
     return response.items.map((item: unknown) => {
-      const heroVideo = item as { fields: { id: string; title: string; description?: string; webmUrl?: string; mp4Url?: string; mobileUrl?: string; vimeoId?: string; order: number } };
+      const heroVideo = item as { 
+        fields: { 
+          id: string; 
+          title: string; 
+          description?: string; 
+          webmVideo?: { 
+            sys: { id: string };
+            fields: { file: { url: string; contentType: string } };
+          }; 
+          mp4Video?: { 
+            sys: { id: string };
+            fields: { file: { url: string; contentType: string } };
+          }; 
+          mobileVideo?: { 
+            sys: { id: string };
+            fields: { file: { url: string; contentType: string } };
+          }; 
+          vimeoId?: string; 
+          order: number 
+        } 
+      };
       return {
         id: heroVideo.fields.id,
         title: heroVideo.fields.title,
         description: heroVideo.fields.description,
-        webmUrl: heroVideo.fields.webmUrl,
-        mp4Url: heroVideo.fields.mp4Url,
-        mobileUrl: heroVideo.fields.mobileUrl,
+        webmVideo: heroVideo.fields.webmVideo,
+        mp4Video: heroVideo.fields.mp4Video,
+        mobileVideo: heroVideo.fields.mobileVideo,
         vimeoId: heroVideo.fields.vimeoId,
         order: heroVideo.fields.order,
       };
@@ -219,26 +258,26 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
   const video = document.createElement('video');
   const supportsWebM = video.canPlayType('video/webm; codecs="vp9"').replace(/no/, '') !== '';
   
-  // En móvil, usar mobileUrl si está disponible
-  if (isMobile && heroVideo.mobileUrl) {
+  // En móvil, usar mobileVideo si está disponible
+  if (isMobile && heroVideo.mobileVideo) {
     return {
-      src: heroVideo.mobileUrl,
-      type: heroVideo.mobileUrl.includes('.webm') ? 'webm' : 'mp4'
+      src: `https:${heroVideo.mobileVideo.fields.file.url}`,
+      type: heroVideo.mobileVideo.fields.file.contentType.includes('webm') ? 'webm' : 'mp4'
     };
   }
   
   // Prioridad 1: WebM (si es soportado)
-  if (supportsWebM && heroVideo.webmUrl) {
+  if (supportsWebM && heroVideo.webmVideo) {
     return {
-      src: heroVideo.webmUrl,
+      src: `https:${heroVideo.webmVideo.fields.file.url}`,
       type: 'webm'
     };
   }
   
   // Prioridad 2: MP4
-  if (heroVideo.mp4Url) {
+  if (heroVideo.mp4Video) {
     return {
-      src: heroVideo.mp4Url,
+      src: `https:${heroVideo.mp4Video.fields.file.url}`,
       type: 'mp4'
     };
   }
@@ -246,7 +285,7 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
   // Prioridad 3: Vimeo
   if (heroVideo.vimeoId) {
     return {
-      src: `https://player.vimeo.com/video/${heroVideo.vimeoId}?autoplay=1&loop=1&muted=1&controls=0&background=1`,
+      src: `https://player.vimeo.com/video/${heroVideo.vimeoId}?autoplay=1&loop=1&muted=1&controls=0&background=1&quality=1080p&responsive=1&dnt=1`,
       type: 'vimeo'
     };
   }

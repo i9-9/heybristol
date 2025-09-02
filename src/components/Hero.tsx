@@ -3,19 +3,43 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import LogoMain from "@/components/LogoMain";
-import { getRandomHeroVideo, getBestVideoSource, type HeroVideo } from "@/lib/contentful";
+import { getRandomHeroVideo, getBestVideoSource, getRandomAudioTrack, type HeroVideo, type AudioTrack } from "@/lib/contentful";
+
+// Hook para detectar si es móvil
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    // Verificar en el mount
+    checkIsMobile();
+
+    // Escuchar cambios de tamaño
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  return isMobile;
+}
 
 interface HeroProps {
   initialHeroVideo?: HeroVideo | null;
+  initialAudioTrack?: AudioTrack | null;
 }
 
-export default function Hero({ initialHeroVideo }: HeroProps) {
+export default function Hero({ initialHeroVideo, initialAudioTrack }: HeroProps) {
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [videoSource, setVideoSource] = useState<string | null>(null);
   const [heroVideo, setHeroVideo] = useState<HeroVideo | null>(null);
+  const [audioTrack, setAudioTrack] = useState<AudioTrack | null>(null);
   const [isVimeoVideo, setIsVimeoVideo] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const isMobile = useIsMobile();
 
   const detectVideoSupport = () => {
     const video = document.createElement("video");
@@ -31,19 +55,19 @@ export default function Hero({ initialHeroVideo }: HeroProps) {
   };
 
   const toggleAudio = () => {
-    // Solo funciona con videos locales, no con Vimeo iframes
-    if (isVimeoVideo) {
-      console.log('Audio control not available for Vimeo videos');
-      return;
-    }
+    if (!audioRef.current || !audioTrack) return;
     
-    if (!videoRef.current) return;
     if (isMuted) {
-      videoRef.current.muted = false;
       setIsMuted(false);
+      audioRef.current.volume = audioTrack.volume || 0.5;
+      audioRef.current.play().catch(error => {
+        console.error('Error playing audio:', error);
+      });
+      console.log('🎵 Activando música:', audioTrack.title);
     } else {
-      videoRef.current.muted = true;
       setIsMuted(true);
+      audioRef.current.pause();
+      console.log('🔇 Silenciando música');
     }
   };
 
@@ -58,16 +82,16 @@ export default function Hero({ initialHeroVideo }: HeroProps) {
   };
 
   useEffect(() => {
-    const loadHeroVideo = async () => {
+    const loadHeroContent = async () => {
       try {
-        // Usar video inicial si está disponible (SSG), sino obtener uno aleatorio
+        // Cargar video
         const randomVideo = initialHeroVideo || await getRandomHeroVideo();
         
         if (randomVideo) {
           setHeroVideo(randomVideo);
           
-          // Detectar dispositivo móvil
-          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          // Usar el hook para detectar móvil
+          // const isMobile = window.innerWidth <= 768;
           
           // Obtener la mejor fuente de video
           const bestSource = getBestVideoSource(randomVideo, isMobile);
@@ -88,8 +112,16 @@ export default function Hero({ initialHeroVideo }: HeroProps) {
           // Fallback a video local si no hay videos en Contentful
           fallbackToLocal();
         }
+
+        // Cargar audio track
+        const randomAudio = initialAudioTrack || await getRandomAudioTrack();
+        if (randomAudio) {
+          setAudioTrack(randomAudio);
+          console.log('🎵 Audio track cargado:', randomAudio.title);
+        }
+
       } catch (error) {
-        console.error('Error loading hero video from Contentful:', error);
+        console.error('Error loading hero content from Contentful:', error);
         // Fallback a video local en caso de error
         fallbackToLocal();
       }
@@ -101,21 +133,36 @@ export default function Hero({ initialHeroVideo }: HeroProps) {
       setIsVimeoVideo(false);
     };
 
-    loadHeroVideo();
+    loadHeroContent();
 
     const timer = setTimeout(() => setIsVideoLoaded(true), 3000);
 
     return () => clearTimeout(timer);
-  }, [initialHeroVideo]);
+  }, [initialHeroVideo, initialAudioTrack, isMobile]);
 
   return (
     <section className="relative z-10 h-screen">
+      {/* Audio track independiente */}
+      {audioTrack && (
+        <audio
+          ref={audioRef}
+          loop={audioTrack.loop}
+          preload="auto"
+          style={{ display: 'none' }}
+        >
+          <source
+            src={`https:${audioTrack.audioFile.fields.file.url}`}
+            type={audioTrack.audioFile.fields.file.contentType}
+          />
+        </audio>
+      )}
+
       {/* Video de fondo dentro del hero */}
       <div className="absolute inset-0 w-full h-full overflow-hidden bg-black pointer-events-none z-0">
         {videoSource && !isVimeoVideo && (
           <video
             ref={videoRef}
-            className="absolute top-0 left-1/2 transform -translate-x-1/2 w-auto h-full min-w-full min-h-full object-cover"
+            className="absolute inset-0 w-screen h-screen object-cover md:top-0 md:left-1/2 md:transform md:-translate-x-1/2 md:w-auto md:h-full md:min-w-full md:min-h-full"
             autoPlay
             muted
             loop
@@ -123,7 +170,7 @@ export default function Hero({ initialHeroVideo }: HeroProps) {
             preload="auto"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
-              transition: "opacity 0.8s ease-in-out",
+              transition: "opacity 0.8s ease-in-out"
             }}
             onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
@@ -145,7 +192,7 @@ export default function Hero({ initialHeroVideo }: HeroProps) {
 
         {videoSource && isVimeoVideo && (
           <div 
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 w-screen h-screen md:w-full md:h-full"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
               transition: "opacity 0.8s ease-in-out",
@@ -202,22 +249,20 @@ export default function Hero({ initialHeroVideo }: HeroProps) {
         </div>
       </div>
 
-      {/* Botón de audio dentro del hero (abajo derecha) - Solo para videos locales */}
-      {!isVimeoVideo && (
-        <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10">
-          <button
-            onClick={toggleAudio}
-            className="w-12 h-12 md:w-14 md:h-14 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer"
-            aria-label={isMuted ? "Activar audio" : "Silenciar audio"}
-          >
-            {isMuted ? (
-              <VolumeX className="w-6 h-6 text-white" />
-            ) : (
-              <Volume2 className="w-6 h-6 text-white" />
-            )}
-          </button>
-        </div>
-      )}
+      {/* Botón de audio dentro del hero (abajo derecha) - Para música independiente */}
+      <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10">
+        <button
+          onClick={toggleAudio}
+          className="w-12 h-12 md:w-14 md:h-14 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer"
+          aria-label={isMuted ? "Activar música" : "Silenciar música"}
+        >
+          {isMuted ? (
+            <VolumeX className="w-6 h-6 text-white" />
+          ) : (
+            <Volume2 className="w-6 h-6 text-white" />
+          )}
+        </button>
+      </div>
 
       {/* Año (arriba derecha) */}
       {/*       <div className="absolute top-4 right-4 md:top-6 md:right-8 z-10 pointer-events-none">

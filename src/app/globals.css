@@ -126,6 +126,9 @@ html::-webkit-scrollbar {
     .mx-app { margin-left: 30px; margin-right: 30px; }
   }
 
+  /* Custom object-fit utilities */
+  .object-fill { object-fit: fill; }
+
   /* Fluid gaps and typography for main hero overlay */
   .gap-fluid-main { gap: clamp(1rem, 6vw, 2.5rem); }
   .gap-fluid-links { column-gap: clamp(1rem, 5vw, 12.5rem); }

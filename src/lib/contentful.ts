@@ -65,6 +65,21 @@ export interface HeroVideo {
   order: number;
 }
 
+export interface AudioTrack {
+  id: string;
+  title: string;
+  description?: string;
+  audioFile: { 
+    sys: { id: string };
+    fields: { file: { url: string; contentType: string } };
+  };
+  volume?: number;
+  loop?: boolean;
+  fadeIn?: number;
+  fadeOut?: number;
+  order?: number;
+}
+
 export interface VideoSource {
   src: string;
   type: 'webm' | 'mp4' | 'vimeo';
@@ -252,21 +267,39 @@ export async function getRandomHeroVideo(): Promise<HeroVideo | null> {
 
 // Función para obtener la mejor fuente de video
 export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = false): VideoSource | null {
-  // Prioridad: WebM > MP4 > Vimeo
+  // Prioridad: WebM > MP4 > Vimeo (NUNCA Vimeo en móvil)
   
   // Detectar soporte de WebM
   const video = document.createElement('video');
   const supportsWebM = video.canPlayType('video/webm; codecs="vp9"').replace(/no/, '') !== '';
   
-  // En móvil, usar mobileVideo si está disponible
-  if (isMobile && heroVideo.mobileVideo) {
-    return {
-      src: `https:${heroVideo.mobileVideo.fields.file.url}`,
-      type: heroVideo.mobileVideo.fields.file.contentType.includes('webm') ? 'webm' : 'mp4'
-    };
+  // En móvil, usar mobileVideo si está disponible, sino usar WebM normal
+  if (isMobile) {
+    if (heroVideo.mobileVideo) {
+      return {
+        src: `https:${heroVideo.mobileVideo.fields.file.url}`,
+        type: heroVideo.mobileVideo.fields.file.contentType.includes('webm') ? 'webm' : 'mp4'
+      };
+    }
+    // Si no hay mobileVideo, usar WebM normal (mismo video que desktop)
+    if (supportsWebM && heroVideo.webmVideo) {
+      return {
+        src: `https:${heroVideo.webmVideo.fields.file.url}`,
+        type: 'webm'
+      };
+    }
+    // Fallback a MP4 en móvil si no hay WebM
+    if (heroVideo.mp4Video) {
+      return {
+        src: `https:${heroVideo.mp4Video.fields.file.url}`,
+        type: 'mp4'
+      };
+    }
+    // NUNCA usar Vimeo en móvil
+    return null;
   }
   
-  // Prioridad 1: WebM (si es soportado)
+  // Desktop: Prioridad 1: WebM (si es soportado)
   if (supportsWebM && heroVideo.webmVideo) {
     return {
       src: `https:${heroVideo.webmVideo.fields.file.url}`,
@@ -274,7 +307,7 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
     };
   }
   
-  // Prioridad 2: MP4
+  // Desktop: Prioridad 2: MP4
   if (heroVideo.mp4Video) {
     return {
       src: `https:${heroVideo.mp4Video.fields.file.url}`,
@@ -282,7 +315,7 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
     };
   }
   
-  // Prioridad 3: Vimeo
+  // Desktop: Prioridad 3: Vimeo (solo en desktop)
   if (heroVideo.vimeoId) {
     return {
       src: `https://player.vimeo.com/video/${heroVideo.vimeoId}?autoplay=1&loop=1&muted=1&controls=0&background=1&quality=1080p&responsive=1&dnt=1`,
@@ -291,4 +324,56 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
   }
   
   return null;
+}
+
+// Función interna para obtener audio tracks desde Contentful
+async function _getAudioTracksFromContentful(): Promise<AudioTrack[]> {
+  try {
+    const entries = await client.getEntries({
+      content_type: 'audioTrack',
+      order: 'fields.order'
+    });
+
+    return entries.items.map((audioTrack: any) => {
+      return {
+        id: audioTrack.fields.id,
+        title: audioTrack.fields.title,
+        description: audioTrack.fields.description,
+        audioFile: audioTrack.fields.audioFile,
+        volume: audioTrack.fields.volume || 0.5,
+        loop: audioTrack.fields.loop || true,
+        fadeIn: audioTrack.fields.fadeIn || 0,
+        fadeOut: audioTrack.fields.fadeOut || 0,
+        order: audioTrack.fields.order || 0,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching audio tracks from Contentful:', error);
+    return [];
+  }
+}
+
+// Función con cache para audio tracks
+export const getAudioTracksFromContentful = withCache(
+  _getAudioTracksFromContentful,
+  () => 'audio-tracks-all',
+  5 * 60 * 1000 // 5 minutos
+);
+
+// Función para obtener un audio track aleatorio
+export async function getRandomAudioTrack(): Promise<AudioTrack | null> {
+  try {
+    const audioTracks = await getAudioTracksFromContentful();
+    
+    if (audioTracks.length === 0) {
+      return null;
+    }
+    
+    // Seleccionar un track aleatorio
+    const randomIndex = Math.floor(Math.random() * audioTracks.length);
+    return audioTracks[randomIndex];
+  } catch (error) {
+    console.error('Error getting random audio track:', error);
+    return null;
+  }
 }

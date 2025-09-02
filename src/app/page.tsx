@@ -1,7 +1,7 @@
 import Hero from '@/components/Hero';
 import Directors from '@/components/Directors';
 import Contact from '@/components/Contact';
-import { getRandomHeroVideo, getRandomAudioTrack } from '@/lib/contentful';
+import { getAllHeroVideos, getRandomAudioTrack } from '@/lib/contentful';
 
 // Configurar ISR - se regenera cada 5 minutos para que cambie más frecuentemente
 export const revalidate = 300; // 5 minutos
@@ -9,22 +9,23 @@ export const revalidate = 300; // 5 minutos
 // Función para generar datos estáticos
 async function getStaticData() {
   try {
-    // Obtener video hero y audio track aleatorios en build time
-    const [heroVideo, audioTrack] = await Promise.all([
-      getRandomHeroVideo(),
+    // Obtener TODOS los videos hero (para randomización en cliente)
+    // y UN audio track fijo (se puede cambiar desde Contentful)
+    const [allHeroVideos, fixedAudioTrack] = await Promise.all([
+      getAllHeroVideos(),
       getRandomAudioTrack()
     ]);
     
     return {
-      heroVideo,
-      audioTrack,
+      allHeroVideos,
+      fixedAudioTrack,
       timestamp: new Date().toISOString()
     };
   } catch (error) {
     console.error('Error getting static data:', error);
     return {
-      heroVideo: null,
-      audioTrack: null,
+      allHeroVideos: [],
+      fixedAudioTrack: null,
       timestamp: new Date().toISOString()
     };
   }
@@ -36,8 +37,8 @@ export default async function Home() {
   return (
     <>
       <Hero 
-        initialHeroVideo={staticData.heroVideo} 
-        initialAudioTrack={staticData.audioTrack} 
+        allHeroVideos={staticData.allHeroVideos} 
+        fixedAudioTrack={staticData.fixedAudioTrack} 
       />
       <Directors />
       <Contact />

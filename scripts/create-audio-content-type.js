@@ -1,5 +1,8 @@
 const { createClient } = require('contentful-management');
-require('dotenv').config({ path: '.env.local' });
+const path = require('path');
+
+// Cargar variables de entorno de forma más robusta
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') });
 
 // Usar variables de entorno con dotenv
 const spaceId = process.env.CONTENTFUL_SPACE_ID || 'ii9zv0je6636';
@@ -8,6 +11,15 @@ const managementToken = process.env.CONTENTFUL_MANAGEMENT_TOKEN;
 console.log('🔍 Verificando variables de entorno...');
 console.log('CONTENTFUL_SPACE_ID:', spaceId ? '✅ Configurado' : '❌ No configurado');
 console.log('CONTENTFUL_MANAGEMENT_TOKEN:', managementToken ? '✅ Configurado' : '❌ No configurado');
+
+// Debug: mostrar todas las variables que empiezan con CONTENTFUL
+console.log('\n🔍 Variables CONTENTFUL disponibles:');
+Object.keys(process.env)
+  .filter(key => key.startsWith('CONTENTFUL'))
+  .forEach(key => {
+    const value = process.env[key];
+    console.log(`${key}: ${value ? '✅ ' + (value.length > 20 ? value.substring(0, 20) + '...' : value) : '❌ No configurado'}`);
+  });
 
 if (!managementToken) {
   console.error('❌ CONTENTFUL_MANAGEMENT_TOKEN es requerido');
@@ -20,23 +32,21 @@ const client = createClient({
   accessToken: managementToken,
 });
 
-async function createAudioTrackContentType(space) {
+async function createAudioTrackContentType(environment) {
   try {
     console.log('🎵 Creando content type AudioTrack...');
     
     // Verificar si ya existe
     try {
-      const existing = await space.getContentType('audioTrack');
+      const existing = await environment.getContentType('audioTrack');
       console.log('⚠️  Content type audioTrack ya existe, actualizando...');
       return existing;
     } catch (error) {
       // No existe, continuar con la creación
     }
     
-    const contentType = await space.createContentType({
-      sys: {
-        id: 'audioTrack'
-      },
+    // Crear el content type usando la API correcta para v11+
+    const contentType = await environment.createContentTypeWithId('audioTrack', {
       name: 'Audio Track',
       displayField: 'title',
       description: 'Tracks de audio para el hero',
@@ -59,12 +69,6 @@ async function createAudioTrackContentType(space) {
           required: true
         },
         {
-          id: 'description',
-          name: 'Descripción',
-          type: 'Text',
-          required: false
-        },
-        {
           id: 'audioFile',
           name: 'Archivo de Audio',
           type: 'Link',
@@ -75,60 +79,6 @@ async function createAudioTrackContentType(space) {
               linkMimetypeGroup: ['audio']
             }
           ]
-        },
-        {
-          id: 'volume',
-          name: 'Volumen (0-1)',
-          type: 'Number',
-          required: false,
-          validations: [
-            {
-              range: {
-                min: 0,
-                max: 1
-              }
-            }
-          ]
-        },
-        {
-          id: 'loop',
-          name: 'Loop',
-          type: 'Boolean',
-          required: false
-        },
-        {
-          id: 'fadeIn',
-          name: 'Fade In (segundos)',
-          type: 'Number',
-          required: false,
-          validations: [
-            {
-              range: {
-                min: 0,
-                max: 10
-              }
-            }
-          ]
-        },
-        {
-          id: 'fadeOut',
-          name: 'Fade Out (segundos)',
-          type: 'Number',
-          required: false,
-          validations: [
-            {
-              range: {
-                min: 0,
-                max: 10
-              }
-            }
-          ]
-        },
-        {
-          id: 'order',
-          name: 'Orden',
-          type: 'Integer',
-          required: false
         }
       ]
     });
@@ -139,9 +89,10 @@ async function createAudioTrackContentType(space) {
     return contentType;
     
   } catch (error) {
+    console.error('❌ Error detallado:', error.message);
     if (error.sys?.id === 'VersionMismatch') {
       console.log('⚠️  Content type ya existe, actualizando...');
-      const existingContentType = await space.getContentType('audioTrack');
+      const existingContentType = await environment.getContentType('audioTrack');
       await existingContentType.publish();
       console.log('✅ Content type AudioTrack actualizado');
       return existingContentType;
@@ -155,10 +106,12 @@ async function main() {
     console.log('🚀 Iniciando creación de content type AudioTrack...\n');
     
     const space = await client.getSpace(spaceId);
-    await createAudioTrackContentType(space);
+    const environment = await space.getEnvironment('master');
+    await createAudioTrackContentType(environment);
     
     console.log('\n✅ Content type AudioTrack configurado exitosamente!');
     console.log('\n📝 Próximo paso: Crear entradas de audio tracks');
+    console.log('💡 Ejecuta: node scripts/create-sample-audio-tracks.js');
     
   } catch (error) {
     console.error('❌ Error:', error.message);

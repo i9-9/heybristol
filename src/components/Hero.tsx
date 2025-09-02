@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import LogoMain from "@/components/LogoMain";
-import { getRandomHeroVideo, getBestVideoSource, getRandomAudioTrack, type HeroVideo, type AudioTrack } from "@/lib/contentful";
+import { getBestVideoSource, getRandomAudioTrack, type HeroVideo, type AudioTrack } from "@/lib/contentful";
 
 // Hook para detectar si es móvil
 function useIsMobile() {
@@ -26,11 +26,11 @@ function useIsMobile() {
 }
 
 interface HeroProps {
-  initialHeroVideo?: HeroVideo | null;
-  initialAudioTrack?: AudioTrack | null;
+  allHeroVideos?: HeroVideo[];
+  fixedAudioTrack?: AudioTrack | null;
 }
 
-export default function Hero({ initialHeroVideo, initialAudioTrack }: HeroProps) {
+export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [videoSource, setVideoSource] = useState<string | null>(null);
@@ -59,7 +59,7 @@ export default function Hero({ initialHeroVideo, initialAudioTrack }: HeroProps)
     
     if (isMuted) {
       setIsMuted(false);
-      audioRef.current.volume = audioTrack.volume || 0.5;
+      audioRef.current.volume = 0.5; // Fixed volume since it's not in the schema
       audioRef.current.play().catch(error => {
         console.error('Error playing audio:', error);
       });
@@ -84,14 +84,18 @@ export default function Hero({ initialHeroVideo, initialAudioTrack }: HeroProps)
   useEffect(() => {
     const loadHeroContent = async () => {
       try {
-        // Cargar video
-        const randomVideo = initialHeroVideo || await getRandomHeroVideo();
+        // Randomizar video en el cliente
+        let randomVideo: HeroVideo | null = null;
+        
+        if (allHeroVideos && allHeroVideos.length > 0) {
+          // Seleccionar un video aleatorio de la lista
+          const randomIndex = Math.floor(Math.random() * allHeroVideos.length);
+          randomVideo = allHeroVideos[randomIndex];
+          console.log('🎲 Video aleatorio seleccionado:', randomVideo.title, '(índice:', randomIndex, ')');
+        }
         
         if (randomVideo) {
           setHeroVideo(randomVideo);
-          
-          // Usar el hook para detectar móvil
-          // const isMobile = window.innerWidth <= 768;
           
           // Obtener la mejor fuente de video
           const bestSource = getBestVideoSource(randomVideo, isMobile);
@@ -113,11 +117,17 @@ export default function Hero({ initialHeroVideo, initialAudioTrack }: HeroProps)
           fallbackToLocal();
         }
 
-        // Cargar audio track
-        const randomAudio = initialAudioTrack || await getRandomAudioTrack();
-        if (randomAudio) {
-          setAudioTrack(randomAudio);
-          console.log('🎵 Audio track cargado:', randomAudio.title);
+        // Usar audio track fijo (se puede cambiar desde Contentful)
+        if (fixedAudioTrack) {
+          setAudioTrack(fixedAudioTrack);
+          console.log('🎵 Audio track fijo cargado:', fixedAudioTrack.title);
+        } else {
+          // Fallback: intentar obtener audio track aleatorio directamente
+          const fallbackAudio = await getRandomAudioTrack();
+          if (fallbackAudio) {
+            setAudioTrack(fallbackAudio);
+            console.log('🎵 Audio track fallback cargado:', fallbackAudio.title);
+          }
         }
 
       } catch (error) {
@@ -138,7 +148,7 @@ export default function Hero({ initialHeroVideo, initialAudioTrack }: HeroProps)
     const timer = setTimeout(() => setIsVideoLoaded(true), 3000);
 
     return () => clearTimeout(timer);
-  }, [initialHeroVideo, initialAudioTrack, isMobile]);
+  }, [allHeroVideos, fixedAudioTrack, isMobile]);
 
   return (
     <section className="relative z-10 h-screen">
@@ -146,7 +156,7 @@ export default function Hero({ initialHeroVideo, initialAudioTrack }: HeroProps)
       {audioTrack && (
         <audio
           ref={audioRef}
-          loop={audioTrack.loop}
+          loop={true} // Always loop since it's not in the schema
           preload="auto"
           style={{ display: 'none' }}
         >

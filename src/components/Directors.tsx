@@ -58,7 +58,7 @@ export default function Directors() {
         <div className="md:hidden flex gap-6 items-start">
           {/* Lista de directores (izquierda) */}
           <div className="flex-1">
-            <ul className="text-[#f31014] text-lg font-hagrid-text flex flex-col font-normal uppercase gap-y-2 transition-all duration-1000 ease-in-out">
+            <ul className="text-[#f31014] text-lg font-hagrid-text flex flex-col font-normal uppercase gap-y-[0.1] transition-all duration-1000 ease-in-out">
               {directors.map((director, index) => (
                 <li
                   className={`${
@@ -78,38 +78,38 @@ export default function Directors() {
             </ul>
           </div>
 
-          {/* Grilla de imágenes (derecha) */}
+          {/* Stack de imágenes (derecha) */}
           <div className="flex-1">
-            <div className="grid grid-cols-3 gap-2">
-              {/* Jugador 1 */}
-              <div className="relative aspect-[9/16] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
+            <div className="flex flex-col gap-3">
+              {/* Imagen 1 */}
+              <div className="relative aspect-[16/9] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
                 <Image
                   src="/images/alta.jpg"
                   alt="Retrato jugador"
                   fill
-                  sizes="(max-width: 768px) 33vw"
+                  sizes="(max-width: 768px) 50vw"
                   className="object-cover"
                 />
               </div>
               
-              {/* Jugador 2 */}
-              <div className="relative aspect-[9/16] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
+              {/* Imagen 2 */}
+              <div className="relative aspect-[16/9] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
                 <Image
-                  src="/images/alta.jpg"
+                  src="/images/ojos.jpg"
                   alt="Retrato jugador placeholder"
                   fill
-                  sizes="(max-width: 768px) 33vw"
+                  sizes="(max-width: 768px) 50vw"
                   className="object-cover"
                 />
               </div>
               
-              {/* Jugador 3 */}
-              <div className="relative aspect-[9/16] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
+              {/* Imagen 3 */}
+              <div className="relative aspect-[16/9] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
                 <Image
-                  src="/images/alta.jpg"
+                  src="/images/perro.jpg"
                   alt="Retrato jugador placeholder"
                   fill
-                  sizes="(max-width: 768px) 33vw"
+                  sizes="(max-width: 768px) 50vw"
                   className="object-cover"
                 />
               </div>

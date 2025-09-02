@@ -68,15 +68,28 @@ export interface HeroVideo {
 export interface AudioTrack {
   id: string;
   title: string;
-  description?: string;
   audioFile: { 
     sys: { id: string };
     fields: { file: { url: string; contentType: string } };
   };
-  volume?: number;
-  loop?: boolean;
-  fadeIn?: number;
-  fadeOut?: number;
+}
+
+export interface EditorialVideo {
+  id: string;
+  title: string;
+  description?: string;
+  webmVideo?: { 
+    sys: { id: string };
+    fields: { file: { url: string; contentType: string } };
+  };
+  mp4Video?: { 
+    sys: { id: string };
+    fields: { file: { url: string; contentType: string } };
+  };
+  mobileVideo?: { 
+    sys: { id: string };
+    fields: { file: { url: string; contentType: string } };
+  };
   order?: number;
 }
 
@@ -265,6 +278,16 @@ export async function getRandomHeroVideo(): Promise<HeroVideo | null> {
   }
 }
 
+// Función para obtener todos los videos hero (sin random)
+export async function getAllHeroVideos(): Promise<HeroVideo[]> {
+  try {
+    return await getHeroVideosFromContentful();
+  } catch (error) {
+    console.error('Error getting all hero videos:', error);
+    return [];
+  }
+}
+
 // Función para obtener la mejor fuente de video
 export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = false): VideoSource | null {
   // Prioridad: WebM > MP4 > Vimeo (NUNCA Vimeo en móvil)
@@ -273,9 +296,18 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
   const video = document.createElement('video');
   const supportsWebM = video.canPlayType('video/webm; codecs="vp9"').replace(/no/, '') !== '';
   
+  console.log('🔍 getBestVideoSource - isMobile:', isMobile, 'supportsWebM:', supportsWebM);
+  console.log('🔍 Video fields:', {
+    mobileVideo: !!heroVideo.mobileVideo,
+    webmVideo: !!heroVideo.webmVideo,
+    mp4Video: !!heroVideo.mp4Video,
+    vimeoId: !!heroVideo.vimeoId
+  });
+  
   // En móvil, usar mobileVideo si está disponible, sino usar WebM normal
   if (isMobile) {
     if (heroVideo.mobileVideo) {
+      console.log('📱 Usando mobileVideo');
       return {
         src: `https:${heroVideo.mobileVideo.fields.file.url}`,
         type: heroVideo.mobileVideo.fields.file.contentType.includes('webm') ? 'webm' : 'mp4'
@@ -283,6 +315,7 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
     }
     // Si no hay mobileVideo, usar WebM normal (mismo video que desktop)
     if (supportsWebM && heroVideo.webmVideo) {
+      console.log('📱 Usando webmVideo en móvil');
       return {
         src: `https:${heroVideo.webmVideo.fields.file.url}`,
         type: 'webm'
@@ -290,12 +323,14 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
     }
     // Fallback a MP4 en móvil si no hay WebM
     if (heroVideo.mp4Video) {
+      console.log('📱 Usando mp4Video en móvil');
       return {
         src: `https:${heroVideo.mp4Video.fields.file.url}`,
         type: 'mp4'
       };
     }
     // NUNCA usar Vimeo en móvil
+    console.log('📱 No hay fuentes válidas para móvil');
     return null;
   }
   
@@ -330,8 +365,7 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
 async function _getAudioTracksFromContentful(): Promise<AudioTrack[]> {
   try {
     const entries = await client.getEntries({
-      content_type: 'audioTrack',
-      order: ['fields.order']
+      content_type: 'audioTrack'
     });
 
     return entries.items.map((audioTrack: unknown) => {
@@ -339,28 +373,16 @@ async function _getAudioTracksFromContentful(): Promise<AudioTrack[]> {
         fields: { 
           id: string; 
           title: string; 
-          description?: string; 
           audioFile: { 
             sys: { id: string };
             fields: { file: { url: string; contentType: string } };
           }; 
-          volume?: number; 
-          loop?: boolean; 
-          fadeIn?: number; 
-          fadeOut?: number; 
-          order?: number 
         } 
       };
       return {
         id: track.fields.id,
         title: track.fields.title,
-        description: track.fields.description,
         audioFile: track.fields.audioFile,
-        volume: track.fields.volume || 0.5,
-        loop: track.fields.loop || true,
-        fadeIn: track.fields.fadeIn || 0,
-        fadeOut: track.fields.fadeOut || 0,
-        order: track.fields.order || 0,
       };
     });
   } catch (error) {

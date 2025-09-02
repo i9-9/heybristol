@@ -331,20 +331,36 @@ async function _getAudioTracksFromContentful(): Promise<AudioTrack[]> {
   try {
     const entries = await client.getEntries({
       content_type: 'audioTrack',
-      order: 'fields.order'
+      order: ['fields.order']
     });
 
-    return entries.items.map((audioTrack: any) => {
+    return entries.items.map((audioTrack: unknown) => {
+      const track = audioTrack as { 
+        fields: { 
+          id: string; 
+          title: string; 
+          description?: string; 
+          audioFile: { 
+            sys: { id: string };
+            fields: { file: { url: string; contentType: string } };
+          }; 
+          volume?: number; 
+          loop?: boolean; 
+          fadeIn?: number; 
+          fadeOut?: number; 
+          order?: number 
+        } 
+      };
       return {
-        id: audioTrack.fields.id,
-        title: audioTrack.fields.title,
-        description: audioTrack.fields.description,
-        audioFile: audioTrack.fields.audioFile,
-        volume: audioTrack.fields.volume || 0.5,
-        loop: audioTrack.fields.loop || true,
-        fadeIn: audioTrack.fields.fadeIn || 0,
-        fadeOut: audioTrack.fields.fadeOut || 0,
-        order: audioTrack.fields.order || 0,
+        id: track.fields.id,
+        title: track.fields.title,
+        description: track.fields.description,
+        audioFile: track.fields.audioFile,
+        volume: track.fields.volume || 0.5,
+        loop: track.fields.loop || true,
+        fadeIn: track.fields.fadeIn || 0,
+        fadeOut: track.fields.fadeOut || 0,
+        order: track.fields.order || 0,
       };
     });
   } catch (error) {

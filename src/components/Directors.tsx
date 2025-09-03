@@ -3,30 +3,47 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
+import EditorialVideoComponent from "@/components/EditorialVideo";
 import { useRouter } from "next/navigation";
 import { getDirectorNames, getDirectorSlugs } from "@/lib/directors-api";
+import { getEditorialVideosFromContentful, EditorialVideo } from "@/lib/contentful";
 
 export default function Directors() {
   const [selectedDirector, setSelectedDirector] = useState<string | undefined>();
   const [directors, setDirectors] = useState<string[]>([]);
   const [directorSlugs, setDirectorSlugs] = useState<string[]>([]);
+  const [editorialVideos, setEditorialVideos] = useState<EditorialVideo[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const fetchDirectors = async () => {
       try {
-        const [names, slugs] = await Promise.all([
+        const [names, slugs, videos] = await Promise.all([
           getDirectorNames(),
-          getDirectorSlugs()
+          getDirectorSlugs(),
+          getEditorialVideosFromContentful()
         ]);
         setDirectors(names);
         setDirectorSlugs(slugs);
+        setEditorialVideos(videos);
       } catch (error) {
         console.error('Error fetching directors:', error);
       }
     };
 
     fetchDirectors();
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const handleDirectorClick = (director: string) => {
@@ -78,47 +95,71 @@ export default function Directors() {
             </ul>
           </div>
 
-          {/* Stack de imágenes (derecha) */}
+          {/* Stack de videos (derecha) */}
           <div className="flex-1">
-            <div className="flex flex-col gap-3">
-              {/* Imagen 1 */}
-              <div className="relative aspect-[16/9] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
-                <Image
-                  src="/images/alta.jpg"
-                  alt="Retrato jugador"
-                  fill
-                  sizes="(max-width: 768px) 50vw"
-                  className="object-cover"
+            <div className="flex flex-col gap-2">
+              {/* Video 1 */}
+              {editorialVideos[0] ? (
+                <EditorialVideoComponent
+                  video={editorialVideos[0]}
+                  className="aspect-[16/9]"
+                  isMobile={isMobile}
                 />
-              </div>
+              ) : (
+                <div className="relative aspect-[16/9] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
+                  <Image
+                    src="/images/alta.jpg"
+                    alt="Retrato jugador"
+                    fill
+                    sizes="(max-width: 768px) 50vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
               
-              {/* Imagen 2 */}
-              <div className="relative aspect-[16/9] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
-                <Image
-                  src="/images/ojos.jpg"
-                  alt="Retrato jugador placeholder"
-                  fill
-                  sizes="(max-width: 768px) 50vw"
-                  className="object-cover"
+              {/* Video 2 */}
+              {editorialVideos[1] ? (
+                <EditorialVideoComponent
+                  video={editorialVideos[1]}
+                  className="aspect-[16/9]"
+                  isMobile={isMobile}
                 />
-              </div>
+              ) : (
+                <div className="relative aspect-[16/9] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
+                  <Image
+                    src="/images/ojos.jpg"
+                    alt="Retrato jugador placeholder"
+                    fill
+                    sizes="(max-width: 768px) 50vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
               
-              {/* Imagen 3 */}
-              <div className="relative aspect-[16/9] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
-                <Image
-                  src="/images/perro.jpg"
-                  alt="Retrato jugador placeholder"
-                  fill
-                  sizes="(max-width: 768px) 50vw"
-                  className="object-cover"
+              {/* Video 3 */}
+              {editorialVideos[2] ? (
+                <EditorialVideoComponent
+                  video={editorialVideos[2]}
+                  className="aspect-[16/9]"
+                  isMobile={isMobile}
                 />
-              </div>
+              ) : (
+                <div className="relative aspect-[16/9] bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
+                  <Image
+                    src="/images/perro.jpg"
+                    alt="Retrato jugador placeholder"
+                    fill
+                    sizes="(max-width: 768px) 50vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Desktop: Layout original */}
-        <div className="hidden md:grid md:grid-cols-12 md:gap-6 md:items-start">
+        <div className="hidden md:grid md:grid-cols-12 md:gap-4 md:items-start">
           {/* Lista de directores (izquierda) */}
           <ul className="col-span-4 text-[#f31014] text-2xl font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-300 ease-in-out">
             {directors.map((director, index) => (
@@ -143,37 +184,67 @@ export default function Directors() {
           <div className="col-span-8">
             {/* Desktop: composición absoluta */}
             <div className="hidden md:block relative h-[520px] lg:h-[600px]">
-              {/* Jugador 1: alto a la derecha */}
-              <div className="absolute top-0 right-0 w-[28%] lg:w-[28%] h-[78%] overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
-                <Image
-                  src="/images/alta.jpg"
-                  alt="Retrato jugador"
-                  fill
-                  sizes="(min-width: 1024px) 36vw, 34vw"
-                  className="object-cover"
-                />
+              {/* Video 1: alto a la derecha */}
+              <div className="absolute top-0 right-0 w-[28%] lg:w-[28%] h-[78%]">
+                {editorialVideos[0] ? (
+                  <EditorialVideoComponent
+                    video={editorialVideos[0]}
+                    className="w-full h-full"
+                    isMobile={false}
+                  />
+                ) : (
+                  <div className="w-full h-full overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
+                    <Image
+                      src="/images/alta.jpg"
+                      alt="Retrato jugador"
+                      fill
+                      sizes="(min-width: 1024px) 36vw, 34vw"
+                      className="object-cover"
+                    />
+                  </div>
+                )}
               </div>
               
-              {/* Jugador 2: centro-derecha */}
-              <div className="absolute top-0 right-[32%] w-[28%] lg:w-[28%] h-[78%] overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
-                <Image
-                  src="/images/alta.jpg"
-                  alt="Retrato jugador placeholder"
-                  fill
-                  sizes="(min-width: 1024px) 36vw, 34vw"
-                  className="object-cover"
-                />
+              {/* Video 2: centro-derecha */}
+              <div className="absolute top-0 right-[32%] w-[28%] lg:w-[28%] h-[78%]">
+                {editorialVideos[1] ? (
+                  <EditorialVideoComponent
+                    video={editorialVideos[1]}
+                    className="w-full h-full"
+                    isMobile={false}
+                  />
+                ) : (
+                  <div className="w-full h-full overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
+                    <Image
+                      src="/images/ojos.jpg"
+                      alt="Retrato jugador placeholder"
+                      fill
+                      sizes="(min-width: 1024px) 36vw, 34vw"
+                      className="object-cover"
+                    />
+                  </div>
+                )}
               </div>
               
-              {/* Jugador 3: centro-izquierda */}
-              <div className="absolute top-0 right-[64%] w-[28%] lg:w-[28%] h-[78%] overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
-                <Image
-                  src="/images/alta.jpg"
-                  alt="Retrato jugador placeholder"
-                  fill
-                  sizes="(min-width: 1024px) 36vw, 34vw"
-                  className="object-cover"
-                />
+              {/* Video 3: centro-izquierda */}
+              <div className="absolute top-0 right-[64%] w-[28%] lg:w-[28%] h-[78%]">
+                {editorialVideos[2] ? (
+                  <EditorialVideoComponent
+                    video={editorialVideos[2]}
+                    className="w-full h-full"
+                    isMobile={false}
+                  />
+                ) : (
+                  <div className="w-full h-full overflow-hidden shadow-[0_6px_20px_rgba(0,0,0,0.15)]">
+                    <Image
+                      src="/images/perro.jpg"
+                      alt="Retrato jugador placeholder"
+                      fill
+                      sizes="(min-width: 1024px) 36vw, 34vw"
+                      className="object-cover"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

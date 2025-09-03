@@ -415,3 +415,55 @@ export async function getRandomAudioTrack(): Promise<AudioTrack | null> {
     return null;
   }
 }
+
+// Función interna para obtener editorial videos desde Contentful
+async function _getEditorialVideosFromContentful(): Promise<EditorialVideo[]> {
+  try {
+    const entries = await client.getEntries({
+      content_type: 'editorialVideo',
+      order: ['fields.order']
+    });
+
+    return entries.items.map((editorialVideo: unknown) => {
+      const video = editorialVideo as { 
+        fields: { 
+          id: string; 
+          title: string; 
+          description?: string; 
+          webmVideo?: { 
+            sys: { id: string };
+            fields: { file: { url: string; contentType: string } };
+          }; 
+          mp4Video?: { 
+            sys: { id: string };
+            fields: { file: { url: string; contentType: string } };
+          }; 
+          mobileVideo?: { 
+            sys: { id: string };
+            fields: { file: { url: string; contentType: string } };
+          }; 
+          order?: number 
+        } 
+      };
+      return {
+        id: video.fields.id,
+        title: video.fields.title,
+        description: video.fields.description,
+        webmVideo: video.fields.webmVideo,
+        mp4Video: video.fields.mp4Video,
+        mobileVideo: video.fields.mobileVideo,
+        order: video.fields.order,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching editorial videos from Contentful:', error);
+    return [];
+  }
+}
+
+// Función con cache para editorial videos
+export const getEditorialVideosFromContentful = withCache(
+  _getEditorialVideosFromContentful,
+  () => 'editorial-videos-all',
+  5 * 60 * 1000 // 5 minutos
+);

@@ -11,14 +11,18 @@ export default function Contact() {
         </div>
       </div>
       
-      {/* Texto CONTACT primero (capa inferior) */}
+      {/* Título CONTACT */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-y-[4rem] md:translate-y-[2rem] z-10">
         <div className="text-center">
-          <h2 className="text-[clamp(4rem,15vw,8.75rem)] md:text-[8.75rem] font-tusker font-bold text-white leading-none tracking-tight transition-all duration-500 ease-in-out">
+          <h2 className="text-[clamp(3rem,12vw,6rem)] md:text-[6rem] font-tusker font-bold text-white leading-none tracking-tight transition-all duration-500 ease-in-out">
             CONTACT
           </h2>
-          
-          {/* Contact Information - Grid 2x2 */}
+        </div>
+      </div>
+
+      {/* Contact Information - Grid 2x2 */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 translate-y-[4rem] md:translate-y-[8rem] z-10">
+        <div className="text-center">
           <div className="mt-2 md:mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 md:gap-x-16 md:gap-y-4 text-black">
             <div>
               <p className="font-extrabold text-xs md:text-sm lg:text-base mb-1 md:mb-2 font-hagrid">MARTÍN GIUDICESSI</p>
@@ -41,9 +45,9 @@ export default function Contact() {
       </div>
 
       {/* Imagen del caballo después (capa superior) */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-y-[19rem] md:-translate-y-[28rem] z-20">
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-[44%] -translate-y-1/2 -translate-y-[19rem] md:-translate-y-[21rem] z-20">
         <div className="text-center">
-          <div className="relative w-[18rem] h-[18rem] md:w-[36rem] md:h-[36rem] mb-0 mx-auto transition-all duration-500 ease-in-out">
+          <div className="relative w-[16rem] h-[16rem] md:w-[28rem] md:h-[28rem] mb-0 mx-auto transition-all duration-500 ease-in-out">
             <Image 
               src="/images/caballo.png" 
               alt="Caballo" 

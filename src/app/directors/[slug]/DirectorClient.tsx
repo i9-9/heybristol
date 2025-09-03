@@ -131,6 +131,35 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
         </button>
       </div>
 
+      {/* Botón de volver a DIRECTORS - esquina inferior izquierda, solo cuando no hay video seleccionado */}
+      {!selectedVideo && (
+        <div className="absolute bottom-6 left-6 z-10">
+          <button
+            onClick={() => {
+              router.push('/');
+              setTimeout(() => {
+                const directorsSection = document.getElementById('directors');
+                if (directorsSection) {
+                  directorsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }, 100);
+            }}
+            className="flex flex-col items-start space-y-2 text-white cursor-pointer"
+          >
+            <Image 
+              src="/images/icons/arrow.png" 
+              alt="Arrow Left" 
+              width={32} 
+              height={32} 
+              className="w-8 h-8 rotate-180 hover:opacity-80 transition-opacity" 
+            />
+            <span className="font-ordinary text-sm md:text-xl uppercase leading-tight text-left whitespace-nowrap">
+              BACK TO DIRECTORS
+            </span>
+          </button>
+        </div>
+      )}
+
       {/* Contenido */}
       <div className="flex flex-col items-start justify-start h-full px-6 pt-[150px] md:pt-[150px] overflow-y-auto">
         {!selectedVideo ? (
@@ -218,7 +247,9 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
           router.push('/');
         }} className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer">
           <Image src="/images/icons/arrow.png" alt="Arrow Up" width={32} height={32} className="w-8 h-8" />
-          <span className="font-ordinary text-sm md:text-xl">BRISTOL</span>
+          <span className="font-ordinary text-sm md:text-xl uppercase leading-tight text-right whitespace-nowrap">
+            BRISTOL
+          </span>
         </button>
       </div>
     </div>

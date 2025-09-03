@@ -252,9 +252,6 @@ export default function Directors() {
       </div>
 
       <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10 pointer-events-none">
-        <p className="font-ordinary text-[#f31014] text-sm md:text-xl leading-5 text-left">
-          BRISTOL
-        </p>
       </div>
     </section>
   );

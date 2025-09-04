@@ -72,7 +72,6 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
   const loadVideoAtIndex = useCallback((index: number) => {
     if (!allHeroVideos || allHeroVideos.length === 0) return;
     
-    
     setIsTransitioning(true);
     setIsVideoLoaded(false);
     
@@ -95,11 +94,9 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
       setIsVimeoVideo(false);
     }
     
-    // Finalizar transición
-    setTimeout(() => {
-      setIsTransitioning(false);
-      setIsVideoLoaded(true);
-    }, 500);
+    // Finalizar transición inmediatamente
+    setIsTransitioning(false);
+    setIsVideoLoaded(true);
   }, [allHeroVideos, isMobile]);
 
   const getNextVideoInSequence = useCallback(() => {
@@ -119,6 +116,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     setSequenceIndex(prev => prev + 1);
     return nextVideoIndex;
   }, [allHeroVideos, videoSequence, sequenceIndex, generateRandomSequence]);
+
 
   const handleVideoEnded = useCallback(() => {
     // Prevenir múltiples ejecuciones

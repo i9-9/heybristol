@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, Maximize, Minimize } from "lucide-react";
 import LogoMain from "@/components/LogoMain";
 import { getBestVideoSource, getRandomAudioTrack, type HeroVideo, type AudioTrack } from "@/lib/contentful";
 
@@ -37,6 +37,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [videoSequence, setVideoSequence] = useState<number[]>([]);
   const [sequenceIndex, setSequenceIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -170,6 +171,34 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     }
   };
 
+  const toggleFullscreen = useCallback(async () => {
+    if (!videoRef.current) return;
+
+    try {
+      if (!isFullscreen) {
+        // Entrar a pantalla completa
+        if (videoRef.current.requestFullscreen) {
+          await videoRef.current.requestFullscreen();
+        } else if ((videoRef.current as unknown as { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
+          await (videoRef.current as unknown as { webkitRequestFullscreen: () => Promise<void> }).webkitRequestFullscreen();
+        } else if ((videoRef.current as unknown as { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen) {
+          await (videoRef.current as unknown as { msRequestFullscreen: () => Promise<void> }).msRequestFullscreen();
+        }
+      } else {
+        // Salir de pantalla completa
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as unknown as { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen) {
+          await (document as unknown as { webkitExitFullscreen: () => Promise<void> }).webkitExitFullscreen();
+        } else if ((document as unknown as { msExitFullscreen?: () => Promise<void> }).msExitFullscreen) {
+          await (document as unknown as { msExitFullscreen: () => Promise<void> }).msExitFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling fullscreen:', error);
+    }
+  }, [isFullscreen]);
+
   // Configurar Vimeo player cuando sea necesario
   useEffect(() => {
     if (isVimeoVideo && videoSource && !isTransitioning) {
@@ -248,6 +277,47 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     loadHeroContent();
   }, [allHeroVideos, fixedAudioTrack, isMobile, loadVideoAtIndex, generateRandomSequence]);
 
+  // Manejar cambios de pantalla completa y orientación
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        (document as { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+        (document as { msFullscreenElement?: Element }).msFullscreenElement
+      );
+      setIsFullscreen(isCurrentlyFullscreen);
+    };
+
+    const handleOrientationChange = () => {
+      // En móvil, cuando cambia la orientación, intentar entrar a pantalla completa automáticamente
+      if (isMobile && videoRef.current && !isFullscreen) {
+        // Pequeño delay para que el navegador procese el cambio de orientación
+        setTimeout(() => {
+          toggleFullscreen();
+        }, 100);
+      }
+    };
+
+    // Event listeners para pantalla completa
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    // Event listener para cambios de orientación (solo en móvil)
+    if (isMobile) {
+      window.addEventListener('orientationchange', handleOrientationChange);
+    }
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+      if (isMobile) {
+        window.removeEventListener('orientationchange', handleOrientationChange);
+      }
+    };
+  }, [isMobile, isFullscreen, toggleFullscreen]);
+
   return (
     <section className="relative z-10 h-screen">
       {/* Audio track independiente */}
@@ -270,11 +340,12 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
         {videoSource && !isVimeoVideo && (
           <video
             ref={videoRef}
-            className="absolute inset-0 w-screen h-screen object-cover md:top-0 md:left-1/2 md:transform md:-translate-x-1/2 md:w-auto md:h-full md:min-w-full md:min-h-full"
+            className="absolute inset-0 w-screen h-screen object-cover md:top-0 md:left-1/2 md:transform md:-translate-x-1/2 md:w-auto md:h-full md:min-w-full md:min-h-full cursor-pointer"
             autoPlay
             muted
             playsInline
             preload="auto"
+            controls={isMobile}
             key={videoSource} // Forzar re-render cuando cambia el source
             style={{
               opacity: isVideoLoaded && !isTransitioning ? 1 : 0,
@@ -283,6 +354,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
             onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
             onEnded={handleVideoEnded}
+            onClick={isMobile ? toggleFullscreen : undefined}
             onError={(e) => {
               console.error('Error en video:', e);
               if (videoSource?.includes(".webm")) {
@@ -358,8 +430,24 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
         </div>
       </div>
 
-      {/* Botón de audio */}
-      <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10">
+      {/* Botones de control */}
+      <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10 flex gap-2">
+        {/* Botón de pantalla completa (solo en móvil) */}
+        {isMobile && (
+          <button
+            onClick={toggleFullscreen}
+            className="w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer"
+            aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+          >
+            {isFullscreen ? (
+              <Minimize className="w-6 h-6 text-white" />
+            ) : (
+              <Maximize className="w-6 h-6 text-white" />
+            )}
+          </button>
+        )}
+        
+        {/* Botón de audio */}
         <button
           onClick={toggleAudio}
           className="w-12 h-12 md:w-14 md:h-14 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer"

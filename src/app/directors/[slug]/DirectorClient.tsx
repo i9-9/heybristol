@@ -2,14 +2,32 @@
 
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import type { VideoItem } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { Maximize, Minimize } from "lucide-react";
 
 interface DirectorClientProps {
   director: { name: string };
   videos: VideoItem[];
+}
+
+// Hook para detectar si es móvil
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+
+  return isMobile;
 }
 
 // Componente para el card de video con lazy loading - IDÉNTICO al modal
@@ -100,7 +118,10 @@ function VideoCard({ video, onClick }: { video: VideoItem; onClick: () => void }
 
 export default function DirectorClient({ director, videos }: DirectorClientProps) {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const router = useRouter();
+  const isMobile = useIsMobile();
+  const videoContainerRef = useRef<HTMLDivElement>(null);
 
   const handleVideoSelect = (video: VideoItem) => {
     setSelectedVideo(video);
@@ -109,6 +130,56 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
   const handleBackToVideos = () => {
     setSelectedVideo(null);
   };
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!videoContainerRef.current) return;
+
+    try {
+      if (!isFullscreen) {
+        // Entrar a pantalla completa
+        if (videoContainerRef.current.requestFullscreen) {
+          await videoContainerRef.current.requestFullscreen();
+        } else if ((videoContainerRef.current as unknown as { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
+          await (videoContainerRef.current as unknown as { webkitRequestFullscreen: () => Promise<void> }).webkitRequestFullscreen();
+        } else if ((videoContainerRef.current as unknown as { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen) {
+          await (videoContainerRef.current as unknown as { msRequestFullscreen: () => Promise<void> }).msRequestFullscreen();
+        }
+      } else {
+        // Salir de pantalla completa
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as unknown as { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen) {
+          await (document as unknown as { webkitExitFullscreen: () => Promise<void> }).webkitExitFullscreen();
+        } else if ((document as unknown as { msExitFullscreen?: () => Promise<void> }).msExitFullscreen) {
+          await (document as unknown as { msExitFullscreen: () => Promise<void> }).msExitFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling fullscreen:', error);
+    }
+  }, [isFullscreen]);
+
+  // Manejar cambios de pantalla completa
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        (document as { webkitFullscreenElement?: Element }).webkitFullscreenElement ||
+        (document as { msFullscreenElement?: Element }).msFullscreenElement
+      );
+      setIsFullscreen(isCurrentlyFullscreen);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
@@ -198,8 +269,15 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
             </div>
 
             {/* Video grande centrado */}
-            <div className="w-full max-w-5xl mx-auto mt-8 md:-mt-4 animate-fadeIn px-4 md:px-0 video-container-mobile mobile-video-selected">
-              <div className="aspect-video w-full bg-black overflow-hidden rounded-lg video-aspect-mobile">
+            <div 
+              ref={videoContainerRef}
+              className={`w-full max-w-5xl mx-auto mt-8 md:-mt-4 animate-fadeIn px-4 md:px-0 video-container-mobile mobile-video-selected ${
+                isFullscreen ? 'fixed inset-0 z-50 bg-black flex items-center justify-center' : ''
+              }`}
+            >
+              <div className={`aspect-video w-full bg-black overflow-hidden rounded-lg video-aspect-mobile ${
+                isFullscreen ? 'w-full h-full max-w-none max-h-none rounded-none' : ''
+              }`}>
                 <iframe
                   src={selectedVideo.embedUrl}
                   className="w-full h-full"
@@ -208,18 +286,40 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
                 />
               </div>
               
-              {/* Espaciador para crear distancia */}
-              <div className="h-4 mobile-video-spacing"></div>
+              {/* Botón de pantalla completa (solo en móvil) */}
+              {isMobile && (
+                <button
+                  onClick={toggleFullscreen}
+                  className={`absolute top-4 right-4 w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer z-10 ${
+                    isFullscreen ? 'top-4 right-4' : 'top-4 right-4'
+                  }`}
+                  aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+                >
+                  {isFullscreen ? (
+                    <Minimize className="w-6 h-6 text-white" />
+                  ) : (
+                    <Maximize className="w-6 h-6 text-white" />
+                  )}
+                </button>
+              )}
               
-              {/* Título del video debajo */}
-              <h3 className="text-white text-lg md:text-2xl font-medium text-center animate-slideUp uppercase px-2">
-                {selectedVideo.tags?.[0] || 'CLIENTE'} | {selectedVideo.title}
-              </h3>
+              {/* Espaciador para crear distancia - solo cuando no está en pantalla completa */}
+              {!isFullscreen && (
+                <>
+                  <div className="h-4 mobile-video-spacing"></div>
+                  
+                  {/* Título del video debajo */}
+                  <h3 className="text-white text-lg md:text-2xl font-medium text-center animate-slideUp uppercase px-2">
+                    {selectedVideo.tags?.[0] || 'CLIENTE'} | {selectedVideo.title}
+                  </h3>
+                </>
+              )}
               
             </div>
             
-            {/* Botón de volver en esquina inferior izquierda */}
-            <div className="absolute bottom-6 left-6 z-10">
+            {/* Botón de volver en esquina inferior izquierda - solo cuando no está en pantalla completa */}
+            {!isFullscreen && (
+              <div className="absolute bottom-6 left-6 z-10">
               <button
                 onClick={handleBackToVideos}
                 className="flex flex-col items-start space-y-2 text-white cursor-pointer"
@@ -235,13 +335,15 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
                   BACK TO {director.name}
                 </span>
               </button>
-            </div>
+              </div>
+            )}
           </>
         )}
       </div>
 
-      {/* Esquinas - IDÉNTICAS al modal */}
-      <div className="absolute bottom-6 right-6 z-10">
+      {/* Esquinas - IDÉNTICAS al modal - solo cuando no está en pantalla completa */}
+      {!isFullscreen && (
+        <div className="absolute bottom-6 right-6 z-10">
         <button onClick={() => {
           // Navegar al home
           router.push('/');
@@ -251,7 +353,8 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
             BRISTOL
           </span>
         </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

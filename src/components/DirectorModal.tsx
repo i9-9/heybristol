@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useInView } from "react-intersection-observer";
 import type { VideoItem } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { Maximize, Minimize } from "lucide-react";
 
 interface DirectorModalProps {
   isOpen: boolean;

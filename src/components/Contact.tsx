@@ -45,12 +45,12 @@ export default function Contact() {
       </div>
 
       {/* Imagen del caballo después (capa superior) */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-[44%] -translate-y-1/2 -translate-y-[19rem] md:-translate-y-[21rem] z-20">
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-[44%] -translate-y-1/2 -translate-y-[17rem] md:-translate-y-[21rem] z-20">
         <div className="text-center">
           <div className="relative w-[16rem] h-[16rem] md:w-[28rem] md:h-[28rem] mb-0 mx-auto transition-all duration-500 ease-in-out">
             <Image 
-              src="/images/caballo.png" 
-              alt="Caballo" 
+              src="/images/galgoweb.png" 
+              alt="Galgo" 
               fill 
               sizes="(max-width: 768px) 288px, 576px" 
               className="object-contain"

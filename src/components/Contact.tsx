@@ -84,7 +84,7 @@ export default function Contact() {
           alt="Bristol Logo" 
           width={120} 
           height={40} 
-          className="h-8 md:h-10 w-auto"
+          className="h-6 md:h-10 w-auto"
         />
       </div>
 

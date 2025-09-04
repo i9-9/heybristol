@@ -34,7 +34,6 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
   const [heroVideo, setHeroVideo] = useState<HeroVideo | null>(null);
   const [audioTrack, setAudioTrack] = useState<AudioTrack | null>(null);
   const [isVimeoVideo, setIsVimeoVideo] = useState(false);
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [videoSequence, setVideoSequence] = useState<number[]>([]);
   const [sequenceIndex, setSequenceIndex] = useState(0);
@@ -45,7 +44,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
   
   // Ref para evitar múltiples llamadas al handleVideoEnded
   const isHandlingVideoEnd = useRef(false);
-  const vimeoPlayerRef = useRef<any>(null);
+  const vimeoPlayerRef = useRef<unknown>(null);
 
   const detectVideoSupport = () => {
     const video = document.createElement("video");
@@ -58,7 +57,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     return "/videos/under_construction_optimized.mp4";
   };
 
-  const generateRandomSequence = (totalVideos: number) => {
+  const generateRandomSequence = useCallback((totalVideos: number) => {
     const indices = Array.from({ length: totalVideos }, (_, i) => i);
     
     for (let i = indices.length - 1; i > 0; i--) {
@@ -66,9 +65,41 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
       [indices[i], indices[j]] = [indices[j], indices[i]];
     }
     
-    console.log('🎲 Nueva secuencia generada:', indices);
     return indices;
-  };
+  }, []);
+
+  const loadVideoAtIndex = useCallback((index: number) => {
+    if (!allHeroVideos || allHeroVideos.length === 0) return;
+    
+    
+    setIsTransitioning(true);
+    setIsVideoLoaded(false);
+    
+    const video = allHeroVideos[index];
+    setHeroVideo(video);
+    
+    const bestSource = getBestVideoSource(video, isMobile);
+    
+    if (bestSource) {
+      if (bestSource.type === 'vimeo') {
+        setIsVimeoVideo(true);
+        setVideoSource(bestSource.src);
+      } else {
+        setIsVimeoVideo(false);
+        setVideoSource(bestSource.src);
+      }
+    } else {
+      const fallbackFormat = detectVideoSupport();
+      setVideoSource(fallbackFormat);
+      setIsVimeoVideo(false);
+    }
+    
+    // Finalizar transición
+    setTimeout(() => {
+      setIsTransitioning(false);
+      setIsVideoLoaded(true);
+    }, 500);
+  }, [allHeroVideos, isMobile]);
 
   const getNextVideoInSequence = useCallback(() => {
     if (!allHeroVideos || allHeroVideos.length === 0) return 0;
@@ -83,26 +114,22 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     }
     
     const nextVideoIndex = videoSequence[sequenceIndex];
-    console.log(`🎬 Secuencia: [${videoSequence.join(', ')}], posición: ${sequenceIndex}, siguiente: ${nextVideoIndex}`);
     
     setSequenceIndex(prev => prev + 1);
     return nextVideoIndex;
-  }, [allHeroVideos, videoSequence, sequenceIndex]);
+  }, [allHeroVideos, videoSequence, sequenceIndex, generateRandomSequence]);
 
   const handleVideoEnded = useCallback(() => {
     // Prevenir múltiples ejecuciones
     if (isHandlingVideoEnd.current) {
-      console.log('🎬 Ya procesando fin de video, ignorando...');
       return;
     }
 
     if (!allHeroVideos || allHeroVideos.length <= 1) {
-      console.log('🎬 Solo hay un video o ninguno, no rotando');
       return;
     }
     
     isHandlingVideoEnd.current = true;
-    console.log('🎬 Video terminó, cambiando al siguiente en la secuencia...');
     
     // Resetear el video actual
     if (videoRef.current) {
@@ -116,46 +143,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     setTimeout(() => {
       isHandlingVideoEnd.current = false;
     }, 1000);
-  }, [allHeroVideos, getNextVideoInSequence]);
-
-  const loadVideoAtIndex = useCallback((index: number) => {
-    if (!allHeroVideos || allHeroVideos.length === 0) return;
-    
-    console.log(`🎬 Iniciando carga de video ${index + 1}/${allHeroVideos.length}`);
-    
-    setIsTransitioning(true);
-    setIsVideoLoaded(false);
-    setCurrentVideoIndex(index);
-    
-    const video = allHeroVideos[index];
-    setHeroVideo(video);
-    
-    const bestSource = getBestVideoSource(video, isMobile);
-    
-    if (bestSource) {
-      if (bestSource.type === 'vimeo') {
-        setIsVimeoVideo(true);
-        setVideoSource(bestSource.src);
-        console.log('🎬 Cargando video de Vimeo:', video.title);
-      } else {
-        setIsVimeoVideo(false);
-        setVideoSource(bestSource.src);
-        console.log('🎬 Cargando video directo:', video.title);
-      }
-    } else {
-      console.log('🎬 Fallback a video local');
-      const fallbackFormat = detectVideoSupport();
-      setVideoSource(fallbackFormat);
-      setIsVimeoVideo(false);
-    }
-    
-    // Finalizar transición
-    setTimeout(() => {
-      setIsTransitioning(false);
-      setIsVideoLoaded(true);
-      console.log('🎬 Transición completada para:', video.title);
-    }, 500);
-  }, [allHeroVideos, isMobile]);
+  }, [allHeroVideos, getNextVideoInSequence, loadVideoAtIndex]);
 
   const toggleAudio = () => {
     if (!audioRef.current || !audioTrack) return;
@@ -166,11 +154,9 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
       audioRef.current.play().catch(error => {
         console.error('Error playing audio:', error);
       });
-      console.log('🎵 Activando música:', audioTrack.title);
     } else {
       setIsMuted(true);
       audioRef.current.pause();
-      console.log('🔇 Silenciando música');
     }
   };
 
@@ -190,23 +176,30 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
       // Configurar el player de Vimeo con la API
       const setupVimeoPlayer = () => {
         const iframe = document.querySelector('iframe[src*="vimeo"]') as HTMLIFrameElement;
-        if (iframe && (window as any).Vimeo) {
-          const player = new (window as any).Vimeo.Player(iframe);
+        const VimeoPlayer = (window as { Vimeo?: { Player: new (iframe: HTMLIFrameElement) => unknown } }).Vimeo;
+        
+        if (iframe && VimeoPlayer) {
+          const player = new VimeoPlayer.Player(iframe);
           vimeoPlayerRef.current = player;
           
-          player.on('ended', () => {
-            console.log('🎬 Video de Vimeo terminó');
-            handleVideoEnded();
-          });
-          
-          player.play().catch((error: any) => {
-            console.error('Error playing Vimeo video:', error);
-          });
+          // Configurar eventos del player
+          if (player && typeof player === 'object' && 'on' in player) {
+            (player as { on: (event: string, callback: () => void) => void }).on('ended', () => {
+              handleVideoEnded();
+            });
+            
+            if ('play' in player) {
+              (player as { play: () => Promise<unknown> }).play().catch((error: unknown) => {
+                console.error('Error playing Vimeo video:', error);
+              });
+            }
+          }
         }
       };
 
       // Cargar script de Vimeo si no está disponible
-      if (!(window as any).Vimeo) {
+      const VimeoPlayer = (window as { Vimeo?: unknown }).Vimeo;
+      if (!VimeoPlayer) {
         const script = document.createElement('script');
         script.src = 'https://player.vimeo.com/api/player.js';
         script.onload = setupVimeoPlayer;
@@ -236,12 +229,10 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
 
         if (fixedAudioTrack) {
           setAudioTrack(fixedAudioTrack);
-          console.log('🎵 Audio track fijo cargado:', fixedAudioTrack.title);
         } else {
           const fallbackAudio = await getRandomAudioTrack();
           if (fallbackAudio) {
             setAudioTrack(fallbackAudio);
-            console.log('🎵 Audio track fallback cargado:', fallbackAudio.title);
           }
         }
 
@@ -255,7 +246,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     };
 
     loadHeroContent();
-  }, [allHeroVideos, fixedAudioTrack, isMobile, loadVideoAtIndex]);
+  }, [allHeroVideos, fixedAudioTrack, isMobile, loadVideoAtIndex, generateRandomSequence]);
 
   return (
     <section className="relative z-10 h-screen">
@@ -289,17 +280,11 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
               opacity: isVideoLoaded && !isTransitioning ? 1 : 0,
               transition: "opacity 0.8s ease-in-out"
             }}
-            onLoadedData={() => {
-              console.log('🎬 Video cargado (loadedData)');
-              setIsVideoLoaded(true);
-            }}
-            onCanPlay={() => {
-              console.log('🎬 Video listo para reproducir (canPlay)');
-              setIsVideoLoaded(true);
-            }}
+            onLoadedData={() => setIsVideoLoaded(true)}
+            onCanPlay={() => setIsVideoLoaded(true)}
             onEnded={handleVideoEnded}
             onError={(e) => {
-              console.error('🎬 Error en video:', e);
+              console.error('Error en video:', e);
               if (videoSource?.includes(".webm")) {
                 const fallbackFormat = detectVideoSupport();
                 setVideoSource(fallbackFormat);
@@ -336,12 +321,8 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
               allow="autoplay; fullscreen; picture-in-picture"
               title={heroVideo?.title || "Hero Video"}
               frameBorder="0"
-              onLoad={() => {
-                console.log('🎬 Iframe de Vimeo cargado');
-                setIsVideoLoaded(true);
-              }}
+              onLoad={() => setIsVideoLoaded(true)}
               onError={() => {
-                console.log('🎬 Error en Vimeo, fallback a video local');
                 const fallbackFormat = detectVideoSupport();
                 setVideoSource(fallbackFormat);
                 setIsVimeoVideo(false);

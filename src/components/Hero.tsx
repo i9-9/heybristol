@@ -275,7 +275,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
             muted
             playsInline
             preload="auto"
-            controls={isMobile}
+            controls={false}
             key={videoSource} // Forzar re-render cuando cambia el source
             style={{
               opacity: isVideoLoaded && !isTransitioning ? 1 : 0,

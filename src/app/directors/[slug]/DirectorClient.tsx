@@ -30,6 +30,19 @@ function useIsMobile() {
   return isMobile;
 }
 
+// Hook para detectar iOS
+function useIsIOS() {
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIOSDevice);
+  }, []);
+
+  return isIOS;
+}
+
 // Componente para el card de video con lazy loading - IDÉNTICO al modal
 function VideoCard({ video, onClick }: { video: VideoItem; onClick: () => void }) {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -121,6 +134,7 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
   const [isFullscreen, setIsFullscreen] = useState(false);
   const router = useRouter();
   const isMobile = useIsMobile();
+  const isIOS = useIsIOS();
   const videoContainerRef = useRef<HTMLDivElement>(null);
 
   const handleVideoSelect = (video: VideoItem) => {
@@ -136,31 +150,61 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
 
     try {
       if (!isFullscreen) {
-        // Entrar a pantalla completa
-        if (videoContainerRef.current.requestFullscreen) {
-          await videoContainerRef.current.requestFullscreen();
-        } else if ((videoContainerRef.current as unknown as { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
-          await (videoContainerRef.current as unknown as { webkitRequestFullscreen: () => Promise<void> }).webkitRequestFullscreen();
-        } else if ((videoContainerRef.current as unknown as { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen) {
-          await (videoContainerRef.current as unknown as { msRequestFullscreen: () => Promise<void> }).msRequestFullscreen();
+        // En iOS, usar pseudo-fullscreen ya que el fullscreen nativo no funciona con iframes
+        if (isIOS) {
+          setIsFullscreen(true);
+          // Ocultar la barra de estado en iOS
+          document.body.style.overflow = 'hidden';
+          // Forzar orientación landscape en iPhone
+          if (isMobile && window.screen.orientation && 'lock' in window.screen.orientation) {
+            try {
+              await (window.screen.orientation as { lock: (orientation: string) => Promise<void> }).lock('landscape');
+            } catch (e) {
+              console.log('Could not lock orientation:', e);
+            }
+          }
+        } else {
+          // En otros dispositivos, usar fullscreen nativo
+          if (videoContainerRef.current.requestFullscreen) {
+            await videoContainerRef.current.requestFullscreen();
+          } else if ((videoContainerRef.current as unknown as { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
+            await (videoContainerRef.current as unknown as { webkitRequestFullscreen: () => Promise<void> }).webkitRequestFullscreen();
+          } else if ((videoContainerRef.current as unknown as { msRequestFullscreen?: () => Promise<void> }).msRequestFullscreen) {
+            await (videoContainerRef.current as unknown as { msRequestFullscreen: () => Promise<void> }).msRequestFullscreen();
+          }
         }
       } else {
         // Salir de pantalla completa
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if ((document as unknown as { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen) {
-          await (document as unknown as { webkitExitFullscreen: () => Promise<void> }).webkitExitFullscreen();
-        } else if ((document as unknown as { msExitFullscreen?: () => Promise<void> }).msExitFullscreen) {
-          await (document as unknown as { msExitFullscreen: () => Promise<void> }).msExitFullscreen();
+        if (isIOS) {
+          setIsFullscreen(false);
+          document.body.style.overflow = 'auto';
+          // Restaurar orientación
+          if (isMobile && window.screen.orientation && 'unlock' in window.screen.orientation) {
+            try {
+              (window.screen.orientation as unknown as { unlock: () => void }).unlock();
+            } catch (e) {
+              console.log('Could not unlock orientation:', e);
+            }
+          }
+        } else {
+          if (document.exitFullscreen) {
+            await document.exitFullscreen();
+          } else if ((document as unknown as { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen) {
+            await (document as unknown as { webkitExitFullscreen: () => Promise<void> }).webkitExitFullscreen();
+          } else if ((document as unknown as { msExitFullscreen?: () => Promise<void> }).msExitFullscreen) {
+            await (document as unknown as { msExitFullscreen: () => Promise<void> }).msExitFullscreen();
+          }
         }
       }
     } catch (error) {
       console.error('Error toggling fullscreen:', error);
     }
-  }, [isFullscreen]);
+  }, [isFullscreen, isIOS, isMobile]);
 
-  // Manejar cambios de pantalla completa
+  // Manejar cambios de pantalla completa (solo para dispositivos no iOS)
   useEffect(() => {
+    if (isIOS) return; // No necesitamos escuchar eventos de fullscreen en iOS
+
     const handleFullscreenChange = () => {
       const isCurrentlyFullscreen = !!(
         document.fullscreenElement ||
@@ -179,7 +223,7 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('msfullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [isIOS]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
@@ -286,9 +330,8 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
                 />
               </div>
               
-              {/* Botón de pantalla completa (solo en móvil) */}
-              {isMobile && (
-                <button
+              {/* Botón de pantalla completa */}
+              <button
                   onClick={toggleFullscreen}
                   className={`absolute top-4 right-4 w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer z-10 ${
                     isFullscreen ? 'top-4 right-4' : 'top-4 right-4'
@@ -301,7 +344,6 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
                     <Maximize className="w-6 h-6 text-white" />
                   )}
                 </button>
-              )}
               
               {/* Espaciador para crear distancia - solo cuando no está en pantalla completa */}
               {!isFullscreen && (

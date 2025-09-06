@@ -141,7 +141,7 @@ html::-webkit-scrollbar {
   .text-section-body { font-size: clamp(1rem, 1.6vw, 1.125rem); line-height: 1.55; }
 }
 
-/* --- Custom animations for DirectorModal --- */
+/* --- Custom animations --- */
 @keyframes fadeIn {
   from {
     opacity: 0;

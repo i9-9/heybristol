@@ -1,17 +1,38 @@
-const Firmas = () => (
-    <a 
-      href="https://heybristol.com" 
-      target="_blank" 
-      rel="noopener noreferrer"
-      style={{ textDecoration: "none" }}
-    >
-      <img 
-        src="https://raw.githubusercontent.com/i9-9/heybristol/main/public/images/firmas/LEMON.png" 
-        alt="LEMON - Director - Hey Bristol" 
-        style={{ display: "block", border: "none" }}
-      />
-    </a>
+const Firmas = () => {
+  const firmas = [
+    { name: 'AZUL', alt: 'AZUL - Director - Hey Bristol' },
+    { name: 'LARRAIN', alt: 'LARRAIN - Director - Hey Bristol' },
+    { name: 'LEMON', alt: 'LEMON - Director - Hey Bristol' },
+    { name: 'MARTIN', alt: 'MARTIN - Director - Hey Bristol' },
+    { name: 'NAVA', alt: 'NAVA - Director - Hey Bristol' },
+    { name: 'SERE', alt: 'SERE - Director - Hey Bristol' }
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
+      {firmas.map((firma) => (
+        <a 
+          key={firma.name}
+          href="https://heybristol.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ textDecoration: "none" }}
+        >
+          <img 
+            src={`/images/firmas/${firma.name}.png`}
+            alt={firma.alt}
+            style={{ 
+              display: "block", 
+              border: "none",
+              maxWidth: "200px",
+              height: "auto"
+            }}
+          />
+        </a>
+      ))}
+    </div>
   );
+};
   
   export default Firmas;
   

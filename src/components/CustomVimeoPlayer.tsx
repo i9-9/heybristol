@@ -54,7 +54,6 @@ export default function CustomVimeoPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [playerReady, setPlayerReady] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMuted, setIsMuted] = useState(muted);
@@ -97,7 +96,6 @@ export default function CustomVimeoPlayer({
 
     try {
       const currentMuted = await playerRef.current.getMuted();
-      const currentVolume = await playerRef.current.getVolume();
 
       if (currentMuted) {
         await playerRef.current.setMuted(false);
@@ -146,7 +144,7 @@ export default function CustomVimeoPlayer({
         }
 
         // Cargar script de Vimeo
-        if (!(window as any).Vimeo) {
+        if (!(window as Window & { Vimeo?: { Player: new (element: HTMLIFrameElement) => VimeoPlayer } }).Vimeo) {
           await new Promise<void>((resolve, reject) => {
             const script = document.createElement('script');
             script.src = 'https://player.vimeo.com/api/player.js';
@@ -163,14 +161,13 @@ export default function CustomVimeoPlayer({
 
         if (!mountedRef.current) return;
 
-        const VimeoPlayerClass = (window as any).Vimeo.Player;
+        const VimeoPlayerClass = (window as unknown as Window & { Vimeo: { Player: new (element: HTMLIFrameElement) => VimeoPlayer } }).Vimeo.Player;
         const player = new VimeoPlayerClass(iframeRef.current);
         playerRef.current = player;
 
         player.on('loaded', async () => {
           if (!mountedRef.current) return;
           
-          setPlayerReady(true);
           setIsBuffering(false);
           
           setTimeout(async () => {
@@ -235,7 +232,7 @@ export default function CustomVimeoPlayer({
           setIsBuffering(false);
         });
 
-        player.on('error', (error: any) => {
+        player.on('error', (error: unknown) => {
           if (!mountedRef.current) return;
           console.error('[VimeoPlayer] player error:', error);
           setHasError(true);
@@ -310,7 +307,6 @@ export default function CustomVimeoPlayer({
 
   const handleRetry = useCallback(() => {
     setHasError(false);
-    setPlayerReady(false);
     if (iframeRef.current) {
       iframeRef.current.src = getVimeoUrl();
     }

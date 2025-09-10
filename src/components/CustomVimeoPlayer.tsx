@@ -328,8 +328,8 @@ export default function CustomVimeoPlayer({
                 const currentMuted = await playerRef.current?.getMuted();
                 console.log('🔊 Volume changed, current muted:', currentMuted);
                 
-                // Solo actualizar si no es una acción del usuario
-                if (currentMuted !== isMuted) {
+                // Solo actualizar si no es una acción del usuario y el valor es válido
+                if (currentMuted !== undefined && currentMuted !== isMuted) {
                   console.log('🔄 Updating mute state from volume change:', currentMuted);
                   setIsMuted(currentMuted);
                 }
@@ -368,7 +368,7 @@ export default function CustomVimeoPlayer({
         clearTimeout(readyTimeoutRef.current);
       }
     };
-  }, [video.id, onPlay, onPause, onEnded, syncPlayerState, muted]);
+  }, [video.id, onPlay, onPause, onEnded, syncPlayerState, muted, isMuted]);
 
   // Efecto para sincronizar estado cuando el reproductor esté listo
   useEffect(() => {
@@ -380,7 +380,7 @@ export default function CustomVimeoPlayer({
       
       return () => clearTimeout(syncTimeout);
     }
-  }, [playerReady, video.id, syncPlayerState]);
+  }, [playerReady, video.id, syncPlayerState, isMuted]);
 
   const handleMouseEnter = () => {
     setIsHovered(true);

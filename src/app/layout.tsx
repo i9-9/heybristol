@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/opengraph-image.png',
+        url: '/opengraph-image.svg',
         width: 1200,
         height: 630,
         alt: 'Bristol - Productora de contenido audiovisual',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "Bristol",
     description: "Bristol es una productora de contenido audiovisual",
-    images: ['/opengraph-image.png'],
+    images: ['/opengraph-image.svg'],
   },
   icons: {
     icon: [

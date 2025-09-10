@@ -18,6 +18,7 @@ export interface ContentfulDirector {
   fields: {
     name: string;
     slug: string;
+    order: number;
     videos: ContentfulDirectorVideo[];
   };
 }
@@ -108,14 +109,16 @@ async function _getDirectorsFromContentful() {
   try {
     const response = await client.getEntries({
       content_type: 'director',
+      order: ['fields.order'], // Ordenar por el campo order
       include: 2, // Include referenced entries (videos)
     });
 
     return response.items.map((item: unknown) => {
-      const director = item as { fields: { name: string; slug: string; videos?: unknown[] } };
+      const director = item as { fields: { name: string; slug: string; order: number; videos?: unknown[] } };
       return {
         name: director.fields.name,
         slug: director.fields.slug,
+        order: director.fields.order,
         videos: director.fields.videos?.map((video: unknown) => {
           const directorVideo = video as { fields: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
           return {
@@ -154,10 +157,11 @@ async function _getDirectorBySlugFromContentful(slug: string) {
       return null;
     }
 
-    const item = response.items[0] as unknown as { fields: { name: string; slug: string; videos?: unknown[] } };
+    const item = response.items[0] as unknown as { fields: { name: string; slug: string; order: number; videos?: unknown[] } };
     return {
       name: item.fields.name,
       slug: item.fields.slug,
+      order: item.fields.order,
       videos: item.fields.videos?.map((video: unknown) => {
         const directorVideo = video as { fields: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
         return {

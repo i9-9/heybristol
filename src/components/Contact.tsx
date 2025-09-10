@@ -23,22 +23,18 @@ export default function Contact() {
       {/* Contact Information - Grid 2x2 */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 translate-y-[4rem] md:translate-y-[8rem] z-10">
         <div className="text-center">
-          <div className="mt-2 md:mt-4 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 md:gap-x-16 md:gap-y-4 text-black">
+          <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 md:gap-x-16 md:gap-y-4 text-black">
             <div>
-              <p className="font-extrabold text-xs md:text-sm lg:text-base mb-1 md:mb-2 font-hagrid">MARTÍN GIUDICESSI</p>
-              <a href="mailto:martin@heybristol.com" className="text-xs md:text-sm lg:text-base hover:opacity-80 transition-opacity">MARTIN@HEYBRISTOL.COM</a>
+              <a href="mailto:martin@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity block">MARTÍN GIUDICESSI</a>
             </div>
             <div>
-              <p className="font-extrabold text-xs md:text-sm lg:text-base mb-1 md:mb-2 font-hagrid">AZUL CRESPO</p>
-              <a href="mailto:blue@heybristol.com" className="text-xs md:text-sm lg:text-base hover:opacity-80 transition-opacity">BLUE@HEYBRISTOL.COM</a>
+              <a href="mailto:blue@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity block">AZUL CRESPO</a>
             </div>
             <div>
-              <p className="font-extrabold text-xs md:text-sm lg:text-base mb-1 md:mb-2 font-hagrid">JORGE LARRAIN</p>
-              <a href="mailto:jorge@heybristol.com" className="text-xs md:text-sm lg:text-base hover:opacity-80 transition-opacity">JORGE@HEYBRISTOL.COM</a>
+              <a href="mailto:jorge@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity block">JORGE LARRAIN</a>
             </div>
             <div>
-              <p className="font-extrabold text-xs md:text-sm lg:text-base mb-1 md:mb-2 font-hagrid">ENRIQUE NAVA</p>
-              <a href="mailto:direccion@heybristol.com" className="text-xs md:text-sm lg:text-base hover:opacity-80 transition-opacity">DIRECCION@HEYBRISTOL.COM</a>
+              <a href="mailto:direccion@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity block">ENRIQUE NAVA</a>
             </div>
           </div>
         </div>
@@ -90,11 +86,11 @@ export default function Contact() {
 
       {/* Footer - Bottom Right */}
       <div className="absolute bottom-8 right-4 md:bottom-12 md:right-8 z-30">
-        <div className="flex items-center space-x-2 text-black font-raleway text-[10px] md:text-sm">
-          <a href="https://www.instagram.com/bristol________/" className="hover:opacity-80 transition-opacity">INSTAGRAM</a>
-          <span className="text-black">|</span>
-          <span className="font-light">PRIVACY POLICY</span>
-          <span className="font-light">© 2025 BRISTOL</span>
+        <div className="flex items-center space-x-2 text-black font-raleway">
+          <a href="https://www.instagram.com/bristol________/" className="hover:opacity-80 transition-opacity text-[10px] md:text-sm">INSTAGRAM</a>
+          <span className="text-black text-[8px] md:text-[10px]">|</span>
+          <span className="font-light text-[8px] md:text-[10px]">PRIVACY POLICY</span>
+          <span className="font-light text-[8px] md:text-[10px]">© 2025 BRISTOL</span>
         </div>
       </div>
     </section>

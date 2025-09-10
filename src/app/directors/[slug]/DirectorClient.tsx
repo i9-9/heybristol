@@ -6,7 +6,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import type { VideoItem } from "@/lib/types";
 import { useRouter } from "next/navigation";
-import { Maximize, Minimize } from "lucide-react";
+import CustomVimeoPlayer from "@/components/CustomVimeoPlayer";
 
 interface DirectorClientProps {
   director: { name: string };
@@ -132,18 +132,111 @@ function VideoCard({ video, onClick }: { video: VideoItem; onClick: () => void }
 export default function DirectorClient({ director, videos }: DirectorClientProps) {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
   const isMobile = useIsMobile();
   const isIOS = useIsIOS();
   const videoContainerRef = useRef<HTMLDivElement>(null);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleVideoSelect = (video: VideoItem) => {
     setSelectedVideo(video);
   };
 
-  const handleBackToVideos = () => {
+  // Funciones para manejar la visibilidad de controles (solo desktop)
+  const handleMouseEnter = useCallback(() => {
+    if (isMobile) return; // Solo en desktop
+    setIsHovered(true);
+    setShowControls(true);
+    // Limpiar timeout si existe
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    // Crear timeout para ocultar controles después de 3 segundos de inactividad
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+  }, [isMobile]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isMobile) return; // Solo en desktop
+    setIsHovered(false);
+    setShowControls(false);
+    // Limpiar timeout si existe
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+  }, [isMobile]);
+
+  const handleMouseMove = useCallback(() => {
+    if (isMobile) return; // Solo en desktop
+    // Solo mostrar controles si el mouse está sobre el contenedor
+    if (isHovered) {
+      setShowControls(true);
+      // Limpiar timeout anterior si existe
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+      // Crear nuevo timeout para ocultar controles después de 3 segundos de inactividad
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    }
+  }, [isHovered, isMobile]);
+
+  const handleBackToVideos = useCallback(() => {
     setSelectedVideo(null);
-  };
+  }, []);
+
+  // Cleanup del timeout al desmontar
+  useEffect(() => {
+    return () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Navegación entre videos
+  const handlePreviousVideo = useCallback(() => {
+    if (!selectedVideo) return;
+    
+    const currentIndex = videos.findIndex(v => v.id === selectedVideo.id);
+    const previousIndex = currentIndex > 0 ? currentIndex - 1 : videos.length - 1;
+    setSelectedVideo(videos[previousIndex]);
+  }, [selectedVideo, videos]);
+
+  const handleNextVideo = useCallback(() => {
+    if (!selectedVideo) return;
+    
+    const currentIndex = videos.findIndex(v => v.id === selectedVideo.id);
+    const nextIndex = currentIndex < videos.length - 1 ? currentIndex + 1 : 0;
+    setSelectedVideo(videos[nextIndex]);
+  }, [selectedVideo, videos]);
+
+  // Navegación con teclado
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!selectedVideo) return;
+      
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        handlePreviousVideo();
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        handleNextVideo();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        handleBackToVideos();
+      }
+    };
+
+    if (selectedVideo) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [selectedVideo, videos, handleNextVideo, handlePreviousVideo, handleBackToVideos]);
 
   const toggleFullscreen = useCallback(async () => {
     if (!videoContainerRef.current) return;
@@ -318,32 +411,28 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
               className={`w-full max-w-5xl mx-auto mt-8 md:-mt-4 animate-fadeIn px-4 md:px-0 video-container-mobile mobile-video-selected ${
                 isFullscreen ? 'fixed inset-0 z-50 bg-black flex items-center justify-center' : ''
               }`}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onMouseMove={handleMouseMove}
             >
               <div className={`aspect-video w-full bg-black overflow-hidden rounded-lg video-aspect-mobile ${
                 isFullscreen ? 'w-full h-full max-w-none max-h-none rounded-none' : ''
               }`}>
-                <iframe
-                  src={selectedVideo.embedUrl}
+                <CustomVimeoPlayer
+                  video={selectedVideo}
                   className="w-full h-full"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  title={selectedVideo.title}
+                  autoPlay={true}
+                  loop={false}
+                  muted={true}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                  onMouseMove={handleMouseMove}
+                  showControls={showControls}
+                  onFullscreenToggle={toggleFullscreen}
+                  isFullscreen={isFullscreen}
+                  isMobile={isMobile}
                 />
               </div>
-              
-              {/* Botón de pantalla completa */}
-              <button
-                  onClick={toggleFullscreen}
-                  className={`absolute top-4 right-4 w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer z-10 ${
-                    isFullscreen ? 'top-4 right-4' : 'top-4 right-4'
-                  }`}
-                  aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
-                >
-                  {isFullscreen ? (
-                    <Minimize className="w-6 h-6 text-white" />
-                  ) : (
-                    <Maximize className="w-6 h-6 text-white" />
-                  )}
-                </button>
               
               {/* Espaciador para crear distancia - solo cuando no está en pantalla completa */}
               {!isFullscreen && (
@@ -359,25 +448,61 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
               
             </div>
             
-            {/* Botón de volver en esquina inferior izquierda - solo cuando no está en pantalla completa */}
+            {/* Flechas de navegación a los lados del video */}
             {!isFullscreen && (
-              <div className="absolute bottom-6 left-6 z-10">
-              <button
-                onClick={handleBackToVideos}
-                className="flex flex-col items-start space-y-2 text-white cursor-pointer"
-              >
-                <Image 
-                  src="/images/icons/arrow.png" 
-                  alt="Arrow Left" 
-                  width={32} 
-                  height={32} 
-                  className="w-8 h-8 rotate-180 hover:opacity-80 transition-opacity" 
-                />
-                <span className="font-ordinary text-sm md:text-xl uppercase leading-tight text-left whitespace-nowrap">
-                  BACK TO {director.name}
-                </span>
-              </button>
-              </div>
+              <>
+                {/* Flecha izquierda - Anterior video */}
+                <div className="absolute left-6 top-1/2 transform -translate-y-1/2 z-20">
+                  <button
+                    onClick={handlePreviousVideo}
+                    className="flex flex-col items-center space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
+                  >
+                    <Image 
+                      src="/images/icons/arrow.png" 
+                      alt="Previous Video" 
+                      width={32} 
+                      height={32} 
+                      className="w-8 h-8 -rotate-135 transition-transform" 
+                    />
+                  </button>
+                </div>
+
+                {/* Flecha derecha - Siguiente video */}
+                <div className="absolute right-6 top-1/2 transform -translate-y-1/2 z-20">
+                  <button
+                    onClick={handleNextVideo}
+                    className="flex flex-col items-center space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
+                  >
+                    <Image 
+                      src="/images/icons/arrow.png" 
+                      alt="Next Video" 
+                      width={32} 
+                      height={32} 
+                      className="w-8 h-8 transition-transform rotate-45" 
+                    />
+
+                  </button>
+                </div>
+
+                {/* Botón de volver - Esquina inferior izquierda */}
+                <div className="absolute bottom-6 left-6 z-10">
+                  <button
+                    onClick={handleBackToVideos}
+                    className="flex flex-col items-start space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
+                  >
+                    <Image 
+                      src="/images/icons/arrow.png" 
+                      alt="Back to Videos" 
+                      width={32} 
+                      height={32} 
+                      className="w-8 h-8 rotate-180 hover:opacity-80 transition-opacity" 
+                    />
+                    <span className="font-ordinary text-sm md:text-xl uppercase leading-tight text-left whitespace-nowrap">
+                      BACK TO {director.name}
+                    </span>
+                  </button>
+                </div>
+              </>
             )}
           </>
         )}

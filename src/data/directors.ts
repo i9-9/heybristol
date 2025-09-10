@@ -5,11 +5,13 @@ export interface DirectorVideo {
   client: string;
   vimeoId: string;
   thumbnailId?: string; // ID del video loop/thumbnail
+  hash?: string; // Hash para videos privados de Vimeo
 }
 
 export interface Director {
   name: string;
   slug: string;
+  order: number;
   videos: DirectorVideo[];
 }
 
@@ -30,6 +32,7 @@ export const directors: Director[] = [
   {
     name: "Lemon",
     slug: "lemon",
+    order: 1,
     videos: [
       {
         id: "lemon-rexona-1",
@@ -161,6 +164,7 @@ export const directors: Director[] = [
   {
     name: "Iván Jurado",
     slug: "ivan-jurado",
+    order: 3,
     videos: [
       {
         id: "ivan-jurado-ag1-1",
@@ -221,6 +225,7 @@ export const directors: Director[] = [
   {
     name: "Paloma Rincón",
     slug: "paloma-rincon",
+    order: 4,
     videos: [
       {
         id: "paloma-rincon-ntt-1",
@@ -281,6 +286,7 @@ export const directors: Director[] = [
   {
     name: "Luciano Urbani",
     slug: "luciano-urbani",
+    order: 2,
     videos: [
       {
         id: "luciano-urbani-dubai-1",
@@ -341,6 +347,7 @@ export const directors: Director[] = [
   {
     name: "China Pequenino",
     slug: "china-pequenino",
+    order: 5,
     videos: [
       {
         id: "china-pequenino-reebok-1",
@@ -400,6 +407,7 @@ export const directors: Director[] = [
   {
     name: "Tigre Escobar",
     slug: "tigre-escobar",
+    order: 6,
     videos: [
 
       {
@@ -459,11 +467,15 @@ export function getDirectorBySlug(directorSlug: string): Director | null {
 }
 
 export function getDirectorNames(): string[] {
-  return directors.map(d => d.name);
+  return directors
+    .sort((a, b) => a.order - b.order)
+    .map(d => d.name);
 }
 
 export function getDirectorSlugs(): string[] {
-  return directors.map(d => d.slug);
+  return directors
+    .sort((a, b) => a.order - b.order)
+    .map(d => d.slug);
 }
 
 export function getPublishedVideosByDirector(directorName: string): DirectorVideo[] {
@@ -486,6 +498,7 @@ export async function convertToVideoItem(directorVideo: DirectorVideo) {
     embedUrl: directorVideo.vimeoId ? getEmbedUrl(directorVideo.vimeoId) : '',
     // Usar thumbnailId para el grid
     thumbnailId: directorVideo.thumbnailId,
+    hash: directorVideo.hash, // Incluir hash si existe
     thumb: null, // Ya no necesitamos thumbnails de la API
     width: 1920,
     height: 1080,

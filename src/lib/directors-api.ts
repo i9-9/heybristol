@@ -49,19 +49,23 @@ export async function getDirectorBySlug(slug: string): Promise<Director | null> 
 }
 
 /**
- * Obtiene los nombres de todos los directores
+ * Obtiene los nombres de todos los directores ordenados
  */
 export async function getDirectorNames(): Promise<string[]> {
   const directors = await getDirectors();
-  return directors.map(d => d.name);
+  return directors
+    .sort((a, b) => a.order - b.order)
+    .map(d => d.name);
 }
 
 /**
- * Obtiene los slugs de todos los directores
+ * Obtiene los slugs de todos los directores ordenados
  */
 export async function getDirectorSlugs(): Promise<string[]> {
   const directors = await getDirectors();
-  return directors.map(d => d.slug);
+  return directors
+    .sort((a, b) => a.order - b.order)
+    .map(d => d.slug);
 }
 
 /**

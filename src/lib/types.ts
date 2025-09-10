@@ -26,6 +26,7 @@ export interface VideoItem {
     embedUrl: string;
     thumb?: string | null;
     thumbnailId?: string; // ID del video de thumbnail/preview
+    hash?: string; // Hash para videos privados de Vimeo
     width?: number;
     height?: number;
     duration?: number;

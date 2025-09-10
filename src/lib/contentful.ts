@@ -91,7 +91,7 @@ export interface EditorialVideo {
     sys: { id: string };
     fields: { file: { url: string; contentType: string } };
   };
-  order?: number;
+  order: number;
 }
 
 export interface VideoSource {
@@ -113,13 +113,13 @@ async function _getDirectorsFromContentful() {
       include: 2, // Include referenced entries (videos)
     });
 
-    return response.items.map((item: unknown) => {
+    return response.items.map((item: unknown, index: number) => {
       const director = item as { fields: { name: string; slug: string; order: number; videos?: unknown[] } };
       return {
         name: director.fields.name,
         slug: director.fields.slug,
         order: director.fields.order,
-        videos: director.fields.videos?.map((video: unknown) => {
+        videos: director.fields.videos?.map((video: unknown, videoIndex: number) => {
           const directorVideo = video as { fields: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
           return {
             id: directorVideo.fields.id,
@@ -162,7 +162,7 @@ async function _getDirectorBySlugFromContentful(slug: string) {
       name: item.fields.name,
       slug: item.fields.slug,
       order: item.fields.order,
-      videos: item.fields.videos?.map((video: unknown) => {
+      videos: item.fields.videos?.map((video: unknown, videoIndex: number) => {
         const directorVideo = video as { fields: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
         return {
           id: directorVideo.fields.id,
@@ -214,11 +214,11 @@ async function _getHeroVideosFromContentful(): Promise<HeroVideo[]> {
   try {
     const response = await client.getEntries({
       content_type: 'heroVideo',
-      order: ['fields.order'],
+      order: ['fields.order'], // Ordenar por el campo order
       include: 2, // Include referenced assets
     });
 
-    return response.items.map((item: unknown) => {
+    return response.items.map((item: unknown, index: number) => {
       const heroVideo = item as { 
         fields: { 
           id: string; 
@@ -425,10 +425,10 @@ async function _getEditorialVideosFromContentful(): Promise<EditorialVideo[]> {
   try {
     const entries = await client.getEntries({
       content_type: 'editorialVideo',
-      order: ['fields.order']
+      order: ['fields.order'] // Ordenar por el campo order
     });
 
-    return entries.items.map((editorialVideo: unknown) => {
+    return entries.items.map((editorialVideo: unknown, index: number) => {
       const video = editorialVideo as { 
         fields: { 
           id: string; 
@@ -446,7 +446,7 @@ async function _getEditorialVideosFromContentful(): Promise<EditorialVideo[]> {
             sys: { id: string };
             fields: { file: { url: string; contentType: string } };
           }; 
-          order?: number 
+          order: number 
         } 
       };
       return {

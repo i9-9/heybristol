@@ -18,7 +18,10 @@
     "reset-display-fields": "node scripts/reset-display-fields.js",
     "setup-webhook": "node scripts/setup-webhook.js",
     "cleanup-migration": "node scripts/cleanup-after-migration.js",
-    "update-hero-video-content-type": "node scripts/update-hero-video-content-type.js"
+    "update-hero-video-content-type": "node scripts/update-hero-video-content-type.js",
+    "add-order-field": "node scripts/add-order-field.js",
+    "update-contentful-queries": "node scripts/update-contentful-queries.js",
+    "migrate-order-values": "node scripts/migrate-order-values.js"
   },
   "dependencies": {
     "contentful": "^11.7.15",

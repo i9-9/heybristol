@@ -452,7 +452,7 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
             {!isFullscreen && (
               <>
                 {/* Flecha izquierda - Anterior video */}
-                <div className="absolute left-6 top-1/2 transform -translate-y-1/2 z-20">
+                <div className="absolute left-6 top-1/4 md:top-1/2 transform -translate-y-1/2 z-20">
                   <button
                     onClick={handlePreviousVideo}
                     className="flex flex-col items-center space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
@@ -468,7 +468,7 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
                 </div>
 
                 {/* Flecha derecha - Siguiente video */}
-                <div className="absolute right-6 top-1/2 transform -translate-y-1/2 z-20">
+                <div className="absolute right-6 top-1/4 md:top-1/2 transform -translate-y-1/2 z-20">
                   <button
                     onClick={handleNextVideo}
                     className="flex flex-col items-center space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"

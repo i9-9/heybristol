@@ -57,6 +57,7 @@ export default function CustomVimeoPlayer({
   const [isBuffering, setIsBuffering] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isMuted, setIsMuted] = useState(muted);
+  const [hasEnded, setHasEnded] = useState(false);
   
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<VimeoPlayer | null>(null);
@@ -81,7 +82,8 @@ export default function CustomVimeoPlayer({
       color: 'ffffff',
       background: '0',
       api: '1', // Habilitar API
-      player_id: `vimeo_${video.id}` // ID único para el player
+      player_id: `vimeo_${video.id}`, // ID único para el player
+      rel: '0' // Deshabilitar videos relacionados
     });
     
     if (video.hash) {
@@ -135,6 +137,7 @@ export default function CustomVimeoPlayer({
 
   useEffect(() => {
     mountedRef.current = true;
+    setHasEnded(false); // Resetear estado cuando cambie el video
 
     const setupPlayer = async () => {
       try {
@@ -184,6 +187,15 @@ export default function CustomVimeoPlayer({
                 setIsMuted(currentMuted);
               }
               
+              // Force autoplay if enabled
+              if (autoPlay) {
+                try {
+                  await playerRef.current.play();
+                } catch (playError) {
+                  console.log('[VimeoPlayer] Autoplay failed (browser restriction):', playError);
+                }
+              }
+              
               const isPaused = await playerRef.current.getPaused();
               setIsPlaying(!isPaused);
               
@@ -197,6 +209,7 @@ export default function CustomVimeoPlayer({
           if (!mountedRef.current) return;
           setIsPlaying(true);
           setIsBuffering(false);
+          setHasEnded(false);
           onPlay?.();
         });
 
@@ -209,6 +222,7 @@ export default function CustomVimeoPlayer({
         player.on('ended', () => {
           if (!mountedRef.current) return;
           setIsPlaying(false);
+          setHasEnded(true);
           onEnded?.();
         });
 
@@ -269,7 +283,7 @@ export default function CustomVimeoPlayer({
         }
       }
     };
-  }, [video.id, muted, onPlay, onPause, onEnded]); // Dependencias simplificadas
+  }, [video.id, video.hash, autoPlay, loop, muted, onPlay, onPause, onEnded]); // Dependencias completas
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -311,6 +325,19 @@ export default function CustomVimeoPlayer({
       iframeRef.current.src = getVimeoUrl();
     }
   }, [getVimeoUrl]);
+
+  const handleRestart = useCallback(async () => {
+    if (!playerRef.current) return;
+    
+    try {
+      setHasEnded(false);
+      setIsPlaying(false);
+      // Reiniciar el video desde el principio
+      await playerRef.current.play();
+    } catch (error) {
+      console.error('[VimeoPlayer] restart error:', error);
+    }
+  }, []);
 
   // Validación del video
   if (!video?.id) {
@@ -359,6 +386,21 @@ export default function CustomVimeoPlayer({
         title={video.title}
         frameBorder="0"
       />
+
+      {/* Pantalla negra cuando el video termina */}
+      {hasEnded && (
+        <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
+          <button
+            onClick={handleRestart}
+            className="w-20 h-20 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105"
+            aria-label="Reproducir de nuevo"
+          >
+            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+        </div>
+      )}
 
 
       {/* Overlay de controles */}

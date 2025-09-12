@@ -3,13 +3,13 @@
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
 import { useState, useRef, useCallback, useEffect } from "react";
-import { useInView } from "react-intersection-observer";
 import type { VideoItem } from "@/lib/types";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import CustomVimeoPlayer from "@/components/CustomVimeoPlayer";
+import VideoCard from "@/components/VideoCard";
 
 interface DirectorClientProps {
-  director: { name: string };
+  director: { name: string; slug: string };
   videos: VideoItem[];
 }
 
@@ -43,91 +43,6 @@ function useIsIOS() {
   return isIOS;
 }
 
-// Componente para el card de video con lazy loading - IDÉNTICO al modal
-function VideoCard({ video, onClick }: { video: VideoItem; onClick: () => void }) {
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  const [isLoadingVideo, setIsLoadingVideo] = useState(false);
-  const { ref, inView } = useInView({
-    threshold: 0.1,
-    triggerOnce: true,
-  });
-
-  const handleVideoLoad = () => {
-    setIsVideoLoaded(true);
-    setIsLoadingVideo(false);
-  };
-
-  const handleVideoError = () => {
-    setIsLoadingVideo(false);
-    // Fallback a imagen si falla el video
-  };
-
-  // Construir URL de thumbnail estático de Vimeo
-  const getThumbnailUrl = (thumbnailId: string) => {
-    return `https://i.vimeocdn.com/video/${thumbnailId}_640.jpg`;
-  };
-
-  return (
-    <button
-      ref={ref}
-      onClick={onClick}
-      className="relative group block overflow-hidden cursor-pointer"
-    >
-      <div className="w-full h-80 md:aspect-video md:h-auto bg-black overflow-hidden">
-        {/* Imagen estática de thumbnail - siempre visible */}
-        <Image
-          src={getThumbnailUrl(video.thumbnailId || video.id)}
-          alt={video.title}
-          width={640}
-          height={360}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${
-            isVideoLoaded ? 'opacity-0' : 'opacity-100'
-          }`}
-        />
-
-        {/* Spinner de carga - solo cuando se está cargando el video */}
-        {inView && isLoadingVideo && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
-            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-          </div>
-        )}
-
-        {/* Iframe de Vimeo - solo cuando está en viewport y cargado */}
-        {inView && (
-          <iframe
-            src={`https://player.vimeo.com/video/${video.thumbnailId || video.id}?h=hash&title=0&byline=0&portrait=0&autoplay=1&loop=1&muted=1&controls=0&background=1&dnt=1`}
-            className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
-              isVideoLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            allow="autoplay; fullscreen; picture-in-picture"
-            title={video.title}
-            frameBorder="0"
-            onLoad={handleVideoLoad}
-            onError={handleVideoError}
-            style={{ display: isVideoLoaded ? 'block' : 'none' }}
-          />
-        )}
-      </div>
-      
-      {/* Overlay con título */}
-      <div className="absolute inset-0 flex items-center justify-center bg-black/60 md:bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 mobile-video-overlay">
-        <span className="text-white text-center px-3 font-medium uppercase text-sm md:text-base mobile-video-title">
-          {video.tags?.[0] || 'CLIENTE'} | {video.title}
-        </span>
-      </div>
-
-      {/* Indicador de carga inicial */}
-      {inView && !isVideoLoaded && !isLoadingVideo && (
-        <div 
-          className="absolute inset-0 bg-black/40 flex items-center justify-center"
-          onTransitionEnd={() => setIsLoadingVideo(true)}
-        >
-          <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-        </div>
-      )}
-    </button>
-  );
-}
 
 export default function DirectorClient({ director, videos }: DirectorClientProps) {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
@@ -135,14 +50,12 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
   const [showControls, setShowControls] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const isMobile = useIsMobile();
   const isIOS = useIsIOS();
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleVideoSelect = (video: VideoItem) => {
-    setSelectedVideo(video);
-  };
 
   // Funciones para manejar la visibilidad de controles (solo desktop)
   const handleMouseEnter = useCallback(() => {
@@ -324,14 +237,25 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
       <div className="absolute top-0 left-0 p-6 z-10">
         <button 
           onClick={() => {
-            // Navegar al home y luego scroll a la sección Directors
-            router.push('/');
+            // Navegar al home (o preview si estamos en devpreview) y luego scroll a la sección Directors
+            const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
+            router.push(isDevPreview ? '/devpreview' : '/');
             setTimeout(() => {
-              const directorsSection = document.getElementById('directors');
-              if (directorsSection) {
-                directorsSection.scrollIntoView({ behavior: 'smooth' });
-              }
-            }, 100);
+              const scrollToDirectors = () => {
+                const directorsSection = document.getElementById('directors');
+                if (directorsSection) {
+                  directorsSection.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start',
+                    inline: 'nearest'
+                  });
+                } else {
+                  // Si no encuentra la sección, intentar de nuevo
+                  setTimeout(scrollToDirectors, 200);
+                }
+              };
+              scrollToDirectors();
+            }, 300);
           }}
           className="w-10 md:w-24 h-auto text-white hover:opacity-80 transition-opacity cursor-pointer"
         >
@@ -344,13 +268,24 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
         <div className="absolute bottom-6 left-6 z-10">
           <button
             onClick={() => {
-              router.push('/');
+              const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
+              router.push(isDevPreview ? '/devpreview' : '/');
               setTimeout(() => {
-                const directorsSection = document.getElementById('directors');
-                if (directorsSection) {
-                  directorsSection.scrollIntoView({ behavior: 'smooth' });
-                }
-              }, 100);
+                const scrollToDirectors = () => {
+                  const directorsSection = document.getElementById('directors');
+                  if (directorsSection) {
+                    directorsSection.scrollIntoView({ 
+                      behavior: 'smooth',
+                      block: 'start',
+                      inline: 'nearest'
+                    });
+                  } else {
+                    // Si no encuentra la sección, intentar de nuevo
+                    setTimeout(scrollToDirectors, 200);
+                  }
+                };
+                scrollToDirectors();
+              }, 300);
             }}
             className="flex flex-col items-start space-y-2 text-white cursor-pointer"
           >
@@ -378,14 +313,14 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
             {/* Espaciador para desktop */}
             <div className="hidden md:block h-16"></div>
 
-            {/* Grid de videos con lazy loading - IDÉNTICO al modal */}
+            {/* Grid de videos con lazy loading */}
             {videos.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 w-full px-6 md:px-0 max-w-sm md:max-w-none mx-auto md:mx-0 pb-8">
                 {videos.map((video) => (
                   <VideoCard
                     key={video.id}
                     video={video}
-                    onClick={() => handleVideoSelect(video)}
+                    directorSlug={director.slug}
                   />
                 ))}
               </div>
@@ -512,8 +447,25 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
       {!isFullscreen && (
         <div className="absolute bottom-6 right-6 z-10">
         <button onClick={() => {
-          // Navegar al home
-          router.push('/');
+          // Navegar al home (o preview si estamos en devpreview)
+          const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
+          router.push(isDevPreview ? '/devpreview' : '/');
+          setTimeout(() => {
+            const scrollToDirectors = () => {
+              const directorsSection = document.getElementById('directors');
+              if (directorsSection) {
+                directorsSection.scrollIntoView({ 
+                  behavior: 'smooth',
+                  block: 'start',
+                  inline: 'nearest'
+                });
+              } else {
+                // Si no encuentra la sección, intentar de nuevo
+                setTimeout(scrollToDirectors, 200);
+              }
+            };
+            scrollToDirectors();
+          }, 300);
         }} className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer">
           <Image src="/images/icons/arrow.png" alt="Arrow Up" width={32} height={32} className="w-8 h-8" />
           <span className="font-ordinary text-sm md:text-xl uppercase leading-tight text-right whitespace-nowrap">

@@ -42,7 +42,7 @@ export default async function DirectorPage({ params }: PageProps) {
 
   const videos = await getVideosAsVideoItems(director.name);
 
-  return <DirectorClient director={director} videos={videos} />;
+  return <DirectorClient director={{ ...director, slug }} videos={videos} />;
 }
 
 

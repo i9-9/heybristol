@@ -110,7 +110,7 @@ export default function EditorialVideoComponent({
       
       {/* Loading overlay */}
       {!isLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+        <div className="absolute inset-0 flex items-center justify-center bg-black">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
             <div className="text-sm opacity-75">Cargando...</div>

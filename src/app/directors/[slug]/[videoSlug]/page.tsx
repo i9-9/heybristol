@@ -4,10 +4,10 @@ import { generateVideoSlug } from '@/lib/types';
 import VideoPlayerPage from './VideoPlayerPage';
 
 interface VideoPageProps {
-  params: {
+  params: Promise<{
     slug: string;
     videoSlug: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -63,7 +63,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
         director={director} 
         videos={videos}
         selectedVideo={video}
-        currentVideoSlug={videoSlug}
       />
     );
   } catch (error) {

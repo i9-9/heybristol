@@ -12,7 +12,6 @@ interface VideoPlayerPageProps {
   director: { name: string; slug: string };
   videos: VideoItem[];
   selectedVideo: VideoItem;
-  currentVideoSlug: string;
 }
 
 // Hook para detectar si es móvil
@@ -48,8 +47,7 @@ function useIsIOS() {
 export default function VideoPlayerPage({ 
   director, 
   videos, 
-  selectedVideo, 
-  currentVideoSlug 
+  selectedVideo
 }: VideoPlayerPageProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(false);

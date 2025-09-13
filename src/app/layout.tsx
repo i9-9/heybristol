@@ -3,11 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Bristol",
-  description: "Bristol es una productora de contenido audiovisual",
+  description: "Bristol is a production company. Our values are rooted in creativity, authenticity and collaboration that reflects a diverse range of voices and perspectives",
   metadataBase: new URL('https://heybristol.com'),
   openGraph: {
     title: "Bristol",
-    description: "Bristol es una productora de contenido audiovisual",
+    description: "Bristol is a production company. Our values are rooted in creativity, authenticity and collaboration that reflects a diverse range of voices and perspectives",
     url: 'https://heybristol.com',
     siteName: 'Bristol',
     type: 'website',
@@ -16,14 +16,14 @@ export const metadata: Metadata = {
         url: '/opengraph-image.svg',
         width: 1200,
         height: 630,
-        alt: 'Bristol - Productora de contenido audiovisual',
+        alt: 'Bristol - Production Company',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Bristol",
-    description: "Bristol es una productora de contenido audiovisual",
+    description: "Bristol - Production Company",
     images: ['/opengraph-image.svg'],
   },
   icons: {

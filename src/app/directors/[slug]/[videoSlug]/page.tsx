@@ -42,14 +42,12 @@ export default async function VideoPage({ params }: VideoPageProps) {
       notFound();
     }
 
-    // Get videos as VideoItems (this handles Contentful properly)
     const videos = await getVideosAsVideoItems(director.name);
     
     if (!videos || videos.length === 0) {
       notFound();
     }
 
-    // Find the video by matching the slug
     const video = videos.find(v => 
       generateVideoSlug(v.title) === videoSlug
     );

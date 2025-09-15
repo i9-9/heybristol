@@ -18,11 +18,8 @@ export default function EditorialVideoComponent({
   const [hasError, setHasError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Función para obtener la mejor fuente de video
   const getBestVideoSource = (editorialVideo: EditorialVideo, isMobile: boolean = false) => {
-    // Prioridad: WebM > MP4 > Mobile Video
     
-    // En móvil, usar mobileVideo si está disponible
     if (isMobile && editorialVideo.mobileVideo) {
       return {
         src: `https:${editorialVideo.mobileVideo.fields.file.url}`,
@@ -30,11 +27,9 @@ export default function EditorialVideoComponent({
       };
     }
     
-    // Detectar soporte de WebM
     const video = document.createElement('video');
     const supportsWebM = video.canPlayType('video/webm; codecs="vp9"').replace(/no/, '') !== '';
     
-    // Prioridad 1: WebM (si es soportado)
     if (supportsWebM && editorialVideo.webmVideo) {
       return {
         src: `https:${editorialVideo.webmVideo.fields.file.url}`,
@@ -42,7 +37,6 @@ export default function EditorialVideoComponent({
       };
     }
     
-    // Prioridad 2: MP4
     if (editorialVideo.mp4Video) {
       return {
         src: `https:${editorialVideo.mp4Video.fields.file.url}`,
@@ -79,7 +73,6 @@ export default function EditorialVideoComponent({
     }
   }, [videoSource]);
 
-  // Si no hay fuente de video o hay error, mostrar placeholder
   if (!videoSource || hasError) {
     return (
       <div className={`relative bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)] ${className}`}>
@@ -108,7 +101,6 @@ export default function EditorialVideoComponent({
         Tu navegador no soporta el elemento de video.
       </video>
       
-      {/* Loading overlay */}
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center bg-black">
           <div className="text-white text-center">

@@ -14,7 +14,6 @@ interface VideoPlayerPageProps {
   selectedVideo: VideoItem;
 }
 
-// Hook para detectar si es móvil
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -31,7 +30,6 @@ function useIsMobile() {
   return isMobile;
 }
 
-// Hook para detectar iOS
 function useIsIOS() {
   const [isIOS, setIsIOS] = useState(false);
 
@@ -59,41 +57,34 @@ export default function VideoPlayerPage({
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Funciones para manejar la visibilidad de controles (solo desktop)
   const handleMouseEnter = useCallback(() => {
-    if (isMobile) return; // Solo en desktop
+    if (isMobile) return;
     setIsHovered(true);
     setShowControls(true);
-    // Limpiar timeout si existe
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
     }
-    // Crear timeout para ocultar controles después de 3 segundos de inactividad
     controlsTimeoutRef.current = setTimeout(() => {
       setShowControls(false);
     }, 3000);
   }, [isMobile]);
 
   const handleMouseLeave = useCallback(() => {
-    if (isMobile) return; // Solo en desktop
+    if (isMobile) return;
     setIsHovered(false);
     setShowControls(false);
-    // Limpiar timeout si existe
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
     }
   }, [isMobile]);
 
   const handleMouseMove = useCallback(() => {
-    if (isMobile) return; // Solo en desktop
-    // Solo mostrar controles si el mouse está sobre el contenedor
+    if (isMobile) return;
     if (isHovered) {
       setShowControls(true);
-      // Limpiar timeout anterior si existe
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
       }
-      // Crear nuevo timeout para ocultar controles después de 3 segundos de inactividad
       controlsTimeoutRef.current = setTimeout(() => {
         setShowControls(false);
       }, 3000);
@@ -104,7 +95,6 @@ export default function VideoPlayerPage({
     router.push(`/directors/${director.slug}`);
   }, [router, director.slug]);
 
-  // Cleanup del timeout al desmontar
   useEffect(() => {
     return () => {
       if (controlsTimeoutRef.current) {
@@ -113,7 +103,6 @@ export default function VideoPlayerPage({
     };
   }, []);
 
-  // Navegación entre videos
   const handlePreviousVideo = useCallback(() => {
     const currentIndex = videos.findIndex(v => v.id === selectedVideo.id);
     const previousIndex = currentIndex > 0 ? currentIndex - 1 : videos.length - 1;
@@ -130,7 +119,6 @@ export default function VideoPlayerPage({
     router.push(`/directors/${director.slug}/${nextVideoSlug}`);
   }, [selectedVideo.id, videos, director.slug, router]);
 
-  // Navegación con teclado
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'ArrowLeft') {
@@ -154,12 +142,9 @@ export default function VideoPlayerPage({
 
     try {
       if (!isFullscreen) {
-        // En iOS, usar pseudo-fullscreen ya que el fullscreen nativo no funciona con iframes
         if (isIOS) {
           setIsFullscreen(true);
-          // Ocultar la barra de estado en iOS
           document.body.style.overflow = 'hidden';
-          // Forzar orientación landscape en iPhone
           if (isMobile && window.screen.orientation && 'lock' in window.screen.orientation) {
             try {
               await (window.screen.orientation as { lock: (orientation: string) => Promise<void> }).lock('landscape');
@@ -168,7 +153,6 @@ export default function VideoPlayerPage({
             }
           }
         } else {
-          // En otros dispositivos, usar fullscreen nativo
           if (videoContainerRef.current.requestFullscreen) {
             await videoContainerRef.current.requestFullscreen();
           } else if ((videoContainerRef.current as unknown as { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
@@ -178,11 +162,9 @@ export default function VideoPlayerPage({
           }
         }
       } else {
-        // Salir de pantalla completa
         if (isIOS) {
           setIsFullscreen(false);
           document.body.style.overflow = 'auto';
-          // Restaurar orientación
           if (isMobile && window.screen.orientation && 'unlock' in window.screen.orientation) {
             try {
               (window.screen.orientation as unknown as { unlock: () => void }).unlock();
@@ -205,9 +187,8 @@ export default function VideoPlayerPage({
     }
   }, [isFullscreen, isIOS, isMobile]);
 
-  // Manejar cambios de pantalla completa (solo para dispositivos no iOS)
   useEffect(() => {
-    if (isIOS) return; // No necesitamos escuchar eventos de fullscreen en iOS
+    if (isIOS) return;
 
     const handleFullscreenChange = () => {
       const isCurrentlyFullscreen = !!(
@@ -231,11 +212,9 @@ export default function VideoPlayerPage({
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
-      {/* Logo */}
       <div className="absolute top-0 left-0 p-6 z-10">
         <button 
           onClick={() => {
-            // Navegar al home (o preview si estamos en devpreview) y luego scroll a la sección Directors
             const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
             router.push(isDevPreview ? '/devpreview' : '/');
             setTimeout(() => {
@@ -248,7 +227,6 @@ export default function VideoPlayerPage({
                     inline: 'nearest'
                   });
                 } else {
-                  // Si no encuentra la sección, intentar de nuevo
                   setTimeout(scrollToDirectors, 200);
                 }
               };
@@ -261,16 +239,13 @@ export default function VideoPlayerPage({
         </button>
       </div>
 
-      {/* Nombre del director arriba a la derecha */}
       <div className="absolute top-6 right-6 z-20">
         <h2 className="uppercase font-hagrid text-xl md:text-2xl font-bold text-white text-right">
           {director.name}
         </h2>
       </div>
 
-      {/* Contenido centrado */}
       <div className="flex flex-col items-center justify-start h-full px-6 pt-[140px] md:pt-[120px]">
-        {/* Video grande centrado */}
         <div 
           ref={videoContainerRef}
           className={`w-full max-w-5xl mx-auto mt-6 md:mt-2 animate-fadeIn px-4 md:px-0 video-container-mobile mobile-video-selected ${
@@ -299,12 +274,10 @@ export default function VideoPlayerPage({
           />
         </div>
         
-        {/* Espaciador para crear distancia - solo cuando no está en pantalla completa */}
         {!isFullscreen && (
           <>
             <div className="h-4 mobile-video-spacing"></div>
             
-            {/* Título del video debajo */}
             <h3 className="text-white text-lg md:text-2xl font-medium text-center animate-slideUp uppercase px-2">
               {selectedVideo.tags?.[0] || 'CLIENTE'} | {selectedVideo.title}
             </h3>
@@ -314,10 +287,8 @@ export default function VideoPlayerPage({
         </div>
       </div>
       
-      {/* Flechas de navegación a los lados del video */}
       {!isFullscreen && (
         <>
-          {/* Flecha izquierda - Anterior video */}
           <div className="absolute left-6 top-1/4 md:top-1/2 transform -translate-y-1/2 z-20">
             <button
               onClick={handlePreviousVideo}
@@ -333,7 +304,6 @@ export default function VideoPlayerPage({
             </button>
           </div>
 
-          {/* Flecha derecha - Siguiente video */}
           <div className="absolute right-6 top-1/4 md:top-1/2 transform -translate-y-1/2 z-20">
             <button
               onClick={handleNextVideo}
@@ -349,7 +319,6 @@ export default function VideoPlayerPage({
             </button>
           </div>
 
-          {/* Botón de volver - Esquina inferior izquierda */}
           <div className="absolute bottom-6 left-6 z-10">
             <button
               onClick={handleBackToDirector}
@@ -370,11 +339,9 @@ export default function VideoPlayerPage({
         </>
       )}
 
-      {/* Esquinas - solo cuando no está en pantalla completa */}
       {!isFullscreen && (
         <div className="absolute bottom-6 right-6 z-10">
         <button onClick={() => {
-          // Navegar al home (o preview si estamos en devpreview)
           const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
           router.push(isDevPreview ? '/devpreview' : '/');
           setTimeout(() => {

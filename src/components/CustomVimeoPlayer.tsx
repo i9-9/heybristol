@@ -70,13 +70,11 @@ export default function CustomVimeoPlayer({
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Generar URLs de thumbnail de Vimeo
   const getThumbnailUrl = useCallback(() => {
     if (!video?.id) return '';
     return `https://vumbnail.com/${video.id}.jpg`;
   }, [video?.id]);
 
-  // URL de Vimeo optimizada
   const getVimeoUrl = useCallback(() => {
     if (!video?.id) return '';
     
@@ -103,7 +101,6 @@ export default function CustomVimeoPlayer({
     return `https://player.vimeo.com/video/${video.id}?${params.toString()}`;
   }, [video?.id, video?.hash, loop]);
 
-  // Cargar thumbnail al montar
   useEffect(() => {
     const thumbUrl = getThumbnailUrl();
     if (thumbUrl) {
@@ -111,7 +108,6 @@ export default function CustomVimeoPlayer({
     }
   }, [getThumbnailUrl]);
 
-  // Intersection Observer con delay escalonado
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -123,7 +119,6 @@ export default function CustomVimeoPlayer({
           loadTimeoutRef.current = setTimeout(() => {
             setShouldLoadIframe(true);
             
-            // Timeout de emergencia para ocultar poster
             setTimeout(() => {
               setShowPoster(false);
             }, 4000);
@@ -144,7 +139,6 @@ export default function CustomVimeoPlayer({
     };
   }, [loadIndex]);
 
-  // Setup del player
   useEffect(() => {
     if (!shouldLoadIframe) return;
 
@@ -175,19 +169,16 @@ export default function CustomVimeoPlayer({
           try {
             player.destroy();
           } catch (e) {
-            // Ignorar errores de destroy
           }
           return;
         }
         
         playerRef.current = player;
 
-        // Evento loaded
         player.on('loaded', () => {
           if (!mounted) return;
           setIsBuffering(false);
           
-          // Ocultar poster después de loaded
           setTimeout(() => {
             if (mounted) {
               setShowPoster(false);
@@ -195,7 +186,6 @@ export default function CustomVimeoPlayer({
           }, 2000);
         });
 
-        // Timeupdate para detectar reproducción
         player.on('timeupdate', function(...args: unknown[]) {
           if (!mounted) return;
           const data = args[0] as { seconds: number };
@@ -241,7 +231,6 @@ export default function CustomVimeoPlayer({
           setHasError(true);
         });
 
-        // Timeout de emergencia
         setTimeout(() => {
           if (mounted && showPoster) {
             setShowPoster(false);
@@ -251,7 +240,6 @@ export default function CustomVimeoPlayer({
       } catch (error) {
         if (!mounted) return;
         setHasError(true);
-        // En caso de error, ocultar poster
         setTimeout(() => {
           if (mounted) {
             setShowPoster(false);
@@ -272,7 +260,6 @@ export default function CustomVimeoPlayer({
         try {
           playerRef.current.destroy();
         } catch (error) {
-          console.log('[VimeoPlayer] Destroy error (ignorado):', error);
         }
         playerRef.current = null;
       }
@@ -370,7 +357,6 @@ export default function CustomVimeoPlayer({
     }
   }, []);
 
-  // Validación del video
   if (!video?.id) {
     return (
       <div className={`relative bg-gray-800 flex items-center justify-center ${className}`}>
@@ -382,7 +368,6 @@ export default function CustomVimeoPlayer({
     );
   }
 
-  // Error state
   if (hasError) {
     return (
       <div className={`relative bg-black overflow-hidden ${className}`}>
@@ -410,7 +395,6 @@ export default function CustomVimeoPlayer({
       onMouseLeave={handleMouseLeave}
       onMouseMove={handleMouseMove}
     >
-      {/* POSTER/THUMBNAIL */}
       {showPoster && thumbnailUrl && (
         <div 
           className="absolute inset-0 cursor-pointer group"
@@ -425,10 +409,8 @@ export default function CustomVimeoPlayer({
             priority={loadIndex < 3}
           />
           
-          {/* Overlay oscuro */}
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
 
-          {/* Loading indicator */}
           {shouldLoadIframe && !isPlaying && (
             <div className="absolute top-4 right-4">
               <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -437,7 +419,6 @@ export default function CustomVimeoPlayer({
         </div>
       )}
 
-      {/* IFRAME */}
       {shouldLoadIframe && (
         <iframe
           ref={iframeRef}
@@ -450,13 +431,11 @@ export default function CustomVimeoPlayer({
             backgroundColor: '#000000',
             border: 'none',
             outline: 'none',
-            opacity: showPoster ? 0 : 1,
-            transition: 'opacity 0.3s ease-in-out'
+            opacity: showPoster ? 0 : 1
           }}
         />
       )}
 
-      {/* Pantalla de fin */}
       {hasEnded && !showPoster && (
         <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
           <button
@@ -470,7 +449,6 @@ export default function CustomVimeoPlayer({
         </div>
       )}
 
-      {/* Controles */}
       {!showPoster && (
         <div className={`absolute inset-0 transition-all duration-300 ${
           (externalShowControls !== undefined ? externalShowControls : showControls) ? 'opacity-100' : 'opacity-0'

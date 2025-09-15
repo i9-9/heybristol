@@ -316,11 +316,12 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
             {/* Grid de videos con lazy loading */}
             {videos.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 w-full px-6 md:px-0 max-w-sm md:max-w-none mx-auto md:mx-0 pb-8">
-                {videos.map((video) => (
+                {videos.map((video, index) => (
                   <VideoCard
                     key={video.id}
                     video={video}
                     directorSlug={director.slug}
+                    loadIndex={index} // Pasa el índice para delay escalonado
                   />
                 ))}
               </div>

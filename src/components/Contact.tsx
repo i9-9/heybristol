@@ -58,10 +58,10 @@ export default function Contact() {
 
       {/* Footer Container */}
       <div className="absolute bottom-8 left-4 right-4 md:bottom-12 md:left-8 md:right-8 z-30">
-        {/* Mobile: Logo and Privacy Policy in a row */}
-        <div className="flex flex-row items-center justify-between mb-4 md:hidden">
+        {/* Mobile: Logo and Privacy Policy in a row with baseline alignment */}
+        <div className="flex flex-row items-baseline justify-between mb-4 md:hidden">
           {/* Footer - Bottom Left (BRISTOL Logo) */}
-          <div>
+          <div className="flex items-baseline">
             <Image 
               src="/logo/bristol_2.png" 
               alt="Bristol Logo" 
@@ -72,8 +72,8 @@ export default function Contact() {
           </div>
 
           {/* Footer - Bottom Right */}
-          <div>
-            <div className="flex items-center space-x-2 text-black font-raleway">
+          <div className="flex items-baseline">
+            <div className="flex items-baseline space-x-2 text-black font-raleway">
               <a href="https://www.instagram.com/bristol________/" className="hover:opacity-80 transition-opacity text-[10px]">INSTAGRAM</a>
               <span className="text-black text-[8px]">|</span>
               <span className="font-light text-[8px]">PRIVACY POLICY</span>
@@ -89,10 +89,10 @@ export default function Contact() {
           </div>
         </div>
 
-        {/* Desktop: All elements in a row */}
-        <div className="hidden md:flex md:flex-row md:items-center md:justify-between">
+        {/* Desktop: All elements in a row with baseline alignment */}
+        <div className="hidden md:flex md:flex-row md:items-baseline md:justify-between">
           {/* Footer - Bottom Left (BRISTOL Logo) */}
-          <div>
+          <div className="flex items-baseline">
             <Image 
               src="/logo/bristol_2.png" 
               alt="Bristol Logo" 
@@ -110,8 +110,8 @@ export default function Contact() {
           </div>
 
           {/* Footer - Bottom Right */}
-          <div className="ml-auto">
-            <div className="flex items-center space-x-2 text-black font-raleway">
+          <div className="ml-auto flex items-baseline">
+            <div className="flex items-baseline space-x-2 text-black font-raleway">
               <a href="https://www.instagram.com/bristol________/" className="hover:opacity-80 transition-opacity text-[12px]">INSTAGRAM</a>
               <span className="text-black text-[10px]">|</span>
               <span className="font-light text-[10px]">PRIVACY POLICY</span>

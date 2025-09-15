@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { VideoItem } from "@/lib/types";
+import Image from "next/image";
 
 interface VimeoPlayer {
   on: (event: string, callback: (...args: unknown[]) => void) => void;
@@ -31,12 +32,12 @@ interface CustomVimeoPlayerProps {
   onFullscreenToggle?: () => void;
   isFullscreen?: boolean;
   isMobile?: boolean;
+  loadIndex?: number;
 }
 
 export default function CustomVimeoPlayer({
   video,
   className = "",
-  autoPlay = false,
   loop = false,
   muted = true,
   onPlay,
@@ -48,7 +49,8 @@ export default function CustomVimeoPlayer({
   showControls: externalShowControls,
   onFullscreenToggle,
   isFullscreen = false,
-  isMobile = false
+  isMobile = false,
+  loadIndex = 0
 }: CustomVimeoPlayerProps) {
   
   const [isPlaying, setIsPlaying] = useState(false);
@@ -58,15 +60,23 @@ export default function CustomVimeoPlayer({
   const [isHovered, setIsHovered] = useState(false);
   const [isMuted, setIsMuted] = useState(muted);
   const [hasEnded, setHasEnded] = useState(false);
+  const [shouldLoadIframe, setShouldLoadIframe] = useState(false);
+  const [showPoster, setShowPoster] = useState(true);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
   
+  const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<VimeoPlayer | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const mountedRef = useRef(true);
+  const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Generar URLs de thumbnail de Vimeo
+  const getThumbnailUrl = useCallback(() => {
+    if (!video?.id) return '';
+    return `https://vumbnail.com/${video.id}.jpg`;
+  }, [video?.id]);
 
-  // URL de Vimeo corregida
+  // URL de Vimeo optimizada
   const getVimeoUrl = useCallback(() => {
     if (!video?.id) return '';
     
@@ -74,16 +84,16 @@ export default function CustomVimeoPlayer({
       title: '0',
       byline: '0',
       portrait: '0',
-      controls: '0',
-      autoplay: autoPlay ? '1' : '0',
+      background: '1',
+      autoplay: '1',
       loop: loop ? '1' : '0',
-      muted: muted ? '1' : '0', // CORREGIDO: usar el valor real de muted
+      muted: '1',
       dnt: '1',
-      color: 'ffffff',
-      background: '0',
-      api: '1', // Habilitar API
-      player_id: `vimeo_${video.id}`, // ID único para el player
-      rel: '0' // Deshabilitar videos relacionados
+      api: '1',
+      player_id: `vimeo_${video.id}`,
+      rel: '0',
+      playsinline: '1',
+      color: '000000'
     });
     
     if (video.hash) {
@@ -91,27 +101,197 @@ export default function CustomVimeoPlayer({
     }
     
     return `https://player.vimeo.com/video/${video.id}?${params.toString()}`;
-  }, [video?.id, video?.hash, autoPlay, loop, muted]);
+  }, [video?.id, video?.hash, loop]);
+
+  // Cargar thumbnail al montar
+  useEffect(() => {
+    const thumbUrl = getThumbnailUrl();
+    if (thumbUrl) {
+      setThumbnailUrl(thumbUrl);
+    }
+  }, [getThumbnailUrl]);
+
+  // Intersection Observer con delay escalonado
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
+          const delayMs = loadIndex * 300;
+          
+          loadTimeoutRef.current = setTimeout(() => {
+            setShouldLoadIframe(true);
+            
+            // Timeout de emergencia para ocultar poster
+            setTimeout(() => {
+              setShowPoster(false);
+            }, 4000);
+          }, delayMs);
+        }
+      },
+      { 
+        threshold: [0.3],
+        rootMargin: '100px'
+      }
+    );
+
+    observer.observe(containerRef.current);
+
+    return () => {
+      observer.disconnect();
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    };
+  }, [loadIndex]);
+
+  // Setup del player
+  useEffect(() => {
+    if (!shouldLoadIframe) return;
+
+    let mounted = true;
+
+    const setupPlayer = async () => {
+      try {
+        if (!(window as Window & { Vimeo?: { Player: new (element: HTMLIFrameElement) => VimeoPlayer } }).Vimeo) {
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://player.vimeo.com/api/player.js';
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load Vimeo script'));
+            document.head.appendChild(script);
+          });
+        }
+
+        if (!mounted || !iframeRef.current) return;
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        if (!mounted) return;
+
+        const VimeoPlayerClass = (window as unknown as Window & { Vimeo: { Player: new (element: HTMLIFrameElement) => VimeoPlayer } }).Vimeo.Player;
+        const player = new VimeoPlayerClass(iframeRef.current);
+        
+        if (!mounted) {
+          try {
+            player.destroy();
+          } catch (e) {
+            // Ignorar errores de destroy
+          }
+          return;
+        }
+        
+        playerRef.current = player;
+
+        // Evento loaded
+        player.on('loaded', () => {
+          if (!mounted) return;
+          setIsBuffering(false);
+          
+          // Ocultar poster después de loaded
+          setTimeout(() => {
+            if (mounted) {
+              setShowPoster(false);
+            }
+          }, 2000);
+        });
+
+        // Timeupdate para detectar reproducción
+        player.on('timeupdate', function(...args: unknown[]) {
+          if (!mounted) return;
+          const data = args[0] as { seconds: number };
+          if (data.seconds > 0.1) {
+            setShowPoster(false);
+          }
+        });
+
+        player.on('play', () => {
+          if (!mounted) return;
+          setIsPlaying(true);
+          setIsBuffering(false);
+          setHasEnded(false);
+          onPlay?.();
+        });
+
+        player.on('pause', () => {
+          if (!mounted) return;
+          setIsPlaying(false);
+          onPause?.();
+        });
+
+        player.on('ended', () => {
+          if (!mounted) return;
+          setIsPlaying(false);
+          setHasEnded(true);
+          setShowPoster(true);
+          onEnded?.();
+        });
+
+        player.on('bufferstart', () => {
+          if (!mounted) return;
+          setIsBuffering(true);
+        });
+
+        player.on('bufferend', () => {
+          if (!mounted) return;
+          setIsBuffering(false);
+        });
+
+        player.on('error', (error: unknown) => {
+          if (!mounted) return;
+          setHasError(true);
+        });
+
+        // Timeout de emergencia
+        setTimeout(() => {
+          if (mounted && showPoster) {
+            setShowPoster(false);
+          }
+        }, 5000);
+
+      } catch (error) {
+        if (!mounted) return;
+        setHasError(true);
+        // En caso de error, ocultar poster
+        setTimeout(() => {
+          if (mounted) {
+            setShowPoster(false);
+          }
+        }, 2000);
+      }
+    };
+
+    setupPlayer();
+
+    return () => {
+      mounted = false;
+      
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (error) {
+          console.log('[VimeoPlayer] Destroy error (ignorado):', error);
+        }
+        playerRef.current = null;
+      }
+    };
+  }, [shouldLoadIframe, video.id, onPlay, onPause, onEnded]);
 
   const handleMuteToggle = useCallback(async () => {
     if (!playerRef.current) return;
 
     try {
       const currentMuted = await playerRef.current.getMuted();
-
-      if (currentMuted) {
-        await playerRef.current.setMuted(false);
-        const volAfter = await playerRef.current.getVolume();
-        if (volAfter === 0) {
-          await playerRef.current.setVolume(1);
+      await playerRef.current.setMuted(!currentMuted);
+      
+      setTimeout(async () => {
+        if (playerRef.current) {
+          const finalMuted = await playerRef.current.getMuted();
+          setIsMuted(finalMuted);
         }
-      } else {
-        await playerRef.current.setMuted(true);
-      }
-
-      await new Promise(r => setTimeout(r, 120));
-      const finalMuted = await playerRef.current.getMuted();
-      setIsMuted(finalMuted);
+      }, 120);
 
     } catch (err) {
       console.error('[VimeoPlayer] mute toggle error', err);
@@ -135,155 +315,13 @@ export default function CustomVimeoPlayer({
     }
   }, []);
 
-  useEffect(() => {
-    mountedRef.current = true;
-    setHasEnded(false); // Resetear estado cuando cambie el video
-
-    const setupPlayer = async () => {
-      try {
-        // Limpiar cualquier timeout previo
-        if (initTimeoutRef.current) {
-          clearTimeout(initTimeoutRef.current);
-        }
-
-        // Cargar script de Vimeo
-        if (!(window as Window & { Vimeo?: { Player: new (element: HTMLIFrameElement) => VimeoPlayer } }).Vimeo) {
-          await new Promise<void>((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://player.vimeo.com/api/player.js';
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error('Failed to load Vimeo script'));
-            document.head.appendChild(script);
-          });
-        }
-
-        if (!mountedRef.current || !iframeRef.current) return;
-
-        // Esperar a que el iframe esté listo
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        if (!mountedRef.current) return;
-
-        const VimeoPlayerClass = (window as unknown as Window & { Vimeo: { Player: new (element: HTMLIFrameElement) => VimeoPlayer } }).Vimeo.Player;
-        const player = new VimeoPlayerClass(iframeRef.current);
-        playerRef.current = player;
-
-        player.on('loaded', async () => {
-          if (!mountedRef.current) return;
-          
-          setIsBuffering(false);
-          
-          setTimeout(async () => {
-            try {
-              if (!mountedRef.current || !playerRef.current) return;
-              
-              const currentMuted = await playerRef.current.getMuted();
-              if (currentMuted !== muted) {
-                await playerRef.current.setMuted(muted);
-                await new Promise(resolve => setTimeout(resolve, 100));
-                const finalMuted = await playerRef.current.getMuted();
-                setIsMuted(finalMuted);
-              } else {
-                setIsMuted(currentMuted);
-              }
-              
-              // Force autoplay if enabled
-              if (autoPlay) {
-                try {
-                  await playerRef.current.play();
-                } catch (playError) {
-                  console.log('[VimeoPlayer] Autoplay failed (browser restriction):', playError);
-                }
-              }
-              
-              const isPaused = await playerRef.current.getPaused();
-              setIsPlaying(!isPaused);
-              
-            } catch (error) {
-              console.error('[VimeoPlayer] initial setup error:', error);
-            }
-          }, 500);
-        });
-
-        player.on('play', () => {
-          if (!mountedRef.current) return;
-          setIsPlaying(true);
-          setIsBuffering(false);
-          setHasEnded(false);
-          onPlay?.();
-        });
-
-        player.on('pause', () => {
-          if (!mountedRef.current) return;
-          setIsPlaying(false);
-          onPause?.();
-        });
-
-        player.on('ended', () => {
-          if (!mountedRef.current) return;
-          setIsPlaying(false);
-          setHasEnded(true);
-          onEnded?.();
-        });
-
-        player.on('volumechange', async () => {
-          if (!mountedRef.current || !playerRef.current) return;
-          try {
-            const actualMuted = await playerRef.current.getMuted();
-            setIsMuted(actualMuted);
-          } catch (e) {
-            console.error('[VimeoPlayer] volume change error:', e);
-          }
-        });
-
-        player.on('bufferstart', () => {
-          if (!mountedRef.current) return;
-          setIsBuffering(true);
-        });
-
-        player.on('bufferend', () => {
-          if (!mountedRef.current) return;
-          setIsBuffering(false);
-        });
-
-        player.on('error', (error: unknown) => {
-          if (!mountedRef.current) return;
-          console.error('[VimeoPlayer] player error:', error);
-          setHasError(true);
-        });
-
-        // Timeout de respaldo - solo para casos extremos
-        initTimeoutRef.current = setTimeout(() => {
-          if (!mountedRef.current) return;
-          // No forzar playerReady=true aquí
-        }, 15000);
-
-      } catch (error) {
-        console.error('[VimeoPlayer] setup error:', error);
-        setHasError(true);
-      }
-    };
-
-    setupPlayer();
-
-    return () => {
-      mountedRef.current = false;
-      
-      if (initTimeoutRef.current) {
-        clearTimeout(initTimeoutRef.current);
-      }
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
-      if (playerRef.current) {
-        try {
-          playerRef.current.destroy();
-        } catch (error) {
-          console.error('[VimeoPlayer] destroy error:', error);
-        }
-      }
-    };
-  }, [video.id, video.hash, autoPlay, loop, muted, onPlay, onPause, onEnded]); // Dependencias completas
+  const handlePosterClick = useCallback(() => {
+    if (!shouldLoadIframe) {
+      setShouldLoadIframe(true);
+    } else if (playerRef.current) {
+      handlePlayPause();
+    }
+  }, [shouldLoadIframe, handlePlayPause]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -319,20 +357,13 @@ export default function CustomVimeoPlayer({
     externalOnMouseMove?.();
   }, [isHovered, externalOnMouseMove]);
 
-  const handleRetry = useCallback(() => {
-    setHasError(false);
-    if (iframeRef.current) {
-      iframeRef.current.src = getVimeoUrl();
-    }
-  }, [getVimeoUrl]);
-
   const handleRestart = useCallback(async () => {
     if (!playerRef.current) return;
     
     try {
       setHasEnded(false);
       setIsPlaying(false);
-      // Reiniciar el video desde el principio
+      setShowPoster(false);
       await playerRef.current.play();
     } catch (error) {
       console.error('[VimeoPlayer] restart error:', error);
@@ -360,7 +391,7 @@ export default function CustomVimeoPlayer({
             <div className="text-4xl mb-2">🎬</div>
             <div className="text-sm opacity-75 mb-4">{video.title}</div>
             <button
-              onClick={handleRetry}
+              onClick={() => setHasError(false)}
               className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded text-sm transition-colors mb-4"
             >
               Reintentar
@@ -373,27 +404,64 @@ export default function CustomVimeoPlayer({
 
   return (
     <div 
+      ref={containerRef}
       className={`relative bg-black overflow-hidden group ${className}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseMove={handleMouseMove}
     >
-      <iframe
-        ref={iframeRef}
-        src={getVimeoUrl()}
-        className="absolute inset-0 w-full h-full"
-        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-        title={video.title}
-        frameBorder="0"
-      />
+      {/* POSTER/THUMBNAIL */}
+      {showPoster && thumbnailUrl && (
+        <div 
+          className="absolute inset-0 cursor-pointer group"
+          onClick={handlePosterClick}
+        >
+          <Image
+            src={thumbnailUrl}
+            alt={video.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={loadIndex < 3}
+          />
+          
+          {/* Overlay oscuro */}
+          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
 
-      {/* Pantalla negra cuando el video termina */}
-      {hasEnded && (
+          {/* Loading indicator */}
+          {shouldLoadIframe && !isPlaying && (
+            <div className="absolute top-4 right-4">
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* IFRAME */}
+      {shouldLoadIframe && (
+        <iframe
+          ref={iframeRef}
+          src={getVimeoUrl()}
+          className="absolute inset-0 w-full h-full"
+          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+          title={video.title}
+          frameBorder="0"
+          style={{
+            backgroundColor: '#000000',
+            border: 'none',
+            outline: 'none',
+            opacity: showPoster ? 0 : 1,
+            transition: 'opacity 0.3s ease-in-out'
+          }}
+        />
+      )}
+
+      {/* Pantalla de fin */}
+      {hasEnded && !showPoster && (
         <div className="absolute inset-0 bg-black flex items-center justify-center z-10">
           <button
             onClick={handleRestart}
             className="w-20 h-20 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105"
-            aria-label="Reproducir de nuevo"
           >
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z"/>
@@ -402,88 +470,79 @@ export default function CustomVimeoPlayer({
         </div>
       )}
 
-
-      {/* Overlay de controles */}
-      <div className={`absolute inset-0 transition-all duration-300 ${
-        (externalShowControls !== undefined ? externalShowControls : showControls) ? 'opacity-100' : 'opacity-0'
-      }`}>
-        
-        <div className="absolute bottom-4 left-4 flex space-x-2">
-          {/* Play/Pause */}
-          <button
-            onClick={handlePlayPause}
-            disabled={!playerRef.current}
-            className={`w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center rounded ${
-              !playerRef.current ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'
-            }`}
-            aria-label={isPlaying ? 'Pausar video' : 'Reproducir video'}
-          >
-            {isBuffering ? (
-              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : isPlaying ? (
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-              </svg>
-            ) : (
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-            )}
-          </button>
-
-          {/* Mute/Unmute */}
-          <button
-            onClick={handleMuteToggle}
-            disabled={!playerRef.current}
-            className={`w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center rounded relative group ${
-              !playerRef.current ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'
-            }`}
-            aria-label={isMuted ? 'Activar sonido' : 'Silenciar'}
-          >
-            
-            
-            {isMuted ? (
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-              </svg>
-            ) : (
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-              </svg>
-            )}
-          </button>
-
-          {/* Fullscreen */}
-          {!isMobile && onFullscreenToggle && (
+      {/* Controles */}
+      {!showPoster && (
+        <div className={`absolute inset-0 transition-all duration-300 ${
+          (externalShowControls !== undefined ? externalShowControls : showControls) ? 'opacity-100' : 'opacity-0'
+        }`}>
+          
+          <div className="absolute bottom-4 left-4 flex space-x-2">
             <button
-              onClick={onFullscreenToggle}
-              className="w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer rounded hover:scale-105 group"
-              aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+              onClick={handlePlayPause}
+              disabled={!playerRef.current}
+              className={`w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center rounded ${
+                !playerRef.current ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'
+              }`}
             >
-              
-              {isFullscreen ? (
+              {isBuffering ? (
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : isPlaying ? (
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M5 16h3v3h2v-5H5v2zM3 11h5V5H6v3H3v3zM19 8h-3V5h-2v5h5V8zM16 13h3v3h-2v-3h-1v-2z"/>
+                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
                 </svg>
               ) : (
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                  <path d="M8 5v14l11-7z"/>
                 </svg>
               )}
             </button>
+
+            <button
+              onClick={handleMuteToggle}
+              disabled={!playerRef.current}
+              className={`w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center rounded ${
+                !playerRef.current ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'
+              }`}
+            >
+              {isMuted ? (
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+              )}
+            </button>
+
+            {!isMobile && onFullscreenToggle && (
+              <button
+                onClick={onFullscreenToggle}
+                className="w-12 h-12 transition-all duration-200 bg-white/10 backdrop-blur-md hover:bg-white/20 shadow-lg flex items-center justify-center cursor-pointer rounded hover:scale-105"
+              >
+                {isFullscreen ? (
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M5 16h3v3h2v-5H5v2zM3 11h5V5H6v3H3v3zM19 8h-3V5h-2v5h5V8zM16 13h3v3h-2v-3h-1v-2z"/>
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                  </svg>
+                )}
+              </button>
+            )}
+          </div>
+
+          {isBuffering && (
+            <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
+              <div className="flex items-center space-x-3 text-white text-sm">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="font-medium">Buffering...</span>
+              </div>
+            </div>
           )}
         </div>
-
-        {/* Indicador de buffering */}
-        {isBuffering && (
-          <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
-            <div className="flex items-center space-x-3 text-white text-sm">
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span className="font-medium">Buffering...</span>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

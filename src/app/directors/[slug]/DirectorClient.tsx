@@ -242,7 +242,7 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
       </div>
 
       {!selectedVideo && (
-        <div className="absolute bottom-6 left-6 z-10">
+        <div className="absolute bottom-6 left-6 z-50">
           <button
             onClick={() => {
               const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
@@ -413,20 +413,20 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
           const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
           router.push(isDevPreview ? '/devpreview' : '/');
           setTimeout(() => {
-            const scrollToDirectors = () => {
-              const directorsSection = document.getElementById('directors');
-              if (directorsSection) {
-                directorsSection.scrollIntoView({ 
+            const scrollToHero = () => {
+              const heroSection = document.querySelector('section');
+              if (heroSection) {
+                heroSection.scrollIntoView({ 
                   behavior: 'smooth',
                   block: 'start',
                   inline: 'nearest'
                 });
               } else {
                 // Si no encuentra la sección, intentar de nuevo
-                setTimeout(scrollToDirectors, 200);
+                setTimeout(scrollToHero, 200);
               }
             };
-            scrollToDirectors();
+            scrollToHero();
           }, 300);
         }} className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer">
           <Image src="/images/icons/arrow.png" alt="Arrow Up" width={32} height={32} className="w-8 h-8" />

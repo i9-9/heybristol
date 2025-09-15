@@ -5,7 +5,7 @@ import LogoB from "@/components/LogoB";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { VideoItem } from "@/lib/types";
 import { useRouter, usePathname } from "next/navigation";
-import CustomVimeoPlayer from "@/components/CustomVimeoPlayer";
+import VideoPagePlayer from "@/components/VideoPagePlayer";
 import { generateVideoSlug } from "@/lib/types";
 
 interface VideoPlayerPageProps {
@@ -258,19 +258,16 @@ export default function VideoPlayerPage({
         <div className={`aspect-video w-full bg-black overflow-hidden rounded-lg video-aspect-mobile ${
           isFullscreen ? 'w-full h-full max-w-none max-h-none rounded-none' : ''
         }`}>
-          <CustomVimeoPlayer
+          <VideoPagePlayer
             video={selectedVideo}
             className="w-full h-full"
-            autoPlay={true}
-            loop={false}
-            muted={true}
+            onFullscreenToggle={toggleFullscreen}
+            isFullscreen={isFullscreen}
+            isMobile={isMobile}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onMouseMove={handleMouseMove}
             showControls={showControls}
-            onFullscreenToggle={toggleFullscreen}
-            isFullscreen={isFullscreen}
-            isMobile={isMobile}
           />
         </div>
         
@@ -319,7 +316,7 @@ export default function VideoPlayerPage({
             </button>
           </div>
 
-          <div className="absolute bottom-6 left-6 z-10">
+          <div className="absolute bottom-6 left-6 z-50">
             <button
               onClick={handleBackToDirector}
               className="flex flex-col items-start space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
@@ -345,20 +342,20 @@ export default function VideoPlayerPage({
           const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
           router.push(isDevPreview ? '/devpreview' : '/');
           setTimeout(() => {
-            const scrollToDirectors = () => {
-              const directorsSection = document.getElementById('directors');
-              if (directorsSection) {
-                directorsSection.scrollIntoView({ 
+            const scrollToHero = () => {
+              const heroSection = document.querySelector('section');
+              if (heroSection) {
+                heroSection.scrollIntoView({ 
                   behavior: 'smooth',
                   block: 'start',
                   inline: 'nearest'
                 });
               } else {
                 // Si no encuentra la sección, intentar de nuevo
-                setTimeout(scrollToDirectors, 200);
+                setTimeout(scrollToHero, 200);
               }
             };
-            scrollToDirectors();
+            scrollToHero();
           }, 300);
         }} className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer">
           <Image src="/images/icons/arrow.png" alt="Arrow Up" width={32} height={32} className="w-8 h-8" />

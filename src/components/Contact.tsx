@@ -1,15 +1,44 @@
+"use client";
+
 import LogoB from "@/components/LogoB";
 import Image from "next/image";
 
 export default function Contact() {
+  const scrollToTop = () => {
+    // Usar la misma lógica que funciona en DirectorClient
+    const scrollToTop = () => {
+      const heroSection = document.querySelector('section');
+      if (heroSection) {
+        heroSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      } else {
+        // Si no encuentra la sección, intentar de nuevo
+        setTimeout(scrollToTop, 200);
+      }
+    };
+    scrollToTop();
+  };
+
   return (
     <section id="contact" className="relative bg-[#fa1016] w-full py-32 min-h-[100vh] md:py-[600px] pb-48 md:pb-64">
-      {/* Logo B de Bristol arriba a la izquierda */}
-      <div className="absolute top-6 left-6 md:top-8 md:left-8 z-30">
-        <div className="w-10 md:w-24 h-auto text-[#e2e2e2]">
-          <LogoB />
+        <div className="absolute top-6 left-6 md:top-8 md:left-8 z-30">
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            scrollToTop();
+          }}
+          className="cursor-pointer p-2 rounded z-50 relative"
+          style={{ zIndex: 9999 }}
+        >
+          <div className="w-10 md:w-24 h-auto text-[#e2e2e2]">
+            <LogoB />
+          </div>
+        </button>
         </div>
-      </div>
       
       {/* Título CONTACT */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-y-[4rem] md:translate-y-[2rem] z-100">
@@ -25,23 +54,31 @@ export default function Contact() {
         <div className="text-center">
           <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 md:gap-x-16 md:gap-y-4 text-black">
             <div>
-              <a href="mailto:martin@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity block">MARTÍN GIUDICESSI</a>
+              <a href="mailto:martin@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">MARTÍN GIUDICESSI
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
+              </a>
             </div>
             <div>
-              <a href="mailto:blue@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity block">AZUL CRESPO</a>
+              <a href="mailto:blue@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">AZUL CRESPO
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
+              </a>
             </div>
             <div>
-              <a href="mailto:jorge@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity block">JORGE LARRAIN</a>
+              <a href="mailto:jorge@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">JORGE LARRAIN
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
+              </a>
             </div>
             <div>
-              <a href="mailto:direccion@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity block">ENRIQUE NAVA</a>
+              <a href="mailto:direccion@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">ENRIQUE NAVA
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
+              </a>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Imagen del caballo después (capa superior) */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-[44%] -translate-y-1/2 -translate-y-[17rem] md:-translate-y-[21rem] z-20">
+      {/* Imagen del perro después */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-[44%] -translate-y-1/2 -translate-y-[17rem] md:-translate-y-[22.5rem] z-20">
         <div className="text-center">
           <div className="relative w-[16rem] h-[16rem] md:w-[28rem] md:h-[28rem] mb-0 mx-auto transition-all duration-500 ease-in-out">
             <Image 

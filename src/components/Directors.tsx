@@ -16,6 +16,24 @@ export default function Directors() {
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
 
+  const scrollToTop = () => {
+    // Usar la misma lógica que funciona en DirectorClient
+    const scrollToTop = () => {
+      const heroSection = document.querySelector('section');
+      if (heroSection) {
+        heroSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+      } else {
+        // Si no encuentra la sección, intentar de nuevo
+        setTimeout(scrollToTop, 200);
+      }
+    };
+    scrollToTop();
+  };
+
   useEffect(() => {
     const fetchDirectors = async () => {
       try {
@@ -57,12 +75,19 @@ export default function Directors() {
   return (
     <section
       id="directors"
-      className="relative bg-[#e2e2e2] w-full h-screen pt-12"
+      className="relative bg-[#e2e2e2] w-full h-screen pt-12 z-10"
     >
       <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-2 border-[#f31014] ">
-        <div className="ml-2 w-10 md:w-24 h-auto text-[#f31014] self-start mb-24">
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            scrollToTop();
+          }}
+          className="ml-2 w-10 md:w-24 h-auto text-[#f31014] self-start mb-24 cursor-pointer"
+        >
           <LogoB />
-        </div>
+        </button>
         <div>
           <h2 className="text-[#f31014] font-tusker text-[clamp(1.5rem,33vw,14rem)] md:text-[clamp(2rem,22vw,14rem)] leading-none tracking-tight">
             DIRECTORS

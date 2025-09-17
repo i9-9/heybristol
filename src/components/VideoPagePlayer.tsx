@@ -3,6 +3,33 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { VideoItem } from "@/lib/types";
 
+// Vimeo Player types
+interface VimeoPlayer {
+  on: (event: string, callback: (...args: unknown[]) => void) => void;
+  play: () => Promise<void>;
+  pause: () => void;
+  setMuted: (muted: boolean) => Promise<void>;
+  getMuted: () => Promise<boolean>;
+  getPaused: () => Promise<boolean>;
+  setVolume: (volume: number) => Promise<void>;
+  getVolume: () => Promise<number>;
+  destroy: () => void;
+}
+
+interface VimeoPlayerClass {
+  new (element: HTMLIFrameElement): VimeoPlayer;
+}
+
+interface VimeoAPI {
+  Player: VimeoPlayerClass;
+}
+
+declare global {
+  interface Window {
+    Vimeo?: VimeoAPI;
+  }
+}
+
 interface VideoPagePlayerProps {
   video: VideoItem;
   className?: string;
@@ -29,7 +56,7 @@ export default function VideoPagePlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [player, setPlayer] = useState<any>(null);
+  const [player, setPlayer] = useState<VimeoPlayer | null>(null);
   const [shouldLoadIframe, setShouldLoadIframe] = useState(false);
   
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -90,7 +117,7 @@ export default function VideoPagePlayer({
     const setupPlayer = async () => {
       try {
         // Cargar script de Vimeo si no está disponible
-        if (!(window as any).Vimeo) {
+        if (!window.Vimeo) {
           await new Promise<void>((resolve, reject) => {
             const script = document.createElement('script');
             script.src = 'https://player.vimeo.com/api/player.js';
@@ -106,13 +133,13 @@ export default function VideoPagePlayer({
 
         if (!mounted) return;
 
-        const VimeoPlayerClass = (window as any).Vimeo.Player;
+        const VimeoPlayerClass = window.Vimeo!.Player;
         const vimeoPlayer = new VimeoPlayerClass(iframeRef.current);
         
         if (!mounted) {
           try {
             vimeoPlayer.destroy();
-          } catch (e) {
+          } catch {
             // Ignore cleanup errors
           }
           return;
@@ -124,7 +151,7 @@ export default function VideoPagePlayer({
           if (!mounted) return;
           setIsBuffering(false);
           // Asegurar autoplay
-          vimeoPlayer.play().catch((error: any) => {
+          vimeoPlayer.play().catch((error: Error) => {
             console.log('Autoplay prevented by browser:', error);
           });
         });
@@ -172,12 +199,12 @@ export default function VideoPagePlayer({
       if (player) {
         try {
           player.destroy();
-        } catch (e) {
+        } catch {
           // Ignore cleanup errors
         }
       }
     };
-  }, [shouldLoadIframe, video.id]);
+  }, [shouldLoadIframe, video.id, player]);
 
   const handlePlayPause = useCallback(async () => {
     if (!player) return;

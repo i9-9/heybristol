@@ -75,7 +75,7 @@ export default function Directors() {
   return (
     <section
       id="directors"
-      className="relative bg-[#e2e2e2] w-full h-screen pt-12 z-10"
+      className="relative bg-[#e2e2e2] w-full min-h-screen pt-8 md:pt-12 z-10"
     >
       <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-2 border-[#f31014] ">
         <button 
@@ -84,7 +84,7 @@ export default function Directors() {
             e.stopPropagation();
             scrollToTop();
           }}
-          className="ml-2 w-10 md:w-24 h-auto text-[#f31014] self-start mb-24 cursor-pointer"
+          className="ml-2 w-10 md:w-24 h-auto text-[#f31014] self-start mb-8 md:mb-24 cursor-pointer"
         >
           <LogoB />
         </button>
@@ -95,11 +95,11 @@ export default function Directors() {
         </div>
       </div>
       
-      <div className="mx-app py-6">
+      <div className="mx-app py-4 md:py-6">
         {/* Mobile: Layout optimizado para videos landscape */}
         <div className="md:hidden">
           {/* Lista de directores */}
-          <div className="mb-6">
+          <div className="mb-3">
             <ul className="text-[#f31014] text-lg font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-1000 ease-in-out">
               {directors.map((director, index) => (
                 <li
@@ -121,7 +121,7 @@ export default function Directors() {
           </div>
 
           {/* Videos landscape en grid */}
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-2">
             {/* Video 1 */}
             {editorialVideos[0] ? (
               <EditorialVideoComponent

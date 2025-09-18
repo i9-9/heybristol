@@ -78,7 +78,7 @@ export default function Contact() {
       </div>
 
       {/* Imagen del perro después */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-[44%] -translate-y-1/2 -translate-y-[17rem] md:-translate-y-[22.5rem] z-20">
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-[44%] -translate-y-1/2 -translate-y-[18rem] md:-translate-y-[22.5rem] z-20">
         <div className="text-center">
           <div className="relative w-[16rem] h-[16rem] md:w-[28rem] md:h-[28rem] mb-0 mx-auto transition-all duration-500 ease-in-out">
             <Image 

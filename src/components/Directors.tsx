@@ -98,86 +98,89 @@ export default function Directors() {
       <div className="mx-app py-4 md:py-6">
         {/* Mobile: Layout optimizado para videos landscape */}
         <div className="md:hidden">
-          {/* Lista de directores */}
-          <div className="mb-3">
-            <ul className="text-[#f31014] text-lg font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-1000 ease-in-out">
-              {directors.map((director, index) => (
-                <li
-                  className={`${
-                    director === selectedDirector
-                      ? "font-bold"
-                      : "font-normal cursor-pointer"
-                  } hover:font-bold transition-all duration-1000`}
-                  onClick={() => {
-                    setSelectedDirector(director);
-                    handleDirectorClick(director);
-                  }}
-                  key={index}
-                >
-                  {director}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Layout horizontal: directores a la izquierda, videos a la derecha */}
+          <div className="flex gap-3">
+            {/* Lista de directores (izquierda) */}
+            <div className="w-1/2">
+              <ul className="text-[#f31014] text-sm font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-1000 ease-in-out">
+                {directors.map((director, index) => (
+                  <li
+                    className={`${
+                      director === selectedDirector
+                        ? "font-bold"
+                        : "font-normal cursor-pointer"
+                    } hover:font-bold transition-all duration-1000`}
+                    onClick={() => {
+                      setSelectedDirector(director);
+                      handleDirectorClick(director);
+                    }}
+                    key={index}
+                  >
+                    {director}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Videos landscape en grid */}
-          <div className="grid grid-cols-1 gap-2">
-            {/* Video 1 */}
-            {editorialVideos[0] ? (
-              <EditorialVideoComponent
-                video={editorialVideos[0]}
-                className="aspect-[16/9] w-full"
-                isMobile={isMobile}
-              />
-            ) : (
-              <div className="relative aspect-[16/9] w-full bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
-                <Image
-                  src="/images/alta.jpg"
-                  alt="Retrato jugador"
-                  fill
-                  sizes="(max-width: 768px) 100vw"
-                  className="object-cover"
+            {/* Videos editoriales (derecha) - mitad del ancho de pantalla */}
+            <div className="w-1/2 grid grid-cols-1 gap-1">
+              {/* Video 1 */}
+              {editorialVideos[0] ? (
+                <EditorialVideoComponent
+                  video={editorialVideos[0]}
+                  className="aspect-[16/9] w-full"
+                  isMobile={isMobile}
                 />
-              </div>
-            )}
-            
-            {/* Video 2 */}
-            {editorialVideos[1] ? (
-              <EditorialVideoComponent
-                video={editorialVideos[1]}
-                className="aspect-[16/9] w-full"
-                isMobile={isMobile}
-              />
-            ) : (
-              <div className="relative aspect-[16/9] w-full bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
-                <Image
-                  src="/images/ojos.jpg"
-                  alt="Retrato jugador placeholder"
-                  fill
-                  sizes="(max-width: 768px) 100vw"
-                  className="object-cover"
+              ) : (
+                <div className="relative aspect-[16/9] w-full bg-black overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
+                  <Image
+                    src="/images/alta.jpg"
+                    alt="Retrato jugador"
+                    fill
+                    sizes="(max-width: 768px) 50vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              
+              {/* Video 2 */}
+              {editorialVideos[1] ? (
+                <EditorialVideoComponent
+                  video={editorialVideos[1]}
+                  className="aspect-[16/9] w-full"
+                  isMobile={isMobile}
                 />
-              </div>
-            )}
-            
-            {/* Video 3 */}
-            {editorialVideos[2] ? (
-              <EditorialVideoComponent
-                video={editorialVideos[2]}
-                className="aspect-[16/9] w-full"
-                isMobile={isMobile}
-              />
-            ) : (
-              <div className="relative aspect-[16/9] w-full bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)]">
-                <Image
-                  src="/images/perro.jpg"
-                  alt="Retrato jugador placeholder"
-                  fill
-                  sizes="(max-width: 768px) 100vw"
-                  className="object-cover"
+              ) : (
+                <div className="relative aspect-[16/9] w-full bg-black overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
+                  <Image
+                    src="/images/ojos.jpg"
+                    alt="Retrato jugador placeholder"
+                    fill
+                    sizes="(max-width: 768px) 50vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              
+              {/* Video 3 */}
+              {editorialVideos[2] ? (
+                <EditorialVideoComponent
+                  video={editorialVideos[2]}
+                  className="aspect-[16/9] w-full"
+                  isMobile={isMobile}
                 />
-              </div>
-            )}
+              ) : (
+                <div className="relative aspect-[16/9] w-full bg-black overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
+                  <Image
+                    src="/images/perro.jpg"
+                    alt="Retrato jugador placeholder"
+                    fill
+                    sizes="(max-width: 768px) 50vw"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

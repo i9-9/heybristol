@@ -54,7 +54,7 @@ export default function Contact() {
         <div className="text-center">
           <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 md:gap-x-16 md:gap-y-4 text-black">
             <div>
-              <a href="mailto:martin@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">MARTÍN GIUDICESSI
+              <a href="mailto:jorge@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">JORGE LARRAIN
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>
@@ -64,7 +64,7 @@ export default function Contact() {
               </a>
             </div>
             <div>
-              <a href="mailto:jorge@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">JORGE LARRAIN
+              <a href="mailto:martin@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">MARTÍN GIUDICESSI
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>

@@ -63,6 +63,7 @@ export default function CustomVimeoPlayer({
   const [shouldLoadIframe, setShouldLoadIframe] = useState(false);
   const [showPoster, setShowPoster] = useState(true);
   const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
+  const [isIOS, setIsIOS] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -91,7 +92,11 @@ export default function CustomVimeoPlayer({
       player_id: `vimeo_${video.id}`,
       rel: '0',
       playsinline: '1',
-      color: '000000'
+      color: '000000',
+      // Additional iOS-specific parameters for better autoplay support
+      controls: '0',
+      keyboard: '0',
+      pip: '0'
     });
     
     if (video.hash) {
@@ -106,6 +111,11 @@ export default function CustomVimeoPlayer({
     if (thumbUrl) {
       setThumbnailUrl(thumbUrl);
     }
+    
+    // Detect iOS devices
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIOSDevice);
   }, [getThumbnailUrl]);
 
   useEffect(() => {
@@ -119,9 +129,11 @@ export default function CustomVimeoPlayer({
           loadTimeoutRef.current = setTimeout(() => {
             setShouldLoadIframe(true);
             
+            // On iOS, keep poster visible longer to allow user interaction
+            const posterDelay = isIOS ? 6000 : 4000;
             setTimeout(() => {
               setShowPoster(false);
-            }, 4000);
+            }, posterDelay);
           }, delayMs);
         }
       },
@@ -137,7 +149,7 @@ export default function CustomVimeoPlayer({
       observer.disconnect();
       if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
     };
-  }, [loadIndex]);
+  }, [loadIndex, isIOS]);
 
   useEffect(() => {
     if (!shouldLoadIframe) return;
@@ -302,13 +314,19 @@ export default function CustomVimeoPlayer({
     }
   }, []);
 
-  const handlePosterClick = useCallback(() => {
+  const handlePosterClick = useCallback(async () => {
     if (!shouldLoadIframe) {
       setShouldLoadIframe(true);
+      // On iOS, immediately hide poster after user interaction to enable autoplay
+      if (isIOS) {
+        setTimeout(() => {
+          setShowPoster(false);
+        }, 1000);
+      }
     } else if (playerRef.current) {
       handlePlayPause();
     }
-  }, [shouldLoadIframe, handlePlayPause]);
+  }, [shouldLoadIframe, handlePlayPause, isIOS]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -424,7 +442,7 @@ export default function CustomVimeoPlayer({
           ref={iframeRef}
           src={getVimeoUrl()}
           className="absolute inset-0 w-full h-full"
-          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+          allow="autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope"
           title={video.title}
           frameBorder="0"
           style={{

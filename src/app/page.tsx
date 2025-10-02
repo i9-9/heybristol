@@ -8,6 +8,8 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(true);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [videoSource, setVideoSource] = useState<string | null>(null);
+  const [isIOS, setIsIOS] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -45,7 +47,20 @@ export default function Home() {
     window.location.href = 'mailto:hey@heybristol.com';
   };
 
+  const handleUserInteraction = () => {
+    setUserInteracted(true);
+    // Try to play the video after user interaction
+    if (videoRef.current && videoRef.current.paused) {
+      videoRef.current.play().catch(console.error);
+    }
+  };
+
   useEffect(() => {
+    // Detectar iOS devices
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIOSDevice);
+
     // Detectar el mejor formato para el navegador
     const bestFormat = detectVideoSupport();
     setVideoSource(bestFormat);
@@ -77,12 +92,18 @@ export default function Home() {
             loop
             playsInline
             preload="auto"
+            webkit-playsinline="true"
+            x5-playsinline="true"
+            x5-video-player-type="h5"
+            x5-video-player-fullscreen="false"
             style={{
               opacity: isVideoLoaded ? 1 : 0,
               transition: 'opacity 0.8s ease-in-out',
             }}
             onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
+            onClick={isIOS ? handleUserInteraction : undefined}
+            onTouchStart={isIOS ? handleUserInteraction : undefined}
             onError={() => {
               console.log('Error cargando video, intentando fallback...');
               // Si falla WebM, intentar MP4
@@ -95,6 +116,20 @@ export default function Home() {
             <source src={videoSource} type={videoSource.includes('.webm') ? 'video/webm' : 'video/mp4'} />
             Tu navegador no soporta el elemento de video.
           </video>
+        )}
+        
+        {/* iOS-specific play button overlay when video is paused */}
+        {isIOS && !userInteracted && isVideoLoaded && (
+          <div 
+            className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-30"
+            onClick={handleUserInteraction}
+          >
+            <div className="w-20 h-20 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105">
+              <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
         )}
       </div>
       

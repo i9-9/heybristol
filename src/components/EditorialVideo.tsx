@@ -16,6 +16,8 @@ export default function EditorialVideoComponent({
 }: EditorialVideoProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const getBestVideoSource = (editorialVideo: EditorialVideo, isMobile: boolean = false) => {
@@ -50,6 +52,13 @@ export default function EditorialVideoComponent({
   const videoSource = getBestVideoSource(video, isMobile);
 
   useEffect(() => {
+    // Detect iOS devices
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIOSDevice);
+  }, []);
+
+  useEffect(() => {
     if (videoRef.current && videoSource) {
       const videoElement = videoRef.current;
       
@@ -62,16 +71,34 @@ export default function EditorialVideoComponent({
         setHasError(true);
         setIsLoaded(false);
       };
+
+      const handleUserInteraction = () => {
+        setUserInteracted(true);
+        // Try to play the video after user interaction
+        if (videoElement.paused) {
+          videoElement.play().catch(console.error);
+        }
+      };
       
       videoElement.addEventListener('loadeddata', handleLoadedData);
       videoElement.addEventListener('error', handleError);
       
+      // Add click listener for iOS autoplay
+      if (isIOS) {
+        videoElement.addEventListener('click', handleUserInteraction);
+        videoElement.addEventListener('touchstart', handleUserInteraction);
+      }
+      
       return () => {
         videoElement.removeEventListener('loadeddata', handleLoadedData);
         videoElement.removeEventListener('error', handleError);
+        if (isIOS) {
+          videoElement.removeEventListener('click', handleUserInteraction);
+          videoElement.removeEventListener('touchstart', handleUserInteraction);
+        }
       };
     }
-  }, [videoSource]);
+  }, [videoSource, isIOS]);
 
   if (!videoSource || hasError) {
     return (
@@ -96,6 +123,10 @@ export default function EditorialVideoComponent({
         muted
         playsInline
         preload="metadata"
+        webkit-playsinline="true"
+        x5-playsinline="true"
+        x5-video-player-type="h5"
+        x5-video-player-fullscreen="false"
       >
         <source src={videoSource.src} type={`video/${videoSource.type}`} />
         Tu navegador no soporta el elemento de video.
@@ -106,6 +137,25 @@ export default function EditorialVideoComponent({
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
             <div className="text-sm opacity-75">Loading...</div>
+          </div>
+        </div>
+      )}
+      
+      {/* iOS-specific play button overlay when video is paused */}
+      {isIOS && !userInteracted && isLoaded && (
+        <div 
+          className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
+          onClick={() => {
+            setUserInteracted(true);
+            if (videoRef.current) {
+              videoRef.current.play().catch(console.error);
+            }
+          }}
+        >
+          <div className="w-16 h-16 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105">
+            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
           </div>
         </div>
       )}

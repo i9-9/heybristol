@@ -60,9 +60,8 @@ async function diagnoseContentfulDirectors() {
     console.log('\n🔍 Checking for unpublished entries...');
     const unpublishedResponse = await client.getEntries({
       content_type: 'director',
-      'sys.publishedAt[exists]': false,
       limit: 1000
-    });
+    } as any);
     
     console.log(`📊 Unpublished directors: ${unpublishedResponse.items.length}`);
     if (unpublishedResponse.items.length > 0) {

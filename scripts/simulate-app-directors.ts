@@ -33,7 +33,7 @@ async function simulateAppDirectorsFetch() {
       include: 2,
       // In development, don't filter by published status to include unpublished entries
       ...(isDevelopment ? {} : { 'sys.publishedAt[exists]': true })
-    });
+    } as Parameters<typeof client.getEntries>[0]);
     
     console.log(`\n📊 Query Results:`);
     console.log(`  - Total items found: ${response.items.length}`);
@@ -62,7 +62,7 @@ async function simulateAppDirectorsFetch() {
       console.log(`  ${index + 1}. ${director.name} (${director.slug})`);
       console.log(`     Order: ${director.order}`);
       console.log(`     Videos: ${director.videos.length}`);
-      console.log(`     Published: ${response.items[index].sys.publishedAt ? 'Yes' : 'No'}`);
+      console.log(`     Published: ${(response.items[index].sys as any).publishedAt ? 'Yes' : 'No'}`);
     });
     
     console.log(`\n✅ App simulation completed!`);

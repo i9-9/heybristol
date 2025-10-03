@@ -50,7 +50,7 @@ async function diagnoseContentfulIntegration() {
       order: ['fields.order'],
       include: 2,
       ...(isDevelopment ? {} : { 'sys.publishedAt[exists]': true })
-    });
+    } as Parameters<typeof client.getEntries>[0]);
     
     console.log(`  📊 Query Results:`);
     console.log(`    - Total items: ${response.items.length}`);

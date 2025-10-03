@@ -116,7 +116,7 @@ async function _getDirectorsFromContentful() {
       include: 2, // Include referenced entries (videos)
       // In development, don't filter by published status to include unpublished entries
       ...(isDevelopment ? {} : { 'sys.publishedAt[exists]': true })
-    });
+    } as Parameters<typeof client.getEntries>[0]);
 
     return response.items.map((item: unknown, index: number) => {
       const director = item as { fields: { name: string; slug: string; order: number; videos?: unknown[] } };

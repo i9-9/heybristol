@@ -37,7 +37,7 @@ class ContentfulPublisher {
       const entries = await this.environment.getEntries({
         limit: 1000,
         'sys.publishedAt[exists]': false
-      });
+      } as any);
       
       console.log(`📊 Found ${entries.items.length} unpublished entries`);
       

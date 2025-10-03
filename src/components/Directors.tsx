@@ -187,7 +187,7 @@ export default function Directors() {
         {/* Desktop: Layout original */}
         <div className="hidden md:grid md:grid-cols-12 md:gap-4 md:items-start">
           {/* Lista de directores (izquierda) */}
-          <ul className="col-span-4 text-[#f31014] text-lg font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-300 ease-in-out">
+          <ul className="col-span-4 text-[#f31014] text-md font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-300 ease-in-out">
             {directors.map((director, index) => (
               <li
                 className={`${

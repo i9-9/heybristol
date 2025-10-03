@@ -58,6 +58,7 @@ export default function VideoPagePlayer({
   const [isBuffering, setIsBuffering] = useState(false);
   const [player, setPlayer] = useState<VimeoPlayer | null>(null);
   const [shouldLoadIframe, setShouldLoadIframe] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -77,7 +78,11 @@ export default function VideoPagePlayer({
       player_id: `vimeo_${video.id}`,
       rel: '0',
       playsinline: '1',
-      color: '000000'
+      color: '000000',
+      // Additional iOS-specific parameters for better autoplay support
+      controls: '0',
+      keyboard: '0',
+      pip: '0'
     });
     
     if (video.hash) {
@@ -88,6 +93,11 @@ export default function VideoPagePlayer({
   }, [video?.id, video?.hash]);
 
   useEffect(() => {
+    // Detect iOS devices
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIOSDevice);
+
     if (!containerRef.current) return;
 
     const observer = new IntersectionObserver(
@@ -249,7 +259,7 @@ export default function VideoPagePlayer({
           ref={iframeRef}
           src={getVimeoUrl()}
           className="absolute inset-0 w-full h-full"
-          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+          allow="autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope"
           title={video.title}
           frameBorder="0"
           style={{

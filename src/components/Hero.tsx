@@ -37,6 +37,8 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [videoSequence, setVideoSequence] = useState<number[]>([]);
   const [sequenceIndex, setSequenceIndex] = useState(0);
+  const [isIOS, setIsIOS] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -168,6 +170,14 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     }
   };
 
+  const handleUserInteraction = () => {
+    setUserInteracted(true);
+    // Try to play the video after user interaction
+    if (videoRef.current && videoRef.current.paused) {
+      videoRef.current.play().catch(console.error);
+    }
+  };
+
 
   // Configurar Vimeo player cuando sea necesario
   useEffect(() => {
@@ -211,6 +221,11 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
 
   // Cargar contenido inicial
   useEffect(() => {
+    // Detectar iOS devices
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
+    setIsIOS(isIOSDevice);
+
     const loadHeroContent = async () => {
       try {
         if (allHeroVideos && allHeroVideos.length > 0) {
@@ -276,6 +291,10 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
             playsInline
             preload="auto"
             controls={false}
+            webkit-playsinline="true"
+            x5-playsinline="true"
+            x5-video-player-type="h5"
+            x5-video-player-fullscreen="false"
             key={videoSource} // Forzar re-render cuando cambia el source
             style={{
               opacity: isVideoLoaded && !isTransitioning ? 1 : 0,
@@ -283,6 +302,8 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
             }}
             onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
+            onClick={isIOS ? handleUserInteraction : undefined}
+            onTouchStart={isIOS ? handleUserInteraction : undefined}
             onEnded={handleVideoEnded}
             onError={(e) => {
               console.error('Error en video:', e);
@@ -311,7 +332,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
           >
             <iframe
               className="w-full h-full"
-              src={`${videoSource}&autoplay=1&loop=0&muted=1`}
+              src={`${videoSource}&autoplay=1&loop=0&muted=1&playsinline=1&controls=0&keyboard=0&pip=0`}
               style={{
                 width: "100%",
                 height: "100%",
@@ -319,7 +340,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
                 transform: "scale(1.1)",
                 transformOrigin: "center center",
               }}
-              allow="autoplay; fullscreen; picture-in-picture"
+              allow="autoplay; fullscreen; picture-in-picture; encrypted-media; accelerometer; gyroscope"
               title={heroVideo?.title || "Hero Video"}
               frameBorder="0"
               onLoad={() => setIsVideoLoaded(true)}
@@ -330,6 +351,20 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
                 setIsVideoLoaded(true);
               }}
             />
+          </div>
+        )}
+        
+        {/* iOS-specific play button overlay when video is paused */}
+        {isIOS && !userInteracted && isVideoLoaded && !isVimeoVideo && (
+          <div 
+            className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-5"
+            onClick={handleUserInteraction}
+          >
+            <div className="w-20 h-20 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105">
+              <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
           </div>
         )}
       </div>

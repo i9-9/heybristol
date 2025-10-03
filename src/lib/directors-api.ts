@@ -44,14 +44,26 @@ export async function getDirectorBySlug(slug: string): Promise<Director | null> 
 export async function getDirectorNames(): Promise<string[]> {
   const directors = await getDirectors();
   return directors
-    .sort((a, b) => a.order - b.order)
+    .sort((a, b) => {
+      const namePartsA = a.name.split(' ');
+      const namePartsB = b.name.split(' ');
+      const lastNameA = namePartsA.length >= 2 ? namePartsA[1] : namePartsA[0] || '';
+      const lastNameB = namePartsB.length >= 2 ? namePartsB[1] : namePartsB[0] || '';
+      return lastNameA.localeCompare(lastNameB);
+    })
     .map(d => d.name);
 }
 
 export async function getDirectorSlugs(): Promise<string[]> {
   const directors = await getDirectors();
   return directors
-    .sort((a, b) => a.order - b.order)
+    .sort((a, b) => {
+      const namePartsA = a.name.split(' ');
+      const namePartsB = b.name.split(' ');
+      const lastNameA = namePartsA.length >= 2 ? namePartsA[1] : namePartsA[0] || '';
+      const lastNameB = namePartsB.length >= 2 ? namePartsB[1] : namePartsB[0] || '';
+      return lastNameA.localeCompare(lastNameB);
+    })
     .map(d => d.slug);
 }
 

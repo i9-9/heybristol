@@ -107,10 +107,15 @@ const client = createClient({
 // Función interna sin cache
 async function _getDirectorsFromContentful() {
   try {
+    // In development, include unpublished entries to work around Contentful cache delays
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    
     const response = await client.getEntries({
       content_type: 'director',
       order: ['fields.order'], // Ordenar por el campo order
       include: 2, // Include referenced entries (videos)
+      // In development, don't filter by published status to include unpublished entries
+      ...(isDevelopment ? {} : { 'sys.publishedAt[exists]': true })
     });
 
     return response.items.map((item: unknown, index: number) => {
@@ -142,7 +147,7 @@ async function _getDirectorsFromContentful() {
 export const getDirectorsFromContentful = withCache(
   _getDirectorsFromContentful,
   () => 'directors-all',
-  5 * 60 * 1000 // 5 minutos
+  process.env.NODE_ENV === 'development' ? 30 * 1000 : 5 * 60 * 1000 // 30 segundos en desarrollo, 5 minutos en producción
 );
 
 async function _getDirectorBySlugFromContentful(slug: string) {

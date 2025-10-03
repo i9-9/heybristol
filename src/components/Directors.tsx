@@ -102,7 +102,7 @@ export default function Directors() {
           <div className="flex gap-3">
             {/* Lista de directores (izquierda) */}
             <div className="w-1/2">
-              <ul className="text-[#f31014] text-sm font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-1000 ease-in-out">
+              <ul className="text-[#f31014] text-xs font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-1000 ease-in-out">
                 {directors.map((director, index) => (
                   <li
                     className={`${

@@ -48,12 +48,12 @@ class ContentfulPublisher {
           await video.publish();
           console.log(`✅ Video "${video.fields.title}" publicado`);
         } catch (error) {
-          console.log(`⚠️  Video "${video.fields.title}" ya estaba publicado o error:`, error.message);
+          console.log(`⚠️  Video "${video.fields.title}" ya estaba publicado o error:`, (error as Error).message);
         }
       }
 
       // 4. Actualizar el director con las referencias a los videos
-      const videoReferences = videoResponse.items.map(video => ({
+      const videoReferences = videoResponse.items.map((video: any) => ({
         sys: {
           type: 'Link',
           linkType: 'Entry',
@@ -73,7 +73,7 @@ class ContentfulPublisher {
         await director.publish();
         console.log('✅ Director Ali Ali publicado');
       } catch (error) {
-        console.log(`⚠️  Director Ali Ali ya estaba publicado o error:`, error.message);
+        console.log(`⚠️  Director Ali Ali ya estaba publicado o error:`, (error as Error).message);
       }
 
       console.log('🎉 ¡Proceso completado!');

@@ -145,7 +145,7 @@ class AliAliVideoCorrector {
         const director = directorResponse.items[0];
         
         // Crear referencias a los videos corregidos
-        const videoReferences = videoResponse.items.map(video => ({
+        const videoReferences = videoResponse.items.map((video: any) => ({
           sys: {
             type: 'Link',
             linkType: 'Entry',

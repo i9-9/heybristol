@@ -121,17 +121,17 @@ class ContentfulDiagnostic {
         const actualTitles = actualVideos.map((v: any) => v.fields.title);
         const expectedTitles = expectedAliAliVideos.map(v => v.title);
         
-        const missingVideos = expectedTitles.filter(title => !actualTitles.includes(title));
-        const extraVideos = actualTitles.filter(title => !expectedTitles.includes(title));
+        const missingVideos = expectedTitles.filter((title: string) => !actualTitles.includes(title));
+        const extraVideos = actualTitles.filter((title: string) => !expectedTitles.includes(title));
 
         if (missingVideos.length > 0) {
           console.log('\n❌ Videos faltantes en Contentful:');
-          missingVideos.forEach(title => console.log(`   - ${title}`));
+          missingVideos.forEach((title: string) => console.log(`   - ${title}`));
         }
 
         if (extraVideos.length > 0) {
           console.log('\n➕ Videos extra en Contentful:');
-          extraVideos.forEach(title => console.log(`   - ${title}`));
+          extraVideos.forEach((title: string) => console.log(`   - ${title}`));
         }
 
         if (missingVideos.length === 0 && extraVideos.length === 0) {

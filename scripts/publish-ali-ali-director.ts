@@ -45,7 +45,7 @@ class AliAliPublisher {
       console.log(`📹 Videos encontrados: ${videoResponse.items.length}`);
 
       // 3. Crear referencias a los videos
-      const videoReferences = videoResponse.items.map(video => ({
+      const videoReferences = videoResponse.items.map((video: any) => ({
         sys: {
           type: 'Link',
           linkType: 'Entry',

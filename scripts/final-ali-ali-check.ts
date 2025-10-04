@@ -76,17 +76,17 @@ class AliAliFinalCheck {
         console.log(`   - Videos asociados al director: ${associatedVideoIds.length}`);
         console.log(`   - Videos encontrados por búsqueda: ${foundVideoIds.length}`);
         
-        const missingAssociations = foundVideoIds.filter(id => !associatedVideoIds.includes(id));
-        const extraAssociations = associatedVideoIds.filter(id => !foundVideoIds.includes(id));
+        const missingAssociations = foundVideoIds.filter((id: string) => !associatedVideoIds.includes(id));
+        const extraAssociations = associatedVideoIds.filter((id: string) => !foundVideoIds.includes(id));
         
         if (missingAssociations.length > 0) {
           console.log(`   - Videos sin asociar: ${missingAssociations.length}`);
-          missingAssociations.forEach(id => console.log(`     - ${id}`));
+          missingAssociations.forEach((id: string) => console.log(`     - ${id}`));
         }
         
         if (extraAssociations.length > 0) {
           console.log(`   - Asociaciones extra: ${extraAssociations.length}`);
-          extraAssociations.forEach(id => console.log(`     - ${id}`));
+          extraAssociations.forEach((id: string) => console.log(`     - ${id}`));
         }
         
         if (missingAssociations.length === 0 && extraAssociations.length === 0) {

@@ -1,9 +1,22 @@
-import Hero from '@/components/Hero';
-import Directors from '@/components/Directors';
-import Contact from '@/components/Contact';
+import dynamicImport from 'next/dynamic';
 import { getAllHeroVideos, getRandomAudioTrack } from '@/lib/contentful';
 
-export const revalidate = 300; // 5 minutos
+// Dynamic imports for better code splitting (no loading screens)
+const Hero = dynamicImport(() => import('@/components/Hero'), {
+  ssr: true
+});
+
+const Directors = dynamicImport(() => import('@/components/Directors'), {
+  ssr: true
+});
+
+const Contact = dynamicImport(() => import('@/components/Contact'), {
+  ssr: true
+});
+
+// SSG - Static Site Generation
+export const dynamic = 'force-static';
+export const revalidate = false;
 
 async function getStaticData() {
   try {

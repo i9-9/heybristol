@@ -28,25 +28,123 @@ function useIsMobile() {
   return isMobile;
 }
 
-// Función para determinar el tamaño de cada card en el grid
-function getCardSize(index: number): string {
-  // Patrón irregular inspirado en alitwotimes.com
-  const pattern = [
-    'col-span-1 row-span-1',     // 0: normal
-    'col-span-2 row-span-1',     // 1: ancho
-    'col-span-1 row-span-2',     // 2: alto
-    'col-span-1 row-span-1',     // 3: normal
-    'col-span-1 row-span-1',     // 4: normal
-    'col-span-2 row-span-2',     // 5: grande
-    'col-span-1 row-span-1',     // 6: normal
-    'col-span-1 row-span-2',     // 7: alto
-    'col-span-2 row-span-1',     // 8: ancho
-    'col-span-1 row-span-1',     // 9: normal
-    'col-span-1 row-span-1',     // 10: normal
-    'col-span-1 row-span-2',     // 11: alto
-  ];
+// Mapping completo de clases
+const SPAN_CLASSES: Record<number, string> = {
+  12: 'col-span-12',
+  11: 'col-span-11',
+  10: 'col-span-10',
+  9: 'col-span-9',
+  8: 'col-span-8',
+  7: 'col-span-7',
+  6: 'col-span-6',
+  5: 'col-span-5',
+  4: 'col-span-4',
+};
+
+const START_CLASSES: Record<number, string> = {
+  1: 'col-start-1',
+  2: 'col-start-2',
+  3: 'col-start-3',
+  4: 'col-start-4',
+  5: 'col-start-5',
+};
+
+// Función para generar un número pseudo-aleatorio basado en un string (slug)
+function seededRandom(seed: string, index: number): number {
+  let hash = 0;
+  const str = seed + index.toString();
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+// Genera un patrón único para cada director basado en su slug
+function generateDirectorPattern(directorSlug: string) {
+  const patterns = [];
   
-  return pattern[index % pattern.length];
+  // Generamos 12 layouts únicos para este director
+  for (let i = 0; i < 12; i++) {
+    const rand = seededRandom(directorSlug, i);
+    
+    // Decide si es full o half
+    const isFull = rand % 3 === 0; // ~33% full width
+    
+    if (isFull) {
+      // Video full width con offset variable
+      const span = 8 + (rand % 4); // 8, 9, 10, 11
+      const start = 1 + (rand % 5); // 1, 2, 3, 4, 5
+      patterns.push({
+        name: `full-${i}`,
+        videos: 1,
+        spans: [span],
+        starts: [start]
+      });
+    } else {
+      // Dos videos con MUCHA MÁS variación asimétrica
+      const sizeVariant = rand % 4;
+      let firstSpan, secondSpan;
+      
+      switch(sizeVariant) {
+        case 0:
+          firstSpan = 7;
+          secondSpan = 5;
+          break;
+        case 1:
+          firstSpan = 5;
+          secondSpan = 7;
+          break;
+        case 2:
+          firstSpan = 6;
+          secondSpan = 6;
+          break;
+        case 3:
+          firstSpan = 8;
+          secondSpan = 4; // Muy asimétrico
+          break;
+        default:
+          firstSpan = 6;
+          secondSpan = 5;
+      }
+      
+      const start = 1 + (rand % 5); // 1, 2, 3, 4, 5
+      const secondStart = start + firstSpan;
+      
+      patterns.push({
+        name: `half-${i}`,
+        videos: 2,
+        spans: [firstSpan, secondSpan],
+        starts: [start, secondStart]
+      });
+    }
+  }
+  
+  return patterns;
+}
+
+function groupVideosByLayouts(videos: VideoItem[], patterns: any[]) {
+  const groups: { layout: any, videos: VideoItem[] }[] = [];
+  let currentIndex = 0;
+  let patternIndex = 0;
+
+  while (currentIndex < videos.length) {
+    const pattern = patterns[patternIndex % patterns.length];
+    const videosInGroup = videos.slice(currentIndex, currentIndex + pattern.videos);
+    
+    if (videosInGroup.length > 0) {
+      groups.push({
+        layout: pattern,
+        videos: videosInGroup
+      });
+    }
+    
+    currentIndex += pattern.videos;
+    patternIndex++;
+  }
+
+  return groups;
 }
 
 export default function GridTestClient({ director, videos }: GridTestClientProps) {
@@ -59,6 +157,10 @@ export default function GridTestClient({ director, videos }: GridTestClientProps
   const handleBackToVideos = useCallback(() => {
     setSelectedVideo(null);
   }, []);
+
+  // Genera un patrón único para este director
+  const directorPattern = generateDirectorPattern(director.slug);
+  const videoGroups = groupVideosByLayouts(videos, directorPattern);
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
@@ -120,36 +222,51 @@ export default function GridTestClient({ director, videos }: GridTestClientProps
             <div className="hidden md:block h-16"></div>
 
             {videos.length > 0 && (
-              <div className="w-full px-6 md:px-0 max-w-sm md:max-w-5xl mx-auto md:mx-0 pb-8">
-                {/* Grid irregular - Mobile: stack normal, Desktop: máximo 2 por fila */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 auto-rows-[300px]">
-                  {videos.map((video, index) => {
-                    const sizeClass = isMobile ? 'col-span-1 row-span-1' : getCardSize(index);
-                    
-                    return (
-                      <div
-                        key={video.id}
-                        className={`relative ${sizeClass} bg-black overflow-hidden cursor-pointer group`}
-                        onClick={() => setSelectedVideo(video)}
-                      >
-                        <CustomVimeoPlayer
-                          video={video}
-                          className="w-full h-full object-cover"
-                          autoPlay={false}
-                          loop={true}
-                          muted={true}
-                          loadIndex={index}
-                        />
+              <div className="w-full px-6 md:px-0 max-w-sm md:max-w-7xl mx-auto pb-8">
+                <div className="flex flex-col gap-2 md:gap-[0.694vw]">
+                  {videoGroups.map((group, groupIndex) => (
+                    <div 
+                      key={groupIndex}
+                      className={`grid ${
+                        isMobile 
+                          ? 'grid-cols-1' 
+                          : 'grid-cols-12'
+                      } gap-2 md:gap-[0.694vw]`}
+                    >
+                      {group.videos.map((video, videoIndex) => {
+                        const spanClass = isMobile 
+                          ? 'col-span-1' 
+                          : SPAN_CLASSES[group.layout.spans[videoIndex]];
                         
-                        {/* Overlay con título */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 md:bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-10">
-                          <span className="text-white text-center px-3 font-medium uppercase text-sm md:text-base">
-                            {video.tags?.[0] || 'CLIENTE'} | {video.title}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        const startClass = isMobile
+                          ? ''
+                          : START_CLASSES[group.layout.starts[videoIndex]];
+                        
+                        return (
+                          <div
+                            key={video.id}
+                            className={`relative ${spanClass} ${startClass} bg-black overflow-hidden cursor-pointer group aspect-video`}
+                            onClick={() => setSelectedVideo(video)}
+                          >
+                            <CustomVimeoPlayer
+                              video={video}
+                              className="w-full h-full object-cover"
+                              autoPlay={false}
+                              loop={true}
+                              muted={true}
+                              loadIndex={groupIndex * 2 + videoIndex}
+                            />
+                            
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/60 md:bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-10">
+                              <span className="text-white text-center px-3 font-medium uppercase text-sm md:text-base">
+                                {video.tags?.[0] || 'CLIENTE'} | {video.title}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -218,4 +335,3 @@ export default function GridTestClient({ director, videos }: GridTestClientProps
     </div>
   );
 }
-

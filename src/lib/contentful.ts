@@ -1,6 +1,66 @@
 import { createClient } from 'contentful';
 import { withCache } from './cache';
 
+// Advanced caching system
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  ttl: number;
+  hits: number;
+}
+
+class AdvancedCache {
+  private cache = new Map<string, CacheEntry<unknown>>();
+  private hitCount = 0;
+  private missCount = 0;
+
+  set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void {
+    const entry: CacheEntry<T> = {
+      data,
+      timestamp: Date.now(),
+      ttl,
+      hits: 0
+    };
+    this.cache.set(key, entry);
+  }
+
+  get<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    
+    if (!entry) {
+      this.missCount++;
+      return null;
+    }
+
+    if (Date.now() - entry.timestamp > entry.ttl) {
+      this.cache.delete(key);
+      this.missCount++;
+      return null;
+    }
+
+    entry.hits++;
+    this.hitCount++;
+    return entry.data as T;
+  }
+
+  getStats() {
+    const total = this.hitCount + this.missCount;
+    return {
+      hitRate: total > 0 ? Math.round((this.hitCount / total) * 10000) / 100 : 0,
+      totalRequests: total,
+      cacheSize: this.cache.size
+    };
+  }
+
+  clear(): void {
+    this.cache.clear();
+    this.hitCount = 0;
+    this.missCount = 0;
+  }
+}
+
+const advancedCache = new AdvancedCache();
+
 export interface ContentfulDirectorVideo {
   contentTypeId: 'directorVideo';
   fields: {
@@ -104,11 +164,20 @@ const client = createClient({
   accessToken: process.env.CONTENTFUL_ACCESS_TOKEN || process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN!,
 });
 
-// Función interna sin cache
+// Función interna con cache avanzado
 async function _getDirectorsFromContentful() {
   try {
-    // In development, include unpublished entries to work around Contentful cache delays
+    const cacheKey = 'directors-all';
     const isDevelopment = process.env.NODE_ENV === 'development';
+    
+    // Try cache first
+    const cached = advancedCache.get(cacheKey);
+    if (cached) {
+      console.log('🎯 Cache HIT for directors');
+      return cached;
+    }
+
+    console.log('🔄 Cache MISS for directors - fetching from Contentful');
     
     const response = await client.getEntries({
       content_type: 'director',
@@ -118,7 +187,7 @@ async function _getDirectorsFromContentful() {
       ...(isDevelopment ? {} : { 'sys.publishedAt[exists]': true })
     } as Parameters<typeof client.getEntries>[0]);
 
-    return response.items.map((item: unknown, index: number) => {
+    const directors = response.items.map((item: unknown, index: number) => {
       const director = item as { fields: { name: string; slug: string; order: number; videos?: unknown[] } };
       return {
         name: director.fields.name,
@@ -137,6 +206,13 @@ async function _getDirectorsFromContentful() {
         }) || [],
       };
     });
+
+    // Cache with different TTL based on environment
+    const ttl = isDevelopment ? 30 * 1000 : 5 * 60 * 1000;
+    advancedCache.set(cacheKey, directors, ttl);
+    
+    console.log(`✅ Directors fetched and cached (TTL: ${ttl/1000}s)`);
+    return directors;
   } catch (error) {
     console.error('Error fetching directors from Contentful:', error);
     return [];
@@ -149,6 +225,17 @@ export const getDirectorsFromContentful = withCache(
   () => 'directors-all',
   process.env.NODE_ENV === 'development' ? 30 * 1000 : 5 * 60 * 1000 // 30 segundos en desarrollo, 5 minutos en producción
 );
+
+// Export cache statistics for monitoring
+export function getCacheStats() {
+  return advancedCache.getStats();
+}
+
+// Export function to clear cache (useful for development)
+export function clearContentfulCache() {
+  advancedCache.clear();
+  console.log('🗑️  Contentful cache cleared');
+}
 
 async function _getDirectorBySlugFromContentful(slug: string) {
   try {

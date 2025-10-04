@@ -3,6 +3,10 @@ import { getDirectorBySlug, getDirectorSlugs, getVideosAsVideoItems } from '@/li
 import { generateVideoSlug } from '@/lib/types';
 import VideoPlayerPage from './VideoPlayerPage';
 
+// SSG - Static Site Generation
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 interface VideoPageProps {
   params: Promise<{
     slug: string;

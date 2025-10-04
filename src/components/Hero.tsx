@@ -5,18 +5,25 @@ import { Volume2, VolumeX } from "lucide-react";
 import LogoMain from "@/components/LogoMain";
 import { getBestVideoSource, getRandomAudioTrack, type HeroVideo, type AudioTrack } from "@/lib/contentful";
 
-// Hook para detectar si es móvil
+// Optimized mobile detection using CSS media queries
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+    // Use CSS media query for better performance
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
     };
 
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
+    // Set initial value
+    setIsMobile(mediaQuery.matches);
+    
+    // Listen for changes
+    mediaQuery.addEventListener('change', handleChange);
+    
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
   return isMobile;
@@ -29,7 +36,7 @@ interface HeroProps {
 
 export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
   const [isMuted, setIsMuted] = useState(true);
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(true); // Start as loaded for faster rendering
   const [videoSource, setVideoSource] = useState<string | null>(null);
   const [heroVideo, setHeroVideo] = useState<HeroVideo | null>(null);
   const [audioTrack, setAudioTrack] = useState<AudioTrack | null>(null);
@@ -176,6 +183,11 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     if (videoRef.current && videoRef.current.paused) {
       videoRef.current.play().catch(console.error);
     }
+    // Load audio only when user interacts (optimized)
+    if (audioRef.current && !isMuted) {
+      audioRef.current.load();
+      audioRef.current.play().catch(console.error);
+    }
   };
 
 
@@ -270,7 +282,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
         <audio
           ref={audioRef}
           loop={true}
-          preload="auto"
+          preload="none"
           style={{ display: 'none' }}
         >
           <source
@@ -289,7 +301,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
             autoPlay
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             controls={false}
             webkit-playsinline="true"
             x5-playsinline="true"
@@ -297,8 +309,8 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
             x5-video-player-fullscreen="false"
             key={videoSource} // Forzar re-render cuando cambia el source
             style={{
-              opacity: isVideoLoaded && !isTransitioning ? 1 : 0,
-              transition: "opacity 0.8s ease-in-out"
+              opacity: !isTransitioning ? 1 : 0,
+              transition: "opacity 0.3s ease-in-out"
             }}
             onLoadedData={() => setIsVideoLoaded(true)}
             onCanPlay={() => setIsVideoLoaded(true)}
@@ -326,8 +338,8 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
           <div 
             className="absolute inset-0 w-screen h-screen md:w-full md:h-full"
             style={{
-              opacity: isVideoLoaded && !isTransitioning ? 1 : 0,
-              transition: "opacity 0.8s ease-in-out",
+              opacity: !isTransitioning ? 1 : 0,
+              transition: "opacity 0.3s ease-in-out",
             }}
           >
             <iframe

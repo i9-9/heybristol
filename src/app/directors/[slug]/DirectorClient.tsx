@@ -41,6 +41,138 @@ function useIsIOS() {
   return isIOS;
 }
 
+// Mapping completo de clases
+const SPAN_CLASSES: Record<number, string> = {
+  12: 'col-span-12',
+  11: 'col-span-11',
+  10: 'col-span-10',
+  9: 'col-span-9',
+  8: 'col-span-8',
+  7: 'col-span-7',
+  6: 'col-span-6',
+  5: 'col-span-5',
+  4: 'col-span-4',
+};
+
+const START_CLASSES: Record<number, string> = {
+  1: 'col-start-1',
+  2: 'col-start-2',
+  3: 'col-start-3',
+  4: 'col-start-4',
+  5: 'col-start-5',
+};
+
+// Función para generar un número pseudo-aleatorio basado en un string (slug)
+function seededRandom(seed: string, index: number): number {
+  let hash = 0;
+  const str = seed + index.toString();
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+// Genera un patrón único para cada director basado en su slug
+function generateDirectorPattern(directorSlug: string) {
+  const patterns = [];
+  
+  // Generamos 12 layouts únicos para este director
+  for (let i = 0; i < 12; i++) {
+    const rand = seededRandom(directorSlug, i);
+    
+    // Decide si es full o half
+    const isFull = rand % 3 === 0; // ~33% full width
+    
+    if (isFull) {
+      // Video full width con offset variable
+      const span = 8 + (rand % 4); // 8, 9, 10, 11
+      const start = 1 + (rand % 5); // 1, 2, 3, 4, 5
+      patterns.push({
+        name: `full-${i}`,
+        videos: 1,
+        spans: [span],
+        starts: [start]
+      });
+    } else {
+      // Dos videos con MUCHA MÁS variación asimétrica
+      const sizeVariant = rand % 4;
+      let firstSpan, secondSpan;
+      
+      switch(sizeVariant) {
+        case 0:
+          firstSpan = 7;
+          secondSpan = 5;
+          break;
+        case 1:
+          firstSpan = 5;
+          secondSpan = 7;
+          break;
+        case 2:
+          firstSpan = 6;
+          secondSpan = 6;
+          break;
+        case 3:
+          firstSpan = 8;
+          secondSpan = 4; // Muy asimétrico
+          break;
+        default:
+          firstSpan = 6;
+          secondSpan = 5;
+      }
+      
+      const start = 1 + (rand % 5); // 1, 2, 3, 4, 5
+      const secondStart = start + firstSpan;
+      
+      patterns.push({
+        name: `half-${i}`,
+        videos: 2,
+        spans: [firstSpan, secondSpan],
+        starts: [start, secondStart]
+      });
+    }
+  }
+  
+  return patterns;
+}
+
+function groupVideosByLayouts(videos: VideoItem[], patterns: Array<{
+  name: string;
+  videos: number;
+  spans: number[];
+  starts: number[];
+}>) {
+  const groups: { 
+    layout: {
+      name: string;
+      videos: number;
+      spans: number[];
+      starts: number[];
+    }, 
+    videos: VideoItem[] 
+  }[] = [];
+  let currentIndex = 0;
+  let patternIndex = 0;
+
+  while (currentIndex < videos.length) {
+    const pattern = patterns[patternIndex % patterns.length];
+    const videosInGroup = videos.slice(currentIndex, currentIndex + pattern.videos);
+    
+    if (videosInGroup.length > 0) {
+      groups.push({
+        layout: pattern,
+        videos: videosInGroup
+      });
+    }
+    
+    currentIndex += pattern.videos;
+    patternIndex++;
+  }
+
+  return groups;
+}
+
 
 export default function DirectorClient({ director, videos }: DirectorClientProps) {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
@@ -92,6 +224,10 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
   const handleBackToVideos = useCallback(() => {
     setSelectedVideo(null);
   }, []);
+
+  // Genera un patrón único para este director
+  const directorPattern = generateDirectorPattern(director.slug);
+  const videoGroups = groupVideosByLayouts(videos, directorPattern);
 
   useEffect(() => {
     return () => {
@@ -287,15 +423,39 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
             <div className="hidden md:block h-16"></div>
 
             {videos.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 w-full px-6 md:px-0 max-w-sm md:max-w-none mx-auto md:mx-0 pb-8">
-                {videos.map((video, index) => (
-                  <VideoCard
-                    key={video.id}
-                    video={video}
-                    directorSlug={director.slug}
-                    loadIndex={index}
-                  />
-                ))}
+              <div className="w-full px-6 md:px-0 max-w-sm md:max-w-7xl mx-auto pb-8">
+                <div className="flex flex-col gap-2 md:gap-[0.694vw]">
+                  {videoGroups.map((group, groupIndex) => (
+                    <div 
+                      key={groupIndex}
+                      className={`grid ${
+                        isMobile 
+                          ? 'grid-cols-1' 
+                          : 'grid-cols-12'
+                      } gap-2 md:gap-[0.694vw]`}
+                    >
+                      {group.videos.map((video, videoIndex) => {
+                        const spanClass = isMobile 
+                          ? 'col-span-1' 
+                          : SPAN_CLASSES[group.layout.spans[videoIndex]];
+                        
+                        const startClass = isMobile
+                          ? ''
+                          : START_CLASSES[group.layout.starts[videoIndex]];
+                        
+                        return (
+                          <VideoCard
+                            key={video.id}
+                            video={video}
+                            directorSlug={director.slug}
+                            loadIndex={groupIndex * 2 + videoIndex}
+                            className={`${spanClass} ${startClass}`}
+                          />
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

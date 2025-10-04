@@ -9,16 +9,17 @@ interface VideoCardProps {
   video: VideoItem;
   directorSlug: string;
   loadIndex?: number;
+  className?: string;
 }
 
-export default function VideoCard({ video, directorSlug, loadIndex = 0 }: VideoCardProps) {
+export default function VideoCard({ video, directorSlug, loadIndex = 0, className = "" }: VideoCardProps) {
   const videoSlug = generateVideoSlug(video.title);
   const videoUrl = `/directors/${directorSlug}/${videoSlug}`;
 
   return (
     <Link
       href={videoUrl}
-      className="relative w-full h-80 md:aspect-video md:h-auto bg-black overflow-hidden cursor-pointer group block"
+      className={`relative w-full h-80 md:aspect-video md:h-auto bg-black overflow-hidden cursor-pointer group block ${className}`}
     >
       {/* Usar CustomVimeoPlayer con thumbnails */}
       <CustomVimeoPlayer

@@ -39,7 +39,15 @@
     "simulate-app-directors": "tsx scripts/simulate-app-directors.ts",
     "diagnose-contentful-integration": "tsx scripts/diagnose-contentful-integration.ts",
     "test-app-cache": "tsx scripts/test-app-cache.ts",
-    "check-env-vars": "tsx scripts/check-env-vars.ts"
+    "check-env-vars": "tsx scripts/check-env-vars.ts",
+    "analyze": "ANALYZE=true npm run build",
+    "performance-analysis": "tsx scripts/performance-analysis.ts",
+    "test-cache": "tsx scripts/test-optimized-cache.ts",
+    "frontend-performance": "tsx scripts/frontend-performance-analysis.ts",
+    "performance-engineer": "tsx scripts/performance-engineer-agent.ts",
+    "hero-performance": "tsx scripts/hero-performance-analysis.ts",
+    "hero-measurement": "tsx scripts/hero-performance-measurement.ts",
+    "hero-loading-analysis": "tsx scripts/hero-loading-removal-analysis.ts"
   },
   "dependencies": {
     "contentful": "^11.7.15",
@@ -54,6 +62,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^15.5.4",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/node": "^20",
     "@types/react": "^19",

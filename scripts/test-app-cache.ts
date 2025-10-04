@@ -12,10 +12,10 @@ async function testAppCache() {
     const directors = await getDirectorsFromContentful();
     
     console.log(`\n📊 Results:`);
-    console.log(`  - Directors returned: ${directors.length}`);
+    console.log(`  - Directors returned: ${(directors as unknown[]).length}`);
     
     console.log(`\n📝 Directors:`);
-    directors.forEach((director, index) => {
+    (directors as unknown[]).forEach((director: any, index) => {
       console.log(`  ${index + 1}. ${director.name} (${director.slug})`);
       console.log(`     Order: ${director.order}`);
       console.log(`     Videos: ${director.videos.length}`);

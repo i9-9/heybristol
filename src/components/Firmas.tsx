@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 const Firmas = () => {
   const firmas = [
     { name: 'AZUL', alt: 'AZUL - Director - Hey Bristol' },
@@ -18,15 +20,20 @@ const Firmas = () => {
           rel="noopener noreferrer"
           style={{ textDecoration: "none" }}
         >
-          <img 
+          <Image 
             src={`/images/firmas/${firma.name}.png`}
             alt={firma.alt}
+            width={200}
+            height={100}
             style={{ 
               display: "block", 
               border: "none",
               maxWidth: "200px",
               height: "auto"
             }}
+            priority={false}
+            loading="lazy"
+            sizes="(max-width: 768px) 150px, 200px"
           />
         </a>
       ))}
@@ -34,5 +41,5 @@ const Firmas = () => {
   );
 };
   
-  export default Firmas;
+export default Firmas;
   

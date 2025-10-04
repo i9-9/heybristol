@@ -17,7 +17,7 @@ export async function getDirectors(): Promise<Director[]> {
   if (USE_CONTENTFUL) {
     try {
       const contentfulDirectors = await getDirectorsFromContentful();
-      return contentfulDirectors;
+      return contentfulDirectors as Director[];
     } catch (error) {
       console.error('Error fetching from Contentful, falling back to local data:', error);
       return localDirectors;
@@ -101,8 +101,8 @@ export async function getMigrationStats() {
   if (USE_CONTENTFUL) {
     try {
       const contentfulDirectors = await getDirectorsFromContentful();
-      contentfulCount = contentfulDirectors.length;
-      contentfulVideosCount = contentfulDirectors.reduce((total, director) => total + director.videos.length, 0);
+      contentfulCount = (contentfulDirectors as Director[]).length;
+      contentfulVideosCount = (contentfulDirectors as Director[]).reduce((total, director) => total + director.videos.length, 0);
     } catch (error) {
       console.error('Error getting Contentful stats:', error);
     }

@@ -8,8 +8,9 @@ interface PageProps {
   }>;
 }
 
-// Configurar ISR - se regenera cada hora o cuando hay cambios
-export const revalidate = 3600; // 1 hora
+// SSG - Static Site Generation
+export const dynamic = 'force-static';
+export const revalidate = false;
 
 // Generar rutas estáticas para todos los directores
 export async function generateStaticParams() {

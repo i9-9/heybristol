@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import LogoB from "@/components/LogoB";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { VideoItem } from "@/lib/types";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import CustomVimeoPlayer from "@/components/CustomVimeoPlayer";
 
 interface GridTestClientProps {
@@ -124,8 +124,21 @@ function generateDirectorPattern(directorSlug: string) {
   return patterns;
 }
 
-function groupVideosByLayouts(videos: VideoItem[], patterns: any[]) {
-  const groups: { layout: any, videos: VideoItem[] }[] = [];
+function groupVideosByLayouts(videos: VideoItem[], patterns: Array<{
+  name: string;
+  videos: number;
+  spans: number[];
+  starts: number[];
+}>) {
+  const groups: { 
+    layout: {
+      name: string;
+      videos: number;
+      spans: number[];
+      starts: number[];
+    }, 
+    videos: VideoItem[] 
+  }[] = [];
   let currentIndex = 0;
   let patternIndex = 0;
 
@@ -149,9 +162,7 @@ function groupVideosByLayouts(videos: VideoItem[], patterns: any[]) {
 
 export default function GridTestClient({ director, videos }: GridTestClientProps) {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
   const isMobile = useIsMobile();
 
   const handleBackToVideos = useCallback(() => {

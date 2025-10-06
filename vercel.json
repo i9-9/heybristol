@@ -5,12 +5,6 @@
       "maxDuration": 30
     }
   },
-  "env": {
-    "VERCEL_TOKEN": "@vercel-token",
-    "VERCEL_PROJECT_ID": "@vercel-project-id",
-    "VERCEL_TEAM_ID": "@vercel-team-id",
-    "CONTENTFUL_WEBHOOK_SECRET": "@contentful-webhook-secret"
-  },
   "headers": [
     {
       "source": "/api/webhook/contentful",

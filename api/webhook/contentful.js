@@ -197,8 +197,13 @@ async function handler(req, res) {
       CONTENTFUL_WEBHOOK_SECRET
     } = process.env;
 
+    // Si no hay variables de entorno, responder con error pero no fallar
     if (!VERCEL_TOKEN || !VERCEL_PROJECT_ID) {
-      throw new Error('Missing required environment variables: VERCEL_TOKEN, VERCEL_PROJECT_ID');
+      console.log('Missing environment variables, skipping deploy');
+      return res.status(200).json({ 
+        message: 'Missing environment variables',
+        skipped: true 
+      });
     }
 
     // Validar firma del webhook (opcional pero recomendado)

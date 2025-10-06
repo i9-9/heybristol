@@ -490,10 +490,19 @@ export function getPublishedVideosByDirectorSlug(directorSlug: string): Director
 
 // Función simplificada que solo usa thumbnailId
 export async function convertToVideoItem(directorVideo: DirectorVideo) {
+  // Solo incluir el cliente en los tags si tiene un valor válido
+  const tags = [];
+  if (directorVideo.client && directorVideo.client.trim() !== '') {
+    tags.push(directorVideo.client);
+  }
+  tags.push(directorVideo.title);
+
   return {
     id: directorVideo.vimeoId || directorVideo.id,
     title: directorVideo.title,
-    description: `${directorVideo.client} - ${directorVideo.title}`,
+    description: directorVideo.client && directorVideo.client.trim() !== '' 
+      ? `${directorVideo.client} - ${directorVideo.title}`
+      : directorVideo.title,
     pageUrl: getVimeoUrl(directorVideo.vimeoId),
     embedUrl: directorVideo.vimeoId ? getEmbedUrl(directorVideo.vimeoId) : '',
     // Usar thumbnailId para el grid
@@ -503,7 +512,7 @@ export async function convertToVideoItem(directorVideo: DirectorVideo) {
     width: 1920,
     height: 1080,
     duration: 0,
-    tags: [directorVideo.client, directorVideo.title]
+    tags: tags
   };
 }
 

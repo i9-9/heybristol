@@ -270,7 +270,7 @@ export default function GridTestClient({ director, videos }: GridTestClientProps
                             
                             <div className="absolute inset-0 flex items-center justify-center bg-black/60 md:bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-10">
                               <span className="text-white text-center px-3 font-medium uppercase text-sm md:text-base">
-                                {video.tags?.[0] || 'CLIENTE'} | {video.title}
+                                {video.tags && video.tags.length > 1 ? `${video.tags[0]} | ${video.tags[1]}` : video.title}
                               </span>
                             </div>
                           </div>

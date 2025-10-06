@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scripts and webhook configuration
+scripts/
+.webhook-config.json
+contentful-webhook-config.json
+test-webhook.js
+CONFIGURACION_COMPLETADA.md
+SETUP_STEP_BY_STEP.md
+MANUAL_INSTALLATION_GUIDE.md
+QUICK_SETUP_GUIDE.md
+CONTENTFUL_VERCEL_WORKFLOW.md
+WEBHOOK_WORKFLOW_SUMMARY.md

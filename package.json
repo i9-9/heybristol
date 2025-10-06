@@ -47,9 +47,13 @@
     "performance-engineer": "tsx scripts/performance-engineer-agent.ts",
     "hero-performance": "tsx scripts/hero-performance-analysis.ts",
     "hero-measurement": "tsx scripts/hero-performance-measurement.ts",
-    "hero-loading-analysis": "tsx scripts/hero-loading-removal-analysis.ts"
+    "hero-loading-analysis": "tsx scripts/hero-loading-removal-analysis.ts",
+    "setup-webhook-filter": "node scripts/simple-setup-webhook.js",
+    "monitor-webhook": "node scripts/monitor-webhook.js",
+    "test-webhook": "node test-webhook.js"
   },
   "dependencies": {
+    "@vercel/kv": "^1.0.1",
     "contentful": "^11.7.15",
     "contentful-management": "^11.54.4",
     "dotenv": "^17.2.1",

@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "functions": {
+    "scripts/contentful-vercel-webhook-filter.js": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "VERCEL_TOKEN": "@vercel-token",
+    "VERCEL_PROJECT_ID": "@vercel-project-id",
+    "VERCEL_TEAM_ID": "@vercel-team-id",
+    "CONTENTFUL_WEBHOOK_SECRET": "@contentful-webhook-secret"
+  },
+  "headers": [
+    {
+      "source": "/api/webhook/contentful",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, x-contentful-signature"
+        }
+      ]
+    }
+  ]
+}

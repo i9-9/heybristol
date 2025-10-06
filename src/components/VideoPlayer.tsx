@@ -307,12 +307,43 @@ export default function VideoPlayer({
   }
 
   return (
-    <div 
-      className={`relative w-full h-full bg-black group ${className}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
-    >
+    <>
+      <style jsx>{`
+        .volume-slider::-webkit-slider-thumb {
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #ff0000;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #ff0000;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .volume-slider::-webkit-slider-track {
+          background: transparent;
+        }
+        
+        .volume-slider::-moz-range-track {
+          background: transparent;
+        }
+      `}</style>
+      <div 
+        className={`relative w-full h-full bg-black group ${className}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onMouseMove={handleMouseMove}
+      >
       {/* Vimeo Player */}
       <iframe
         ref={iframeRef}
@@ -370,7 +401,10 @@ export default function VideoPlayer({
                     step="0.1"
                     value={volume}
                     onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                    className="w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer volume-slider"
+                    style={{
+                      background: `linear-gradient(to right, #ffffff 0%, #ffffff ${volume * 100}%, rgba(255,255,255,0.3) ${volume * 100}%, rgba(255,255,255,0.3) 100%)`
+                    }}
                   />
                 </div>
               )}
@@ -434,5 +468,6 @@ export default function VideoPlayer({
         </div>
       )}
     </div>
+    </>
   );
 }

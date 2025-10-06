@@ -23,17 +23,19 @@ const Firmas = () => {
           <Image 
             src={`/images/firmas/${firma.name}.png`}
             alt={firma.alt}
-            width={200}
-            height={100}
+            width={745}
+            height={178}
             style={{ 
               display: "block", 
               border: "none",
               maxWidth: "200px",
-              height: "auto"
+              height: "auto",
+              width: "auto"
             }}
             priority={false}
             loading="lazy"
             sizes="(max-width: 768px) 150px, 200px"
+            quality={100}
           />
         </a>
       ))}

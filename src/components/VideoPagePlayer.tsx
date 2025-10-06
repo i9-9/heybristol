@@ -2,33 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { VideoItem } from "@/lib/types";
-
-// Vimeo Player types
-interface VimeoPlayer {
-  on: (event: string, callback: (...args: unknown[]) => void) => void;
-  play: () => Promise<void>;
-  pause: () => void;
-  setMuted: (muted: boolean) => Promise<void>;
-  getMuted: () => Promise<boolean>;
-  getPaused: () => Promise<boolean>;
-  setVolume: (volume: number) => Promise<void>;
-  getVolume: () => Promise<number>;
-  destroy: () => void;
-}
-
-interface VimeoPlayerClass {
-  new (element: HTMLIFrameElement): VimeoPlayer;
-}
-
-interface VimeoAPI {
-  Player: VimeoPlayerClass;
-}
-
-declare global {
-  interface Window {
-    Vimeo?: VimeoAPI;
-  }
-}
+import type { VimeoPlayer } from "@/lib/vimeo-types";
 
 interface VideoPagePlayerProps {
   video: VideoItem;

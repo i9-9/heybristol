@@ -5,7 +5,7 @@ import LogoB from "@/components/LogoB";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { VideoItem } from "@/lib/types";
 import { useRouter, usePathname } from "next/navigation";
-import VideoPagePlayer from "@/components/VideoPagePlayer";
+import VideoPlayer from "@/components/VideoPlayer";
 import { generateVideoSlug } from "@/lib/types";
 
 interface VideoPlayerPageProps {
@@ -258,12 +258,11 @@ export default function VideoPlayerPage({
         <div className={`aspect-video w-full bg-black overflow-hidden rounded-lg video-aspect-mobile ${
           isFullscreen ? 'w-full h-full max-w-none max-h-none rounded-none' : ''
         }`}>
-          <VideoPagePlayer
+          <VideoPlayer
             video={selectedVideo}
             className="w-full h-full"
             onFullscreenToggle={toggleFullscreen}
             isFullscreen={isFullscreen}
-            isMobile={isMobile}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onMouseMove={handleMouseMove}

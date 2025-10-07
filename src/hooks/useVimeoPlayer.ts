@@ -1,5 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { VimeoPlayer } from '@vimeo/player';
+
+interface VimeoPlayerInstance {
+  destroy(): void;
+  play(): Promise<void>;
+  pause(): Promise<void>;
+  setCurrentTime(time: number): Promise<void>;
+  setVolume(volume: number): Promise<void>;
+  getBuffered(): Promise<number[][]>;
+  on(event: string, callback: (...args: unknown[]) => void): void;
+}
 
 interface PlayerState {
   isPlaying: boolean;
@@ -36,7 +45,7 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
     buffered: 0
   });
 
-  const playerRef = useRef<VimeoPlayer | null>(null);
+  const playerRef = useRef<VimeoPlayerInstance | null>(null);
   const isDraggingRef = useRef(false);
   const animationRef = useRef<number | null>(null);
   const lastUpdateTimeRef = useRef(0);
@@ -65,8 +74,8 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
 
         const vimeoPlayer = new Player(`vimeo_${videoId}`, {
           id: parseInt(videoId),
-          width: '100%',
-          height: '100%',
+          width: 640,
+          height: 360,
           autoplay: autoPlay,
           muted: muted,
           loop: loop,
@@ -76,8 +85,6 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
           portrait: false,
           background: true,
           dnt: true,
-          api: true,
-          player_id: `vimeo_${videoId}`,
           rel: false,
           playsinline: true,
           color: '000000',

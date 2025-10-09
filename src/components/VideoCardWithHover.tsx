@@ -48,6 +48,8 @@ export default function VideoCardWithHover({
       pip: '0',
       playsinline: '1',
       color: '000000',
+      quality: '360p', // Calidad más baja para carga más rápida
+      speed: '1', // Velocidad normal
     });
     
     return `https://player.vimeo.com/video/${video.thumbnailId}?${params.toString()}`;
@@ -64,10 +66,10 @@ export default function VideoCardWithHover({
   const handleMouseEnter = () => {
     // Solo mostrar preview si hay thumbnailId
     if (video.thumbnailId) {
-      // Pequeño delay antes de mostrar el preview
+      // Delay reducido para respuesta más rápida
       hoverTimeoutRef.current = setTimeout(() => {
         setShowPreview(true);
-      }, 300);
+      }, 150);
     }
   };
 
@@ -110,7 +112,7 @@ export default function VideoCardWithHover({
       {/* Preview video (thumbnailId) - solo se carga en hover */}
       {showPreview && previewUrl && (
         <div 
-          className={`absolute inset-0 transition-opacity duration-500 ${
+          className={`absolute inset-0 transition-opacity duration-300 ${
             iframeLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         >
@@ -121,6 +123,7 @@ export default function VideoCardWithHover({
             allow="autoplay; fullscreen; picture-in-picture"
             title={`${video.title} preview`}
             frameBorder="0"
+            loading="eager"
             onLoad={() => setIframeLoaded(true)}
             style={{
               backgroundColor: '#000000',

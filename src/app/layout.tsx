@@ -49,6 +49,12 @@ export default function RootLayout({
         {/* Meta tags para optimización de carga */}
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+        
+        {/* DNS Prefetch y Preconnect para Vimeo - mejora velocidad de carga de videos */}
+        <link rel="dns-prefetch" href="https://player.vimeo.com" />
+        <link rel="preconnect" href="https://player.vimeo.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://vumbnail.com" />
+        <link rel="preconnect" href="https://vumbnail.com" crossOrigin="anonymous" />
       </head>
       <body className="w-full h-full m-0 p-0 overflow-hidden">
         {children}

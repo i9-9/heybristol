@@ -84,8 +84,6 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
           byline: false,
           portrait: false,
           background: true,
-          dnt: true,
-          rel: false,
           playsinline: true,
           color: '000000',
           controls: false

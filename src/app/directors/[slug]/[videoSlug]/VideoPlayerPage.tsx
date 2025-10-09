@@ -4,7 +4,7 @@ import Image from "next/image";
 import LogoB from "@/components/LogoB";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { VideoItem } from "@/lib/types";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import VideoPlayer from "@/components/VideoPlayer";
 import { generateVideoSlug } from "@/lib/types";
 
@@ -51,7 +51,6 @@ export default function VideoPlayerPage({
   const [showControls, setShowControls] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
   const isMobile = useIsMobile();
   const isIOS = useIsIOS();
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -215,22 +214,21 @@ export default function VideoPlayerPage({
       <div className="absolute top-0 left-0 p-6 z-10">
         <button 
           onClick={() => {
-            const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
-            router.push(isDevPreview ? '/devpreview' : '/');
+            router.push('/');
             setTimeout(() => {
-              const scrollToDirectors = () => {
-                const directorsSection = document.getElementById('directors');
-                if (directorsSection) {
-                  directorsSection.scrollIntoView({ 
+              const scrollToHero = () => {
+                const heroSection = document.querySelector('section');
+                if (heroSection) {
+                  heroSection.scrollIntoView({ 
                     behavior: 'smooth',
                     block: 'start',
                     inline: 'nearest'
                   });
                 } else {
-                  setTimeout(scrollToDirectors, 200);
+                  setTimeout(scrollToHero, 200);
                 }
               };
-              scrollToDirectors();
+              scrollToHero();
             }, 300);
           }}
           className="w-10 md:w-24 h-auto text-white hover:opacity-80 transition-opacity cursor-pointer"
@@ -339,8 +337,7 @@ export default function VideoPlayerPage({
       {!isFullscreen && (
         <div className="absolute bottom-6 right-6 z-10">
         <button onClick={() => {
-          const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
-          router.push(isDevPreview ? '/devpreview' : '/');
+          router.push('/');
           setTimeout(() => {
             const scrollToHero = () => {
               const heroSection = document.querySelector('section');

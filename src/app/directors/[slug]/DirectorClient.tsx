@@ -4,9 +4,9 @@ import Image from "next/image";
 import LogoB from "@/components/LogoB";
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { VideoItem } from "@/lib/types";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import CustomVimeoPlayer from "@/components/CustomVimeoPlayer";
-import VideoCard from "@/components/VideoCard";
+import VideoCardWithHover from "@/components/VideoCardWithHover";
 
 interface DirectorClientProps {
   director: { name: string; slug: string };
@@ -180,7 +180,6 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
   const [showControls, setShowControls] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
   const isMobile = useIsMobile();
   const isIOS = useIsIOS();
   const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -353,22 +352,21 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
       <div className="absolute top-0 left-0 p-6 z-10">
         <button 
           onClick={() => {
-            const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
-            router.push(isDevPreview ? '/devpreview' : '/');
+            router.push('/');
             setTimeout(() => {
-              const scrollToDirectors = () => {
-                const directorsSection = document.getElementById('directors');
-                if (directorsSection) {
-                  directorsSection.scrollIntoView({ 
+              const scrollToHero = () => {
+                const heroSection = document.querySelector('section');
+                if (heroSection) {
+                  heroSection.scrollIntoView({ 
                     behavior: 'smooth',
                     block: 'start',
                     inline: 'nearest'
                   });
                 } else {
-                  setTimeout(scrollToDirectors, 200);
+                  setTimeout(scrollToHero, 200);
                 }
               };
-              scrollToDirectors();
+              scrollToHero();
             }, 300);
           }}
           className="w-10 md:w-24 h-auto text-white hover:opacity-80 transition-opacity cursor-pointer"
@@ -381,8 +379,7 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
         <div className="absolute bottom-6 left-6 z-50">
           <button
             onClick={() => {
-              const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
-              router.push(isDevPreview ? '/devpreview' : '/');
+              router.push('/');
               setTimeout(() => {
                 const scrollToDirectors = () => {
                   const directorsSection = document.getElementById('directors');
@@ -444,7 +441,7 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
                           : START_CLASSES[group.layout.starts[videoIndex]];
                         
                         return (
-                          <VideoCard
+                          <VideoCardWithHover
                             key={video.id}
                             video={video}
                             directorSlug={director.slug}
@@ -571,8 +568,7 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
       {!isFullscreen && (
         <div className="absolute bottom-6 right-6 z-10">
         <button onClick={() => {
-          const isDevPreview = pathname.startsWith('/devpreview') || pathname.includes('/directors/');
-          router.push(isDevPreview ? '/devpreview' : '/');
+          router.push('/');
           setTimeout(() => {
             const scrollToHero = () => {
               const heroSection = document.querySelector('section');

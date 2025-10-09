@@ -33,6 +33,7 @@ interface CustomVimeoPlayerProps {
   isFullscreen?: boolean;
   isMobile?: boolean;
   loadIndex?: number;
+  quality?: '360p' | '540p' | '720p' | '1080p' | '1440p' | '2160p' | 'auto';
 }
 
 export default function CustomVimeoPlayer({
@@ -50,7 +51,8 @@ export default function CustomVimeoPlayer({
   onFullscreenToggle,
   isFullscreen = false,
   isMobile = false,
-  loadIndex = 0
+  loadIndex = 0,
+  quality = 'auto'
 }: CustomVimeoPlayerProps) {
   
   const [isPlaying, setIsPlaying] = useState(false);
@@ -99,12 +101,17 @@ export default function CustomVimeoPlayer({
       pip: '0'
     });
     
+    // Add quality parameter if specified
+    if (quality !== 'auto') {
+      params.set('quality', quality);
+    }
+    
     if (video.hash) {
       params.set('h', video.hash);
     }
     
     return `https://player.vimeo.com/video/${video.id}?${params.toString()}`;
-  }, [video?.id, video?.hash, loop]);
+  }, [video?.id, video?.hash, loop, quality]);
 
   useEffect(() => {
     const thumbUrl = getThumbnailUrl();

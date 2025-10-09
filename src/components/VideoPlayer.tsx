@@ -16,6 +16,7 @@ interface VideoPlayerProps {
   onMouseLeave?: () => void;
   onMouseMove?: () => void;
   showControls?: boolean;
+  quality?: '360p' | '540p' | '720p' | '1080p' | '1440p' | '2160p' | 'auto';
 }
 
 export default function VideoPlayer({ 
@@ -29,7 +30,8 @@ export default function VideoPlayer({
   onMouseEnter,
   onMouseLeave,
   onMouseMove,
-  showControls = false
+  showControls = false,
+  quality = 'auto'
 }: VideoPlayerProps) {
   const autoHideTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isClient, setIsClient] = useState(false);
@@ -37,6 +39,7 @@ export default function VideoPlayer({
   const [hasShownInitialTimeline, setHasShownInitialTimeline] = useState(false);
   const [isMouseOverVideo, setIsMouseOverVideo] = useState(false);
   const [isDraggingTimeline, setIsDraggingTimeline] = useState(false);
+  const [showLoadingError, setShowLoadingError] = useState(false);
 
   // Usar el custom hook
   const {
@@ -52,13 +55,34 @@ export default function VideoPlayer({
   } = useVimeoPlayer(video?.id || '', {
     autoPlay,
     muted,
-    loop
+    loop,
+    quality,
+    hash: video?.hash // Pasar el hash para videos privados
   });
 
   // Ensure component only renders on client side to prevent hydration issues
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Add timeout to detect if player is stuck loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!playerState.isReady) {
+        console.error(`[VideoPlayer] Player stuck loading for video ${video?.id}. Current state:`, playerState);
+        setShowLoadingError(true);
+      }
+    }, 10000); // 10 seconds
+
+    return () => clearTimeout(timeout);
+  }, [playerState.isReady, video?.id, playerState]);
+
+  // Reset error state when player becomes ready
+  useEffect(() => {
+    if (playerState.isReady) {
+      setShowLoadingError(false);
+    }
+  }, [playerState.isReady]);
 
   // Auto-hide controls logic
   useEffect(() => {
@@ -442,11 +466,30 @@ export default function VideoPlayer({
       )}
 
       {/* Loading State */}
-      {!playerState.isReady && (
+      {!playerState.isReady && !showLoadingError && (
         <div className="absolute inset-0 flex items-center justify-center bg-black">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
             <div className="text-sm opacity-75">Loading...</div>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {showLoadingError && !playerState.isReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black">
+          <div className="text-white text-center p-4">
+            <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div className="text-lg font-medium mb-2">Error loading video</div>
+            <div className="text-sm opacity-75 mb-4">The video could not be loaded. This might be due to privacy settings or network issues.</div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded transition-colors"
+            >
+              Retry
+            </button>
           </div>
         </div>
       )}

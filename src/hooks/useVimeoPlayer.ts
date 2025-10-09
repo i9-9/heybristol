@@ -16,13 +16,17 @@ interface UseVimeoPlayerOptions {
   autoPlay?: boolean;
   muted?: boolean;
   loop?: boolean;
+  quality?: '360p' | '540p' | '720p' | '1080p' | '1440p' | '2160p' | 'auto';
+  hash?: string; // Hash para videos privados de Vimeo
 }
 
 export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions = {}) {
   const {
     autoPlay = true,
     muted = true,
-    loop = false
+    loop = false,
+    quality = 'auto',
+    hash
   } = options;
 
   const [playerState, setPlayerState] = useState<PlayerState>({
@@ -61,10 +65,10 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
       if (!mounted) return;
 
       try {
+        console.log(`[VimeoPlayer] Initializing player for video ${videoId}${hash ? ' with hash' : ''}`);
         const { default: Player } = await import('@vimeo/player');
         
-        const vimeoPlayer = new Player(element, {
-          id: parseInt(videoId),
+        const playerOptions: any = {
           width: 640,
           height: 360,
           autoplay: autoPlay,
@@ -78,24 +82,52 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
           playsinline: true,
           color: '000000',
           controls: false
-        });
+        };
+
+        // If hash is provided (private video), use URL instead of ID
+        if (hash) {
+          playerOptions.url = `https://player.vimeo.com/video/${videoId}?h=${hash}`;
+          console.log(`[VimeoPlayer] Using URL with hash: ${playerOptions.url}`);
+        } else {
+          playerOptions.id = parseInt(videoId);
+          console.log(`[VimeoPlayer] Using video ID: ${playerOptions.id}`);
+        }
+
+        // Add quality if specified
+        if (quality !== 'auto') {
+          playerOptions.quality = quality;
+        }
+
+        console.log(`[VimeoPlayer] Creating Vimeo Player with options:`, playerOptions);
+        const vimeoPlayer = new Player(element, playerOptions);
+        console.log(`[VimeoPlayer] Vimeo Player created successfully`);
 
         playerRef.current = vimeoPlayer;
 
         // Event listeners
         vimeoPlayer.on('ready' as any, () => {
           if (!mounted) return;
+          console.log(`[VimeoPlayer] Player ready for video ${videoId}`);
           setPlayerState(prev => ({ ...prev, isReady: true }));
         });
 
         vimeoPlayer.on('play' as any, () => {
           if (!mounted) return;
+          console.log(`[VimeoPlayer] Playing video ${videoId}`);
           setPlayerState(prev => ({ ...prev, isPlaying: true }));
         });
 
         vimeoPlayer.on('pause' as any, () => {
           if (!mounted) return;
+          console.log(`[VimeoPlayer] Paused video ${videoId}`);
           setPlayerState(prev => ({ ...prev, isPlaying: false }));
+        });
+
+        vimeoPlayer.on('error' as any, (error: any) => {
+          if (!mounted) return;
+          console.error(`[VimeoPlayer] Error with video ${videoId}:`, error);
+          // Set ready to true to prevent infinite loading
+          setPlayerState(prev => ({ ...prev, isReady: true, isBuffering: false }));
         });
 
         vimeoPlayer.on('timeupdate' as any, (...args: unknown[]) => {
@@ -158,9 +190,10 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
         });
 
       } catch (error) {
-        console.error('Error initializing Vimeo player:', error);
+        console.error(`[VimeoPlayer] Error initializing Vimeo player for video ${videoId}:`, error);
         if (mounted) {
-          setPlayerState(prev => ({ ...prev, isReady: true }));
+          // Set ready to true to prevent infinite loading
+          setPlayerState(prev => ({ ...prev, isReady: true, isBuffering: false }));
         }
       }
     };
@@ -173,13 +206,18 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
         return new Promise((resolve) => {
           const element = document.getElementById(elementId);
           if (element) {
+            console.log(`[VimeoPlayer] Element ${elementId} found on retry ${retries}`);
             resolve(element);
-          } else if (retries < 10) { // Max 10 retries (1 second total)
+          } else if (retries < 30) { // Max 30 retries (3 seconds total)
             setTimeout(() => {
               waitForElement(retries + 1).then(resolve);
             }, 100);
           } else {
-            console.error(`Element ${elementId} not found after 10 retries`);
+            console.error(`[VimeoPlayer] Element ${elementId} not found after ${retries} retries`);
+            // Set ready state to true even if player fails to load, to prevent infinite loading
+            if (mounted) {
+              setPlayerState(prev => ({ ...prev, isReady: true, isBuffering: false }));
+            }
             resolve(null);
           }
         });
@@ -188,6 +226,8 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
       const element = await waitForElement();
       if (element && mounted) {
         await initializePlayerWithElement(element);
+      } else if (!element && mounted) {
+        console.error(`[VimeoPlayer] Failed to initialize player for video ${videoId}`);
       }
     };
 
@@ -201,7 +241,7 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoId, autoPlay, muted, loop]);
+  }, [videoId, autoPlay, muted, loop, quality, hash]);
 
   // RequestAnimationFrame loop
   useEffect(() => {

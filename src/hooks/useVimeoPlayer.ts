@@ -1,14 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useRef, useCallback, useEffect } from 'react';
-
-interface VimeoPlayerInstance {
-  destroy(): void;
-  play(): Promise<void>;
-  pause(): Promise<void>;
-  setCurrentTime(time: number): Promise<void>;
-  setVolume(volume: number): Promise<void>;
-  getBuffered(): Promise<number[][]>;
-  on(event: string, callback: (...args: unknown[]) => void): void;
-}
 
 interface PlayerState {
   isPlaying: boolean;
@@ -45,7 +36,7 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
     buffered: 0
   });
 
-  const playerRef = useRef<VimeoPlayerInstance | null>(null);
+  const playerRef = useRef<any>(null);
   const isDraggingRef = useRef(false);
   const animationRef = useRef<number | null>(null);
   const lastUpdateTimeRef = useRef(0);
@@ -66,13 +57,13 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
 
     let mounted = true;
 
-    const initializePlayer = async () => {
+    const initializePlayerWithElement = async (element: HTMLElement) => {
+      if (!mounted) return;
+
       try {
         const { default: Player } = await import('@vimeo/player');
         
-        if (!mounted) return;
-
-        const vimeoPlayer = new Player(`vimeo_${videoId}`, {
+        const vimeoPlayer = new Player(element, {
           id: parseInt(videoId),
           width: 640,
           height: 360,
@@ -92,22 +83,22 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
         playerRef.current = vimeoPlayer;
 
         // Event listeners
-        vimeoPlayer.on('ready', () => {
+        vimeoPlayer.on('ready' as any, () => {
           if (!mounted) return;
           setPlayerState(prev => ({ ...prev, isReady: true }));
         });
 
-        vimeoPlayer.on('play', () => {
+        vimeoPlayer.on('play' as any, () => {
           if (!mounted) return;
           setPlayerState(prev => ({ ...prev, isPlaying: true }));
         });
 
-        vimeoPlayer.on('pause', () => {
+        vimeoPlayer.on('pause' as any, () => {
           if (!mounted) return;
           setPlayerState(prev => ({ ...prev, isPlaying: false }));
         });
 
-        vimeoPlayer.on('timeupdate', (...args: unknown[]) => {
+        vimeoPlayer.on('timeupdate' as any, (...args: unknown[]) => {
           if (!mounted) return;
           const data = args[0] as { seconds: number };
           
@@ -121,29 +112,30 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
           setPlayerState(prev => ({ ...prev, currentTime: data.seconds }));
         });
 
-        vimeoPlayer.on('loaded', (...args: unknown[]) => {
+        vimeoPlayer.on('loaded' as any, (...args: unknown[]) => {
           if (!mounted) return;
           const data = args[0] as { duration: number };
           setPlayerState(prev => ({ ...prev, duration: data.duration }));
         });
 
-        vimeoPlayer.on('waiting', () => {
+        vimeoPlayer.on('waiting' as any, () => {
           if (!mounted) return;
           setPlayerState(prev => ({ ...prev, isBuffering: true }));
         });
 
-        vimeoPlayer.on('canplay', () => {
+        vimeoPlayer.on('canplay' as any, () => {
           if (!mounted) return;
           setPlayerState(prev => ({ ...prev, isBuffering: false }));
         });
 
         // Buffer tracking
-        vimeoPlayer.on('bufferend', () => {
+        vimeoPlayer.on('bufferend' as any, () => {
           if (!mounted) return;
           vimeoPlayer.getBuffered().then((buffered) => {
             if (!mounted) return;
             if (buffered.length > 0) {
-              const bufferedEnd = buffered[buffered.length - 1][1];
+              const lastRange = buffered[buffered.length - 1];
+              const bufferedEnd = lastRange.end;
               const duration = playerState.duration || 1; // Evitar división por 0
               setPlayerState(prev => ({ 
                 ...prev, 
@@ -155,7 +147,7 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
           });
         });
 
-        vimeoPlayer.on('volumechange', (...args: unknown[]) => {
+        vimeoPlayer.on('volumechange' as any, (...args: unknown[]) => {
           if (!mounted) return;
           const data = args[0] as { volume: number };
           setPlayerState(prev => ({ 
@@ -173,6 +165,32 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
       }
     };
 
+    const initializePlayer = async () => {
+      // Wait for DOM element to be available
+      const elementId = `vimeo_${videoId}`;
+      
+      const waitForElement = (retries = 0): Promise<HTMLElement | null> => {
+        return new Promise((resolve) => {
+          const element = document.getElementById(elementId);
+          if (element) {
+            resolve(element);
+          } else if (retries < 10) { // Max 10 retries (1 second total)
+            setTimeout(() => {
+              waitForElement(retries + 1).then(resolve);
+            }, 100);
+          } else {
+            console.error(`Element ${elementId} not found after 10 retries`);
+            resolve(null);
+          }
+        });
+      };
+
+      const element = await waitForElement();
+      if (element && mounted) {
+        await initializePlayerWithElement(element);
+      }
+    };
+
     initializePlayer();
 
     return () => {
@@ -182,7 +200,8 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
         playerRef.current = null;
       }
     };
-  }, [videoId, autoPlay, muted, loop, playerState.duration]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId, autoPlay, muted, loop]);
 
   // RequestAnimationFrame loop
   useEffect(() => {

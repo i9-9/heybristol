@@ -187,14 +187,18 @@ async function _getDirectorsFromContentful() {
       ...(isDevelopment ? {} : { 'sys.publishedAt[exists]': true })
     } as Parameters<typeof client.getEntries>[0]);
 
-    const directors = response.items.map((item: unknown, index: number) => {
+    const directors = response.items.map((item: unknown) => {
       const director = item as { fields: { name: string; slug: string; order: number; videos?: unknown[] } };
       return {
         name: director.fields.name,
         slug: director.fields.slug,
         order: director.fields.order,
-        videos: director.fields.videos?.map((video: unknown, videoIndex: number) => {
-          const directorVideo = video as { fields: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
+        videos: (director.fields.videos?.map((video: unknown) => {
+          const directorVideo = video as { fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
+          // Skip videos that don't have fields (unlinked references)
+          if (!directorVideo || !directorVideo.fields) {
+            return null;
+          }
           return {
             id: directorVideo.fields.id,
             title: directorVideo.fields.title,
@@ -203,7 +207,7 @@ async function _getDirectorsFromContentful() {
             thumbnailId: directorVideo.fields.thumbnailId,
             order: directorVideo.fields.order,
           };
-        }) || [],
+        }).filter(v => v !== null) ?? []) as Array<{ id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number }>,
       };
     });
 
@@ -254,8 +258,12 @@ async function _getDirectorBySlugFromContentful(slug: string) {
       name: item.fields.name,
       slug: item.fields.slug,
       order: item.fields.order,
-      videos: item.fields.videos?.map((video: unknown, videoIndex: number) => {
-        const directorVideo = video as { fields: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
+      videos: (item.fields.videos?.map((video: unknown) => {
+        const directorVideo = video as { fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
+        // Skip videos that don't have fields (unlinked references)
+        if (!directorVideo || !directorVideo.fields) {
+          return null;
+        }
         return {
           id: directorVideo.fields.id,
           title: directorVideo.fields.title,
@@ -264,7 +272,7 @@ async function _getDirectorBySlugFromContentful(slug: string) {
           thumbnailId: directorVideo.fields.thumbnailId,
           order: directorVideo.fields.order,
         };
-      }) || [],
+      }).filter(v => v !== null) ?? []) as Array<{ id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number }>,
     };
   } catch (error) {
     console.error('Error fetching director from Contentful:', error);
@@ -310,7 +318,7 @@ async function _getHeroVideosFromContentful(): Promise<HeroVideo[]> {
       include: 2, // Include referenced assets
     });
 
-    return response.items.map((item: unknown, index: number) => {
+    return response.items.map((item: unknown) => {
       const heroVideo = item as { 
         fields: { 
           id: string; 
@@ -520,7 +528,7 @@ async function _getEditorialVideosFromContentful(): Promise<EditorialVideo[]> {
       order: ['fields.order'] // Ordenar por el campo order
     });
 
-    return entries.items.map((editorialVideo: unknown, index: number) => {
+    return entries.items.map((editorialVideo: unknown) => {
       const video = editorialVideo as { 
         fields: { 
           id: string; 

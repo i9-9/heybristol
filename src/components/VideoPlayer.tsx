@@ -31,7 +31,6 @@ export default function VideoPlayer({
   onMouseMove,
   showControls = false
 }: VideoPlayerProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const autoHideTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [showTimeline, setShowTimeline] = useState(false);
@@ -110,7 +109,7 @@ export default function VideoPlayer({
     } catch (error) {
       console.error('Error seeking:', error);
     }
-  }, [isDragging, handleSeek, playerState.duration]);
+  }, [isDragging, handleSeek, playerState.duration, playerRef]);
 
   const handleTimelineMouseUp = useCallback(async (event: React.MouseEvent) => {
     if (!playerRef.current || !isDragging()) return;
@@ -128,7 +127,7 @@ export default function VideoPlayer({
     } catch (error) {
       console.error('Error seeking:', error);
     }
-  }, [isDragging, stopDragging, handleSeek, playerState.duration]);
+  }, [isDragging, stopDragging, handleSeek, playerState.duration, playerRef]);
 
 
   // Event listeners globales para mejor dragging
@@ -165,7 +164,7 @@ export default function VideoPlayer({
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [isDraggingTimeline, playerState.duration, isDragging, stopDragging, handleSeek]);
+  }, [isDraggingTimeline, playerState.duration, isDragging, stopDragging, handleSeek, playerRef]);
 
   const handleMouseEnter = useCallback(() => {
     setIsMouseOverVideo(true);
@@ -215,36 +214,8 @@ export default function VideoPlayer({
         handleSeek(playerState.duration);
         break;
     }
-  }, [playerState.currentTime, playerState.duration, handlePlayPause, handleSeek]);
+  }, [playerState.currentTime, playerState.duration, handlePlayPause, handleSeek, playerRef]);
 
-  const getVimeoUrl = () => {
-    if (!video?.id) return '';
-    
-    const params = new URLSearchParams({
-      title: '0',
-      byline: '0',
-      portrait: '0',
-      background: '1',
-      autoplay: autoPlay ? '1' : '0',
-      muted: muted ? '1' : '0',
-      dnt: '1',
-      api: '1',
-      player_id: `vimeo_${video.id}`,
-      rel: '0',
-      playsinline: '1',
-      color: '000000',
-      controls: '0',
-      keyboard: '0',
-      pip: '0',
-      loop: loop ? '1' : '0'
-    });
-    
-    if (video.hash) {
-      params.set('h', video.hash);
-    }
-    
-    return `https://player.vimeo.com/video/${video.id}?${params.toString()}`;
-  };
 
   if (!isClient) {
     return (
@@ -296,12 +267,9 @@ export default function VideoPlayer({
         onMouseMove={handleMouseMove}
       >
       {/* Vimeo Player */}
-      <iframe
-        ref={iframeRef}
-        src={getVimeoUrl()}
+      <div 
+        id={`vimeo_${video?.id}`}
         className="w-full h-full"
-        allow="autoplay; fullscreen; picture-in-picture"
-        allowFullScreen
       />
 
       {/* Overlay Controls */}

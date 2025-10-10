@@ -10,6 +10,7 @@ interface PlayerState {
   isMuted: boolean;
   volume: number;
   buffered: number;
+  hasEnded: boolean;
 }
 
 interface UseVimeoPlayerOptions {
@@ -37,13 +38,15 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
     isBuffering: false,
     isMuted: muted,
     volume: 1,
-    buffered: 0
+    buffered: 0,
+    hasEnded: false
   });
 
   const playerRef = useRef<any>(null);
   const isDraggingRef = useRef(false);
   const animationRef = useRef<number | null>(null);
   const lastUpdateTimeRef = useRef(0);
+  const previousVolumeRef = useRef(1); // Guardar el volumen antes de mutear
 
   // RequestAnimationFrame para animaciones fluidas
   const updateProgress = useCallback(() => {
@@ -114,13 +117,20 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
         vimeoPlayer.on('play' as any, () => {
           if (!mounted) return;
           console.log(`[VimeoPlayer] Playing video ${videoId}`);
-          setPlayerState(prev => ({ ...prev, isPlaying: true }));
+          // Si el video empieza a reproducir, considerarlo ready también y resetear hasEnded
+          setPlayerState(prev => ({ ...prev, isPlaying: true, isReady: true, hasEnded: false }));
         });
 
         vimeoPlayer.on('pause' as any, () => {
           if (!mounted) return;
           console.log(`[VimeoPlayer] Paused video ${videoId}`);
           setPlayerState(prev => ({ ...prev, isPlaying: false }));
+        });
+
+        vimeoPlayer.on('ended' as any, () => {
+          if (!mounted) return;
+          console.log(`[VimeoPlayer] Video ended ${videoId}`);
+          setPlayerState(prev => ({ ...prev, isPlaying: false, hasEnded: true }));
         });
 
         vimeoPlayer.on('error' as any, (error: any) => {
@@ -147,7 +157,14 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
         vimeoPlayer.on('loaded' as any, (...args: unknown[]) => {
           if (!mounted) return;
           const data = args[0] as { duration: number };
-          setPlayerState(prev => ({ ...prev, duration: data.duration }));
+          // Si tenemos la duración, el video está listo
+          setPlayerState(prev => ({ ...prev, duration: data.duration, isReady: true }));
+        });
+
+        vimeoPlayer.on('loadeddata' as any, () => {
+          if (!mounted) return;
+          console.log(`[VimeoPlayer] Loaded data for video ${videoId}`);
+          setPlayerState(prev => ({ ...prev, isReady: true }));
         });
 
         vimeoPlayer.on('waiting' as any, () => {
@@ -155,9 +172,10 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
           setPlayerState(prev => ({ ...prev, isBuffering: true }));
         });
 
-        vimeoPlayer.on('canplay' as any, () => {
+        vimeoPlayer.on('playing' as any, () => {
           if (!mounted) return;
-          setPlayerState(prev => ({ ...prev, isBuffering: false }));
+          // El video está reproduciéndose activamente, está ready
+          setPlayerState(prev => ({ ...prev, isBuffering: false, isReady: true }));
         });
 
         // Buffer tracking
@@ -286,6 +304,10 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
     
     try {
       await playerRef.current.setVolume(volume);
+      // Guardar el volumen si no es 0 (para restaurar después del mute)
+      if (volume > 0) {
+        previousVolumeRef.current = volume;
+      }
       setPlayerState(prev => ({ 
         ...prev, 
         volume,
@@ -301,16 +323,34 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
     
     try {
       if (playerState.isMuted) {
-        await playerRef.current.setVolume(playerState.volume);
-        setPlayerState(prev => ({ ...prev, isMuted: false }));
+        // Restaurar el volumen anterior
+        const volumeToRestore = previousVolumeRef.current > 0 ? previousVolumeRef.current : 1;
+        await playerRef.current.setVolume(volumeToRestore);
+        setPlayerState(prev => ({ ...prev, isMuted: false, volume: volumeToRestore }));
       } else {
+        // Guardar el volumen actual antes de mutear
+        if (playerState.volume > 0) {
+          previousVolumeRef.current = playerState.volume;
+        }
         await playerRef.current.setVolume(0);
-        setPlayerState(prev => ({ ...prev, isMuted: true }));
+        setPlayerState(prev => ({ ...prev, isMuted: true, volume: 0 }));
       }
     } catch (error) {
       console.error('Error toggling mute:', error);
     }
   }, [playerState.isMuted, playerState.volume]);
+
+  const handleReplay = useCallback(async () => {
+    if (!playerRef.current) return;
+    
+    try {
+      await playerRef.current.setCurrentTime(0);
+      await playerRef.current.play();
+      setPlayerState(prev => ({ ...prev, hasEnded: false, isPlaying: true, currentTime: 0 }));
+    } catch (error) {
+      console.error('Error replaying video:', error);
+    }
+  }, []);
 
   // Timeline dragging methods
   const startDragging = useCallback(() => {
@@ -332,6 +372,7 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
     handleSeek,
     handleVolumeChange,
     handleMuteToggle,
+    handleReplay,
     startDragging,
     stopDragging,
     isDragging

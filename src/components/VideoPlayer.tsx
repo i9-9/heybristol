@@ -39,7 +39,6 @@ export default function VideoPlayer({
   const [hasShownInitialTimeline, setHasShownInitialTimeline] = useState(false);
   const [isMouseOverVideo, setIsMouseOverVideo] = useState(false);
   const [isDraggingTimeline, setIsDraggingTimeline] = useState(false);
-  const [showLoadingError, setShowLoadingError] = useState(false);
 
   // Usar el custom hook
   const {
@@ -49,6 +48,7 @@ export default function VideoPlayer({
     handleSeek,
     handleVolumeChange,
     handleMuteToggle,
+    handleReplay,
     startDragging,
     stopDragging,
     isDragging
@@ -57,32 +57,13 @@ export default function VideoPlayer({
     muted,
     loop,
     quality,
-    hash: video?.hash // Pasar el hash para videos privados
+    hash: video?.hash
   });
 
   // Ensure component only renders on client side to prevent hydration issues
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  // Add timeout to detect if player is stuck loading
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!playerState.isReady) {
-        console.error(`[VideoPlayer] Player stuck loading for video ${video?.id}. Current state:`, playerState);
-        setShowLoadingError(true);
-      }
-    }, 10000); // 10 seconds
-
-    return () => clearTimeout(timeout);
-  }, [playerState.isReady, video?.id, playerState]);
-
-  // Reset error state when player becomes ready
-  useEffect(() => {
-    if (playerState.isReady) {
-      setShowLoadingError(false);
-    }
-  }, [playerState.isReady]);
 
   // Auto-hide controls logic
   useEffect(() => {
@@ -133,7 +114,7 @@ export default function VideoPlayer({
     } catch (error) {
       console.error('Error seeking:', error);
     }
-  }, [isDragging, handleSeek, playerState.duration, playerRef]);
+  }, [isDragging, handleSeek, playerState.duration]);
 
   const handleTimelineMouseUp = useCallback(async (event: React.MouseEvent) => {
     if (!playerRef.current || !isDragging()) return;
@@ -151,7 +132,7 @@ export default function VideoPlayer({
     } catch (error) {
       console.error('Error seeking:', error);
     }
-  }, [isDragging, stopDragging, handleSeek, playerState.duration, playerRef]);
+  }, [isDragging, stopDragging, handleSeek, playerState.duration]);
 
 
   // Event listeners globales para mejor dragging
@@ -188,7 +169,7 @@ export default function VideoPlayer({
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [isDraggingTimeline, playerState.duration, isDragging, stopDragging, handleSeek, playerRef]);
+  }, [isDraggingTimeline, playerState.duration, isDragging, stopDragging, handleSeek]);
 
   const handleMouseEnter = useCallback(() => {
     setIsMouseOverVideo(true);
@@ -206,7 +187,8 @@ export default function VideoPlayer({
     onMouseMove?.();
   }, [onMouseMove]);
 
-  const formatTime = (time: number) => {
+  const formatTime = (time: number | undefined) => {
+    if (!time || isNaN(time)) return '0:00';
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -238,7 +220,7 @@ export default function VideoPlayer({
         handleSeek(playerState.duration);
         break;
     }
-  }, [playerState.currentTime, playerState.duration, handlePlayPause, handleSeek, playerRef]);
+  }, [playerState.currentTime, playerState.duration, handlePlayPause, handleSeek]);
 
 
   if (!isClient) {
@@ -290,7 +272,7 @@ export default function VideoPlayer({
         onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
       >
-      {/* Vimeo Player */}
+      {/* Vimeo Player - div para que el SDK de Vimeo cree el iframe */}
       <div 
         id={`vimeo_${video?.id}`}
         className="w-full h-full"
@@ -439,14 +421,14 @@ export default function VideoPlayer({
                 
                 {/* Timeline handle */}
                 <div 
-                  className={`absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-200 ${
+                  className={`absolute top-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-200 ${
                     isDraggingTimeline 
                       ? 'scale-125 shadow-xl shadow-white/50' 
                       : 'group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-white/30'
                   }`}
                   style={{ 
                     left: `${playerState.duration > 0 ? (playerState.currentTime / playerState.duration) * 100 : 0}%`,
-                    transform: 'translate(-50%, -50%)'
+                    transform: 'translate(-50%, -35%)'
                   }}
                 />
                 
@@ -465,31 +447,31 @@ export default function VideoPlayer({
         </div>
       )}
 
+      {/* Play Again Overlay - aparece cuando el video termina */}
+      {playerState.hasEnded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm z-50">
+          <button
+            onClick={handleReplay}
+            className="group flex flex-col items-center space-y-4 cursor-pointer transition-all duration-300 hover:scale-105"
+          >
+            <div className="w-20 h-20 bg-white/10 group-hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center transition-all duration-300 border-2 border-white/30 group-hover:border-white/50">
+              <svg className="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+            <span className="text-white text-xl font-medium uppercase tracking-wide">
+              Play Again
+            </span>
+          </button>
+        </div>
+      )}
+
       {/* Loading State */}
-      {!playerState.isReady && !showLoadingError && (
+      {!playerState.isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-black">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
             <div className="text-sm opacity-75">Loading...</div>
-          </div>
-        </div>
-      )}
-
-      {/* Error State */}
-      {showLoadingError && !playerState.isReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black">
-          <div className="text-white text-center p-4">
-            <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <div className="text-lg font-medium mb-2">Error loading video</div>
-            <div className="text-sm opacity-75 mb-4">The video could not be loaded. This might be due to privacy settings or network issues.</div>
-            <button 
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded transition-colors"
-            >
-              Retry
-            </button>
           </div>
         </div>
       )}

@@ -84,6 +84,11 @@ export default function VideoPlayer({
     }
   }, [showTimeline, isMouseOverVideo]);
 
+  // Debug: Log current time updates
+  useEffect(() => {
+    console.log('Current time:', playerState.currentTime, 'Duration:', playerState.duration);
+  }, [playerState.currentTime, playerState.duration]);
+
   // Show timeline on initial interaction
   useEffect(() => {
     if (playerState.isReady && !hasShownInitialTimeline) {
@@ -102,22 +107,22 @@ export default function VideoPlayer({
   }, [startDragging]);
 
   const handleTimelineMouseMove = useCallback(async (event: React.MouseEvent) => {
-    if (!isDragging() || !playerRef.current) return;
+    if (!isDragging() || !playerRef.current || !playerState.duration) return;
     
     const rect = event.currentTarget.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
     const percentage = Math.max(0, Math.min(1, clickX / rect.width));
-    const newTime = percentage * playerState.duration;
+    const newTime = Math.max(0, Math.min(playerState.duration - 0.1, percentage * playerState.duration));
     
     try {
       await handleSeek(newTime);
     } catch (error) {
       console.error('Error seeking:', error);
     }
-  }, [isDragging, handleSeek, playerState.duration]);
+  }, [isDragging, handleSeek, playerState.duration, playerRef]);
 
   const handleTimelineMouseUp = useCallback(async (event: React.MouseEvent) => {
-    if (!playerRef.current || !isDragging()) return;
+    if (!playerRef.current || !isDragging() || !playerState.duration) return;
     
     stopDragging();
     setIsDraggingTimeline(false);
@@ -125,20 +130,20 @@ export default function VideoPlayer({
     const rect = event.currentTarget.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
     const percentage = Math.max(0, Math.min(1, clickX / rect.width));
-    const newTime = percentage * playerState.duration;
+    const newTime = Math.max(0, Math.min(playerState.duration - 0.1, percentage * playerState.duration));
     
     try {
       await handleSeek(newTime);
     } catch (error) {
       console.error('Error seeking:', error);
     }
-  }, [isDragging, stopDragging, handleSeek, playerState.duration]);
+  }, [isDragging, stopDragging, handleSeek, playerState.duration, playerRef]);
 
 
   // Event listeners globales para mejor dragging
   useEffect(() => {
     const handleGlobalMouseMove = async (e: MouseEvent) => {
-      if (!isDragging() || !playerRef.current) return;
+      if (!isDragging() || !playerRef.current || !playerState.duration) return;
       
       const timeline = document.querySelector('[data-timeline]');
       if (!timeline) return;
@@ -146,7 +151,7 @@ export default function VideoPlayer({
       const rect = timeline.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const percentage = Math.max(0, Math.min(1, clickX / rect.width));
-      const newTime = percentage * playerState.duration;
+      const newTime = Math.max(0, Math.min(playerState.duration - 0.1, percentage * playerState.duration));
       
       try {
         await handleSeek(newTime);
@@ -169,7 +174,7 @@ export default function VideoPlayer({
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [isDraggingTimeline, playerState.duration, isDragging, stopDragging, handleSeek]);
+  }, [isDraggingTimeline, playerState.duration, isDragging, stopDragging, handleSeek, playerRef]);
 
   const handleMouseEnter = useCallback(() => {
     setIsMouseOverVideo(true);
@@ -220,7 +225,7 @@ export default function VideoPlayer({
         handleSeek(playerState.duration);
         break;
     }
-  }, [playerState.currentTime, playerState.duration, handlePlayPause, handleSeek]);
+  }, [playerState.currentTime, playerState.duration, handlePlayPause, handleSeek, playerRef]);
 
 
   if (!isClient) {
@@ -381,6 +386,7 @@ export default function VideoPlayer({
               
               {/* Timeline visual */}
               <div
+                data-timeline
                 className={`w-full h-2 bg-white/20 rounded-full cursor-pointer relative group transition-all duration-300 ${
                   isDraggingTimeline ? 'scale-y-125' : 'hover:scale-y-125'
                 }`}
@@ -421,10 +427,10 @@ export default function VideoPlayer({
                 
                 {/* Timeline handle */}
                 <div 
-                  className={`absolute top-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-200 ${
+                  className={`absolute top-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-shadow duration-200 ${
                     isDraggingTimeline 
-                      ? 'scale-125 shadow-xl shadow-white/50' 
-                      : 'group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-white/30'
+                      ? 'shadow-xl shadow-white/50' 
+                      : 'group-hover:shadow-xl group-hover:shadow-white/30'
                   }`}
                   style={{ 
                     left: `${playerState.duration > 0 ? (playerState.currentTime / playerState.duration) * 100 : 0}%`,

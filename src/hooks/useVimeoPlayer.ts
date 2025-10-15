@@ -47,14 +47,31 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
   const animationRef = useRef<number | null>(null);
   const lastUpdateTimeRef = useRef(0);
   const previousVolumeRef = useRef(1); // Guardar el volumen antes de mutear
+  const timeUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // RequestAnimationFrame para animaciones fluidas
-  const updateProgress = useCallback(() => {
-    if (!playerRef.current || isDraggingRef.current) {
-      animationRef.current = requestAnimationFrame(updateProgress);
+  // RequestAnimationFrame para animaciones fluidas - solo cuando se está arrastrando
+  const updateProgress = useCallback(async () => {
+    if (!playerRef.current || !isDraggingRef.current) {
+      if (isDraggingRef.current) {
+        animationRef.current = requestAnimationFrame(updateProgress);
+      }
       return;
     }
-    
+
+    // Update current time when dragging to keep the ball moving smoothly
+    try {
+      const currentTime = await playerRef.current.getCurrentTime();
+      setPlayerState(prev => {
+        // Only update if the time has actually changed to avoid unnecessary re-renders
+        if (Math.abs(prev.currentTime - currentTime) > 0.01) {
+          return { ...prev, currentTime };
+        }
+        return prev;
+      });
+    } catch (error) {
+      // Ignore errors, player might not be ready yet
+    }
+
     animationRef.current = requestAnimationFrame(updateProgress);
   }, []);
 
@@ -108,17 +125,34 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
         playerRef.current = vimeoPlayer;
 
         // Event listeners
-        vimeoPlayer.on('ready' as any, () => {
+        vimeoPlayer.on('ready' as any, async () => {
           if (!mounted) return;
           console.log(`[VimeoPlayer] Player ready for video ${videoId}`);
-          setPlayerState(prev => ({ ...prev, isReady: true }));
+          
+          // Try to get duration when ready
+          try {
+            const duration = await vimeoPlayer.getDuration();
+            console.log('[VimeoPlayer] Got duration from ready event:', duration);
+            setPlayerState(prev => ({ ...prev, duration, isReady: true }));
+          } catch (error) {
+            console.log('[VimeoPlayer] Could not get duration on ready:', error);
+            setPlayerState(prev => ({ ...prev, isReady: true }));
+          }
         });
 
-        vimeoPlayer.on('play' as any, () => {
+        vimeoPlayer.on('play' as any, async () => {
           if (!mounted) return;
           console.log(`[VimeoPlayer] Playing video ${videoId}`);
-          // Si el video empieza a reproducir, considerarlo ready también y resetear hasEnded
-          setPlayerState(prev => ({ ...prev, isPlaying: true, isReady: true, hasEnded: false }));
+          
+          // Try to get duration when playing starts
+          try {
+            const duration = await vimeoPlayer.getDuration();
+            console.log('[VimeoPlayer] Got duration from play event:', duration);
+            setPlayerState(prev => ({ ...prev, duration, isPlaying: true, isReady: true, hasEnded: false }));
+          } catch (error) {
+            console.log('[VimeoPlayer] Could not get duration on play:', error);
+            setPlayerState(prev => ({ ...prev, isPlaying: true, isReady: true, hasEnded: false }));
+          }
         });
 
         vimeoPlayer.on('pause' as any, () => {
@@ -142,21 +176,25 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
 
         vimeoPlayer.on('timeupdate' as any, (...args: unknown[]) => {
           if (!mounted) return;
+          console.log('[VimeoPlayer] timeupdate event:', args);
           const data = args[0] as { seconds: number };
           
-          // Throttle updates when dragging to prevent stuttering
+          // Only throttle when actively dragging, not during normal playback
           const now = Date.now();
-          if (isDraggingRef.current && now - lastUpdateTimeRef.current < 50) {
+          if (isDraggingRef.current && now - lastUpdateTimeRef.current < 16) { // ~60fps
             return;
           }
           
           lastUpdateTimeRef.current = now;
+          console.log('[VimeoPlayer] Updating currentTime to:', data.seconds);
           setPlayerState(prev => ({ ...prev, currentTime: data.seconds }));
         });
 
         vimeoPlayer.on('loaded' as any, (...args: unknown[]) => {
           if (!mounted) return;
+          console.log('[VimeoPlayer] loaded event:', args);
           const data = args[0] as { duration: number };
+          console.log('[VimeoPlayer] Setting duration from loaded event:', data.duration);
           // Si tenemos la duración, el video está listo
           setPlayerState(prev => ({ ...prev, duration: data.duration, isReady: true }));
         });
@@ -257,13 +295,17 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
         playerRef.current.destroy();
         playerRef.current = null;
       }
+      if (timeUpdateIntervalRef.current) {
+        clearInterval(timeUpdateIntervalRef.current);
+        timeUpdateIntervalRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, autoPlay, muted, loop, quality, hash]);
 
-  // RequestAnimationFrame loop
+  // RequestAnimationFrame loop - solo cuando se está arrastrando
   useEffect(() => {
-    if (playerState.isPlaying && playerState.isReady) {
+    if (isDraggingRef.current) {
       animationRef.current = requestAnimationFrame(updateProgress);
     }
     
@@ -272,7 +314,63 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [playerState.isPlaying, playerState.isReady, updateProgress]);
+  }, [updateProgress]);
+
+  // Fallback time update using setInterval when playing
+  useEffect(() => {
+    if (playerState.isPlaying && playerState.isReady && playerRef.current) {
+      console.log('[VimeoPlayer] Starting time update interval');
+      timeUpdateIntervalRef.current = setInterval(async () => {
+        if (!playerRef.current || !playerState.isPlaying) return;
+        
+        try {
+          const currentTime = await playerRef.current.getCurrentTime();
+          console.log('[VimeoPlayer] Interval update - currentTime:', currentTime);
+          setPlayerState(prev => {
+            if (Math.abs(prev.currentTime - currentTime) > 0.1) {
+              return { ...prev, currentTime };
+            }
+            return prev;
+          });
+        } catch (error) {
+          console.error('[VimeoPlayer] Error getting current time:', error);
+        }
+      }, 100); // Update every 100ms
+    } else {
+      if (timeUpdateIntervalRef.current) {
+        console.log('[VimeoPlayer] Clearing time update interval');
+        clearInterval(timeUpdateIntervalRef.current);
+        timeUpdateIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (timeUpdateIntervalRef.current) {
+        clearInterval(timeUpdateIntervalRef.current);
+        timeUpdateIntervalRef.current = null;
+      }
+    };
+  }, [playerState.isPlaying, playerState.isReady]);
+
+  // Try to get duration if it's still undefined
+  useEffect(() => {
+    if (playerState.isReady && !playerState.duration && playerRef.current) {
+      console.log('[VimeoPlayer] Trying to get duration because it\'s undefined');
+      const tryGetDuration = async () => {
+        try {
+          const duration = await playerRef.current.getDuration();
+          console.log('[VimeoPlayer] Successfully got duration:', duration);
+          setPlayerState(prev => ({ ...prev, duration }));
+        } catch (error) {
+          console.log('[VimeoPlayer] Could not get duration:', error);
+        }
+      };
+      
+      // Try immediately and then after a short delay
+      tryGetDuration();
+      setTimeout(tryGetDuration, 1000);
+    }
+  }, [playerState.isReady, playerState.duration]);
 
   // Métodos del player
   const handlePlayPause = useCallback(async () => {
@@ -355,10 +453,19 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
   // Timeline dragging methods
   const startDragging = useCallback(() => {
     isDraggingRef.current = true;
-  }, []);
+    // Start the animation loop for smooth dragging
+    if (!animationRef.current) {
+      animationRef.current = requestAnimationFrame(updateProgress);
+    }
+  }, [updateProgress]);
 
   const stopDragging = useCallback(() => {
     isDraggingRef.current = false;
+    // Stop the animation loop
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
   }, []);
 
   const isDragging = useCallback(() => {

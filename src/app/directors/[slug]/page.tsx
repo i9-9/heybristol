@@ -8,9 +8,10 @@ interface PageProps {
   }>;
 }
 
-// SSG - Static Site Generation
-export const dynamic = 'force-static';
-export const revalidate = false;
+// ISR - Incremental Static Regeneration
+// Pages are statically generated but can be regenerated on-demand via webhooks
+// or automatically after 1 hour if stale
+export const revalidate = 3600; // 1 hour
 
 // Generar rutas estáticas para todos los directores
 export async function generateStaticParams() {

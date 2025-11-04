@@ -8,13 +8,29 @@ export async function POST(request: NextRequest) {
   try {
     const rawBody = await request.json().catch(() => ({}));
     
+    // Type for Contentful webhook entry
+    type ContentfulEntry = {
+      sys?: {
+        type?: string;
+        contentType?: {
+          sys?: {
+            id?: string;
+          };
+        };
+      };
+      fields?: {
+        slug?: string;
+        [key: string]: unknown;
+      };
+    };
+    
     // Handle both single entry and array of entries (batch updates)
-    const entries = Array.isArray(rawBody) ? rawBody : [rawBody];
+    const entries: ContentfulEntry[] = Array.isArray(rawBody) ? rawBody as ContentfulEntry[] : [rawBody as ContentfulEntry];
     
     // Log webhook received for debugging
     console.log('📥 Contentful webhook received:', {
       entryCount: entries.length,
-      entries: entries.map((e: any) => ({
+      entries: entries.map((e) => ({
         contentType: e?.sys?.contentType?.sys?.id,
         type: e?.sys?.type,
         hasFields: !!e?.fields

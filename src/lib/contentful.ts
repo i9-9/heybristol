@@ -196,16 +196,16 @@ async function _getDirectorsFromContentful() {
         videos: (director.fields.videos?.map((video: unknown) => {
           const directorVideo = video as { 
             fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number };
-            sys?: { publishedAt?: string };
+            sys?: { publishedAt?: string; publishedVersion?: number };
           };
           // Skip videos that don't have fields (unlinked references)
           if (!directorVideo || !directorVideo.fields) {
             return null;
           }
-          // Skip unpublished videos (in production, only include published videos)
-          // In production, Contentful Delivery API should only return published entries,
-          // but we add an extra check here for safety
-          if (!isDevelopment && directorVideo.sys && !directorVideo.sys.publishedAt) {
+          // Contentful Delivery API should automatically filter unpublished entries
+          // Only filter if we're in development and explicitly see it's unpublished
+          // In production, trust Contentful's filtering
+          if (isDevelopment && directorVideo.sys && !directorVideo.sys.publishedAt && !directorVideo.sys.publishedVersion) {
             return null;
           }
           return {
@@ -270,15 +270,16 @@ async function _getDirectorBySlugFromContentful(slug: string) {
       videos: (item.fields.videos?.map((video: unknown) => {
         const directorVideo = video as { 
           fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number };
-          sys?: { publishedAt?: string };
+          sys?: { publishedAt?: string; publishedVersion?: number };
         };
         // Skip videos that don't have fields (unlinked references)
         if (!directorVideo || !directorVideo.fields) {
           return null;
         }
-        // Skip unpublished videos (in production, only include published videos)
+        // Contentful Delivery API should automatically filter unpublished entries
+        // Only filter if we're in development and explicitly see it's unpublished
         const isDevelopment = process.env.NODE_ENV === 'development';
-        if (!isDevelopment && directorVideo.sys && !directorVideo.sys.publishedAt) {
+        if (isDevelopment && directorVideo.sys && !directorVideo.sys.publishedAt && !directorVideo.sys.publishedVersion) {
           return null;
         }
         return {

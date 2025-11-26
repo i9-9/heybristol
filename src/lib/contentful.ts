@@ -194,9 +194,18 @@ async function _getDirectorsFromContentful() {
         slug: director.fields.slug,
         order: director.fields.order,
         videos: (director.fields.videos?.map((video: unknown) => {
-          const directorVideo = video as { fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
+          const directorVideo = video as { 
+            fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number };
+            sys?: { publishedAt?: string };
+          };
           // Skip videos that don't have fields (unlinked references)
           if (!directorVideo || !directorVideo.fields) {
+            return null;
+          }
+          // Skip unpublished videos (in production, only include published videos)
+          // In production, Contentful Delivery API should only return published entries,
+          // but we add an extra check here for safety
+          if (!isDevelopment && directorVideo.sys && !directorVideo.sys.publishedAt) {
             return null;
           }
           return {
@@ -259,9 +268,17 @@ async function _getDirectorBySlugFromContentful(slug: string) {
       slug: item.fields.slug,
       order: item.fields.order,
       videos: (item.fields.videos?.map((video: unknown) => {
-        const directorVideo = video as { fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
+        const directorVideo = video as { 
+          fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number };
+          sys?: { publishedAt?: string };
+        };
         // Skip videos that don't have fields (unlinked references)
         if (!directorVideo || !directorVideo.fields) {
+          return null;
+        }
+        // Skip unpublished videos (in production, only include published videos)
+        const isDevelopment = process.env.NODE_ENV === 'development';
+        if (!isDevelopment && directorVideo.sys && !directorVideo.sys.publishedAt) {
           return null;
         }
         return {

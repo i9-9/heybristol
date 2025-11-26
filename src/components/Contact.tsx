@@ -49,27 +49,32 @@ export default function Contact() {
         </div>
       </div>
 
-      {/* Contact Information - Grid 2x2 */}
+      {/* Contact Information - Horizontal on desktop, column on mobile */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 translate-y-[1rem] md:translate-y-[8rem] z-10">
         <div className="text-center">
-          <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 md:gap-x-16 md:gap-y-4 text-black">
+          <div className="mt-4 md:mt-6 flex flex-col md:flex-row md:justify-center md:items-center gap-y-2 md:gap-y-0 md:gap-x-8 lg:gap-x-12 text-black">
             <div>
-              <a href="mailto:jorge@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">JORGE LARRAIN
+              <a href="mailto:gabriela@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">GABRIELA ALFARO
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>
             <div>
-              <a href="mailto:blue@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">AZUL CRESPO
+              <a href="mailto:jorge@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">JORGE LARRAIN
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>
             <div>
-              <a href="mailto:martin@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">MARTÍN GIUDICESSI
+              <a href="mailto:blue@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">AZUL CRESPO
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>
             <div>
-              <a href="mailto:direccion@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group">ENRIQUE NAVA
+              <a href="mailto:martin@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">MARTÍN GIUDICESSI
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
+              </a>
+            </div>
+            <div>
+              <a href="mailto:direccion@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">ENRIQUE NAVA
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>

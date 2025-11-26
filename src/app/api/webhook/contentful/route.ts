@@ -1,12 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { clearContentfulCache } from '@/lib/contentful';
+import crypto from 'crypto';
 
 // Contentful webhook handler that triggers on-demand revalidation
 // This endpoint receives webhooks from Contentful and handles revalidation directly
 export async function POST(request: NextRequest) {
   try {
-    const rawBody = await request.json().catch(() => ({}));
+    // Get the raw body for signature verification
+    const rawBodyText = await request.text();
+    const rawBody = JSON.parse(rawBodyText);
+    
+    // Verify Contentful webhook signature (optional but recommended)
+    const signature = request.headers.get('x-contentful-signature');
+    const webhookSecret = process.env.CONTENTFUL_WEBHOOK_SECRET;
+    
+    if (webhookSecret && signature) {
+      try {
+        // Contentful signs the payload with HMAC SHA256
+        const hmac = crypto.createHmac('sha256', webhookSecret);
+        hmac.update(rawBodyText, 'utf8');
+        const expectedSignature = hmac.digest('base64');
+        
+        // Use timing-safe comparison to prevent timing attacks
+        const signatureBuffer = Buffer.from(signature);
+        const expectedBuffer = Buffer.from(expectedSignature);
+        
+        if (signatureBuffer.length !== expectedBuffer.length) {
+          console.error('❌ Invalid webhook signature (length mismatch)');
+          return NextResponse.json(
+            { message: 'Invalid signature' },
+            { status: 401 }
+          );
+        }
+        
+        if (!crypto.timingSafeEqual(signatureBuffer, expectedBuffer)) {
+          console.error('❌ Invalid webhook signature');
+          return NextResponse.json(
+            { message: 'Invalid signature' },
+            { status: 401 }
+          );
+        }
+        console.log('✅ Webhook signature verified');
+      } catch (error) {
+        console.error('❌ Error verifying signature:', error);
+        return NextResponse.json(
+          { message: 'Error verifying signature' },
+          { status: 401 }
+        );
+      }
+    } else if (webhookSecret && !signature) {
+      console.warn('⚠️  Webhook secret configured but no signature received');
+    }
     
     // Type for Contentful webhook entry
     type ContentfulEntry = {

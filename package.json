@@ -28,6 +28,7 @@
     "test-parse-docx": "tsx scripts/test-parse-docx.ts",
     "test-parse-docx-improved": "tsx scripts/test-parse-docx-improved.ts",
     "upload-directors-markdown": "tsx scripts/upload-directors-from-markdown.ts",
+    "upload-lobo": "tsx scripts/upload-lobo.ts",
     "test-parse-markdown": "tsx scripts/test-parse-markdown.ts",
     "upload-new-directors": "tsx scripts/upload-new-directors.ts",
     "test-new-directors-parser": "tsx scripts/test-new-directors-parser.ts",

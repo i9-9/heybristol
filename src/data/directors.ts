@@ -223,9 +223,112 @@ export const directors: Director[] = [
     ]
   },
   {
+    name: "LOBO",
+    slug: "lobo",
+    order: 4,
+    videos: [
+      {
+        id: "lobo-nivea-1",
+        order: 1,
+        title: "Real Madrid",
+        client: "Nivea Men",
+        vimeoId: "1134638066",
+        thumbnailId: "1134683154"
+      },
+      {
+        id: "lobo-max-2",
+        order: 2,
+        title: "Bendita Champions",
+        client: "Max",
+        vimeoId: "1134635389",
+        thumbnailId: "1134681063"
+      },
+      {
+        id: "lobo-personal-3",
+        order: 3,
+        title: "Conexion total",
+        client: "Personal",
+        vimeoId: "1134639044",
+        thumbnailId: "1134683511"
+      },
+      {
+        id: "lobo-hbomax-4",
+        order: 4,
+        title: "From the cinemas to your home",
+        client: "HBO Max",
+        vimeoId: "1134634171",
+        thumbnailId: "1134679881"
+      },
+      {
+        id: "lobo-betfair-5",
+        order: 5,
+        title: "Lucky charms",
+        client: "Betfair",
+        vimeoId: "1134630732",
+        thumbnailId: "1134678721"
+      },
+      {
+        id: "lobo-cocacola-6",
+        order: 6,
+        title: "Jealousy",
+        client: "Coca Cola",
+        vimeoId: "1134632700",
+        thumbnailId: "1134679246"
+      },
+      {
+        id: "lobo-uber-7",
+        order: 7,
+        title: "Boxer",
+        client: "Uber",
+        vimeoId: "1134646155",
+        thumbnailId: "1134684911"
+      },
+      {
+        id: "lobo-puma-8",
+        order: 8,
+        title: "Forever faster",
+        client: "Puma",
+        vimeoId: "1134643502",
+        thumbnailId: "1134684234"
+      },
+      {
+        id: "lobo-pullman-9",
+        order: 9,
+        title: "The artist",
+        client: "Pullman Hotels",
+        vimeoId: "1134640197",
+        thumbnailId: "1134683941"
+      },
+      {
+        id: "lobo-superbet-10",
+        order: 10,
+        title: "Odds",
+        client: "Superbet",
+        vimeoId: "1134644736",
+        thumbnailId: "1134684550"
+      },
+      {
+        id: "lobo-aguasrio-11",
+        order: 11,
+        title: "Water in you",
+        client: "Aguas de Río de Janeiro",
+        vimeoId: "1134629177",
+        thumbnailId: "1134678299"
+      },
+      {
+        id: "lobo-nike-12",
+        order: 12,
+        title: "Membership",
+        client: "Nike",
+        vimeoId: "1134636586",
+        thumbnailId: "1134682385"
+      }
+    ]
+  },
+  {
     name: "Paloma Rincón",
     slug: "paloma-rincon",
-    order: 4,
+    order: 5,
     videos: [
       {
         id: "paloma-rincon-ntt-1",
@@ -347,7 +450,7 @@ export const directors: Director[] = [
   {
     name: "China Pequenino",
     slug: "china-pequenino",
-    order: 5,
+    order: 6,
     videos: [
       {
         id: "china-pequenino-reebok-1",
@@ -407,7 +510,7 @@ export const directors: Director[] = [
   {
     name: "Tigre Escobar",
     slug: "tigre-escobar",
-    order: 6,
+    order: 7,
     videos: [
 
       {

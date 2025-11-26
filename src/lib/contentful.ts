@@ -194,18 +194,10 @@ async function _getDirectorsFromContentful() {
         slug: director.fields.slug,
         order: director.fields.order,
         videos: (director.fields.videos?.map((video: unknown) => {
-          const directorVideo = video as { 
-            fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number };
-            sys?: { publishedAt?: string; publishedVersion?: number };
-          };
+          const directorVideo = video as { fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
           // Skip videos that don't have fields (unlinked references)
+          // Contentful Delivery API automatically filters unpublished entries, so we trust it
           if (!directorVideo || !directorVideo.fields) {
-            return null;
-          }
-          // Contentful Delivery API should automatically filter unpublished entries
-          // Only filter if we're in development and explicitly see it's unpublished
-          // In production, trust Contentful's filtering
-          if (isDevelopment && directorVideo.sys && !directorVideo.sys.publishedAt && !directorVideo.sys.publishedVersion) {
             return null;
           }
           return {
@@ -268,18 +260,10 @@ async function _getDirectorBySlugFromContentful(slug: string) {
       slug: item.fields.slug,
       order: item.fields.order,
       videos: (item.fields.videos?.map((video: unknown) => {
-        const directorVideo = video as { 
-          fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number };
-          sys?: { publishedAt?: string; publishedVersion?: number };
-        };
+        const directorVideo = video as { fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
         // Skip videos that don't have fields (unlinked references)
+        // Contentful Delivery API automatically filters unpublished entries, so we trust it
         if (!directorVideo || !directorVideo.fields) {
-          return null;
-        }
-        // Contentful Delivery API should automatically filter unpublished entries
-        // Only filter if we're in development and explicitly see it's unpublished
-        const isDevelopment = process.env.NODE_ENV === 'development';
-        if (isDevelopment && directorVideo.sys && !directorVideo.sys.publishedAt && !directorVideo.sys.publishedVersion) {
           return null;
         }
         return {

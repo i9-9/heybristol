@@ -208,9 +208,9 @@ export default function ConstructionClient({ allHeroVideos, fixedAudioTrack }: C
     <>
       {/* Audio track */}
       {audioTrack && (
-        <audio ref={audioRef} loop preload="none" style={{ display: 'none' }}>
+        <audio ref={audioRef} loop preload="auto" style={{ display: 'none' }}>
           <source
-            src={`https:${audioTrack.audioFile.fields.file.url}`}
+            src={audioTrack.audioFile.fields.file.url.startsWith('//') ? `https:${audioTrack.audioFile.fields.file.url}` : audioTrack.audioFile.fields.file.url}
             type={audioTrack.audioFile.fields.file.contentType}
           />
         </audio>

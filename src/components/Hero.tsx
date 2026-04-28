@@ -282,11 +282,11 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
         <audio
           ref={audioRef}
           loop={true}
-          preload="none"
+          preload="auto"
           style={{ display: 'none' }}
         >
           <source
-            src={`https:${audioTrack.audioFile.fields.file.url}`}
+            src={audioTrack.audioFile.fields.file.url.startsWith('//') ? `https:${audioTrack.audioFile.fields.file.url}` : audioTrack.audioFile.fields.file.url}
             type={audioTrack.audioFile.fields.file.contentType}
           />
         </audio>

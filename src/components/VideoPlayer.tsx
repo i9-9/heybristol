@@ -387,9 +387,7 @@ export default function VideoPlayer({
               {/* Timeline visual */}
               <div
                 data-timeline
-                className={`w-full h-2 bg-white/20 rounded-full cursor-pointer relative group transition-all duration-300 ${
-                  isDraggingTimeline ? 'scale-y-125' : 'hover:scale-y-125'
-                }`}
+                className="w-full h-2 bg-white/20 rounded-full cursor-pointer relative group"
                 onMouseDown={handleTimelineMouseDown}
                 onMouseUp={handleTimelineMouseUp}
                 onMouseMove={handleTimelineMouseMove}
@@ -434,7 +432,7 @@ export default function VideoPlayer({
                   }`}
                   style={{ 
                     left: `${playerState.duration > 0 ? (playerState.currentTime / playerState.duration) * 100 : 0}%`,
-                    transform: 'translate(-50%, -35%)'
+                    transform: 'translate(-50%, -50%)'
                   }}
                 />
                 

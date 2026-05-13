@@ -5,6 +5,12 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      { source: '/devpreview', destination: '/preview/', permanent: true },
+      { source: '/devpreview/', destination: '/preview/', permanent: true },
+    ];
+  },
   trailingSlash: true,
   images: {
     unoptimized: true

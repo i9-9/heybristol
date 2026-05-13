@@ -189,11 +189,7 @@ async function _getDirectorsFromContentful() {
 
     const directors = response.items.map((item: unknown) => {
       const director = item as { fields: { name: string; slug: string; order: number; videos?: unknown[] } };
-      return {
-        name: director.fields.name,
-        slug: director.fields.slug,
-        order: director.fields.order,
-        videos: (director.fields.videos?.map((video: unknown) => {
+      const videos = (director.fields.videos?.map((video: unknown) => {
           const directorVideo = video as { fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
           // Skip videos that don't have fields (unlinked references)
           // Contentful Delivery API automatically filters unpublished entries, so we trust it
@@ -208,11 +204,17 @@ async function _getDirectorsFromContentful() {
             thumbnailId: directorVideo.fields.thumbnailId,
             order: directorVideo.fields.order,
           };
-        }).filter(v => v !== null) ?? []) as Array<{ id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number }>,
+        }).filter(v => v !== null) ?? []) as Array<{ id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number }>;
+
+      videos.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+      return {
+        name: director.fields.name,
+        slug: director.fields.slug,
+        order: director.fields.order,
+        videos,
       };
     });
-
-    // Cache with different TTL based on environment
     const ttl = isDevelopment ? 30 * 1000 : 5 * 60 * 1000;
     advancedCache.set(cacheKey, directors, ttl);
     
@@ -255,11 +257,7 @@ async function _getDirectorBySlugFromContentful(slug: string) {
     }
 
     const item = response.items[0] as unknown as { fields: { name: string; slug: string; order: number; videos?: unknown[] } };
-    return {
-      name: item.fields.name,
-      slug: item.fields.slug,
-      order: item.fields.order,
-      videos: (item.fields.videos?.map((video: unknown) => {
+    const videos = (item.fields.videos?.map((video: unknown) => {
         const directorVideo = video as { fields?: { id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number } };
         // Skip videos that don't have fields (unlinked references)
         // Contentful Delivery API automatically filters unpublished entries, so we trust it
@@ -274,7 +272,15 @@ async function _getDirectorBySlugFromContentful(slug: string) {
           thumbnailId: directorVideo.fields.thumbnailId,
           order: directorVideo.fields.order,
         };
-      }).filter(v => v !== null) ?? []) as Array<{ id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number }>,
+      }).filter(v => v !== null) ?? []) as Array<{ id: string; title: string; client: string; vimeoId: string; thumbnailId?: string; order: number }>;
+
+    videos.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    return {
+      name: item.fields.name,
+      slug: item.fields.slug,
+      order: item.fields.order,
+      videos,
     };
   } catch (error) {
     console.error('Error fetching director from Contentful:', error);

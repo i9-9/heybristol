@@ -164,7 +164,7 @@ export const directors: Director[] = [
   {
     name: "Iván Jurado",
     slug: "ivan-jurado",
-    order: 3,
+    order: 2,
     videos: [
       {
         id: "ivan-jurado-ag1-1",
@@ -223,112 +223,9 @@ export const directors: Director[] = [
     ]
   },
   {
-    name: "LOBO",
-    slug: "lobo",
-    order: 4,
-    videos: [
-      {
-        id: "lobo-nivea-1",
-        order: 1,
-        title: "Real Madrid",
-        client: "Nivea Men",
-        vimeoId: "1134638066",
-        thumbnailId: "1134683154"
-      },
-      {
-        id: "lobo-max-2",
-        order: 2,
-        title: "Bendita Champions",
-        client: "Max",
-        vimeoId: "1134635389",
-        thumbnailId: "1134681063"
-      },
-      {
-        id: "lobo-personal-3",
-        order: 3,
-        title: "Conexion total",
-        client: "Personal",
-        vimeoId: "1134639044",
-        thumbnailId: "1134683511"
-      },
-      {
-        id: "lobo-hbomax-4",
-        order: 4,
-        title: "From the cinemas to your home",
-        client: "HBO Max",
-        vimeoId: "1134634171",
-        thumbnailId: "1134679881"
-      },
-      {
-        id: "lobo-betfair-5",
-        order: 5,
-        title: "Lucky charms",
-        client: "Betfair",
-        vimeoId: "1134630732",
-        thumbnailId: "1134678721"
-      },
-      {
-        id: "lobo-cocacola-6",
-        order: 6,
-        title: "Jealousy",
-        client: "Coca Cola",
-        vimeoId: "1134632700",
-        thumbnailId: "1134679246"
-      },
-      {
-        id: "lobo-uber-7",
-        order: 7,
-        title: "Boxer",
-        client: "Uber",
-        vimeoId: "1134646155",
-        thumbnailId: "1134684911"
-      },
-      {
-        id: "lobo-puma-8",
-        order: 8,
-        title: "Forever faster",
-        client: "Puma",
-        vimeoId: "1134643502",
-        thumbnailId: "1134684234"
-      },
-      {
-        id: "lobo-pullman-9",
-        order: 9,
-        title: "The artist",
-        client: "Pullman Hotels",
-        vimeoId: "1134640197",
-        thumbnailId: "1134683941"
-      },
-      {
-        id: "lobo-superbet-10",
-        order: 10,
-        title: "Odds",
-        client: "Superbet",
-        vimeoId: "1134644736",
-        thumbnailId: "1134684550"
-      },
-      {
-        id: "lobo-aguasrio-11",
-        order: 11,
-        title: "Water in you",
-        client: "Aguas de Río de Janeiro",
-        vimeoId: "1134629177",
-        thumbnailId: "1134678299"
-      },
-      {
-        id: "lobo-nike-12",
-        order: 12,
-        title: "Membership",
-        client: "Nike",
-        vimeoId: "1134636586",
-        thumbnailId: "1134682385"
-      }
-    ]
-  },
-  {
     name: "Paloma Rincón",
     slug: "paloma-rincon",
-    order: 5,
+    order: 3,
     videos: [
       {
         id: "paloma-rincon-ntt-1",
@@ -387,70 +284,9 @@ export const directors: Director[] = [
     ]
   },
   {
-    name: "Luciano Urbani",
-    slug: "luciano-urbani",
-    order: 2,
-    videos: [
-      {
-        id: "luciano-urbani-dubai-1",
-        order: 1,
-        title: "Nakheel",
-        client: "Dubai",
-        vimeoId: "1107778294",
-        thumbnailId: "1113559248",
-
-      },
-      {
-        id: "luciano-urbani-toyota-2",
-        order: 2,
-        title: "Race in Monaco",
-        client: "Toyota",
-        vimeoId: "1107777537",
-        thumbnailId: "1111389879",
-
-      },
-      {
-        id: "luciano-urbani-sprite-3",
-        order: 3,
-        title: "Evolución",
-        client: "Sprite",
-        vimeoId: "1107776881",
-        thumbnailId: "1111390080",
-
-      },
-      {
-        id: "luciano-urbani-kfc-4",
-        order: 4,
-        title: "Mother",
-        client: "KFC",
-        vimeoId: "1112933584",
-        thumbnailId: "1111389988",
-
-      },
-      {
-        id: "luciano-urbani-millerlite-5",
-        order: 5,
-        title: "Bell",
-        client: "Miller Lite",
-        vimeoId: "1107774267",
-        thumbnailId: "1111390024",
-
-      },
-      {
-        id: "luciano-urbani-ford-6",
-        order: 6,
-        title: "New Ranger",
-        client: "Ford",
-        vimeoId: "1107771138",
-        thumbnailId: "1111389917",
-
-      }
-    ]
-  },
-  {
     name: "China Pequenino",
     slug: "china-pequenino",
-    order: 6,
+    order: 4,
     videos: [
       {
         id: "china-pequenino-reebok-1",
@@ -510,7 +346,7 @@ export const directors: Director[] = [
   {
     name: "Tigre Escobar",
     slug: "tigre-escobar",
-    order: 7,
+    order: 5,
     videos: [
 
       {
@@ -592,20 +428,40 @@ export function getPublishedVideosByDirectorSlug(directorSlug: string): Director
 }
 
 // Función simplificada que solo usa thumbnailId
+
+/** Quita prefijo repetido `"Cliente – "` cuando ya está en `client` y en `title`. */
+export function titleWithoutRedundantClient(client: string, title: string): string {
+  const c = client.trim();
+  const t = title.trim();
+  if (!c || !t) return t;
+
+  const escaped = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`^${escaped}\\s*-\\s*`, 'i');
+  const stripped = t.replace(re, '').trim();
+  return stripped || t;
+}
+
 export async function convertToVideoItem(directorVideo: DirectorVideo) {
-  // Solo incluir el cliente en los tags si tiene un valor válido
-  const tags = [];
+  const shortTitle = titleWithoutRedundantClient(
+    directorVideo.client || '',
+    directorVideo.title
+  );
+
+  const tags: string[] = [];
   if (directorVideo.client && directorVideo.client.trim() !== '') {
-    tags.push(directorVideo.client);
+    tags.push(directorVideo.client.trim());
+    tags.push(shortTitle);
+  } else {
+    tags.push(directorVideo.title);
   }
-  tags.push(directorVideo.title);
 
   return {
     id: directorVideo.vimeoId || directorVideo.id,
     title: directorVideo.title,
-    description: directorVideo.client && directorVideo.client.trim() !== '' 
-      ? `${directorVideo.client} - ${directorVideo.title}`
-      : directorVideo.title,
+    description:
+      directorVideo.client && directorVideo.client.trim() !== ''
+        ? `${directorVideo.client.trim()} - ${shortTitle}`
+        : directorVideo.title,
     pageUrl: getVimeoUrl(directorVideo.vimeoId),
     embedUrl: directorVideo.vimeoId ? getEmbedUrl(directorVideo.vimeoId) : '',
     // Usar thumbnailId para el grid

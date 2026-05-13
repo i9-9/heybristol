@@ -13,57 +13,66 @@ import type { VideoItem } from './types';
 
 const USE_CONTENTFUL = process.env.NEXT_PUBLIC_USE_CONTENTFUL === 'true';
 
+function sortVideosByOrder(videos: DirectorVideo[]): DirectorVideo[] {
+  return [...videos].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
+
 export async function getDirectors(): Promise<Director[]> {
   if (USE_CONTENTFUL) {
     try {
       const contentfulDirectors = await getDirectorsFromContentful();
-      return contentfulDirectors as Director[];
+      return (contentfulDirectors as Director[]).map((d) => ({
+        ...d,
+        videos: sortVideosByOrder(d.videos),
+      }));
     } catch (error) {
       console.error('Error fetching from Contentful, falling back to local data:', error);
-      return localDirectors;
+      return localDirectors.map((d) => ({
+        ...d,
+        videos: sortVideosByOrder(d.videos),
+      }));
     }
   }
-  
-  return localDirectors;
+
+  return localDirectors.map((d) => ({
+    ...d,
+    videos: sortVideosByOrder(d.videos),
+  }));
 }
 
 export async function getDirectorBySlug(slug: string): Promise<Director | null> {
   if (USE_CONTENTFUL) {
     try {
       const contentfulDirector = await getDirectorBySlugFromContentful(slug);
-      return contentfulDirector;
+      if (contentfulDirector) {
+        return {
+          ...contentfulDirector,
+          videos: sortVideosByOrder(contentfulDirector.videos),
+        };
+      }
+      return null;
     } catch (error) {
       console.error('Error fetching from Contentful, falling back to local data:', error);
-      return getLocalDirectorBySlug(slug);
+      const local = getLocalDirectorBySlug(slug);
+      return local ? { ...local, videos: sortVideosByOrder(local.videos) } : null;
     }
   }
-  
-  return getLocalDirectorBySlug(slug);
+
+  const local = getLocalDirectorBySlug(slug);
+  return local ? { ...local, videos: sortVideosByOrder(local.videos) } : null;
 }
 
 export async function getDirectorNames(): Promise<string[]> {
   const directors = await getDirectors();
-  return directors
-    .sort((a, b) => {
-      const namePartsA = a.name.split(' ');
-      const namePartsB = b.name.split(' ');
-      const lastNameA = namePartsA.length >= 2 ? namePartsA[1] : namePartsA[0] || '';
-      const lastNameB = namePartsB.length >= 2 ? namePartsB[1] : namePartsB[0] || '';
-      return lastNameA.localeCompare(lastNameB);
-    })
+  return [...directors]
+    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
     .map(d => d.name);
 }
 
 export async function getDirectorSlugs(): Promise<string[]> {
   const directors = await getDirectors();
-  return directors
-    .sort((a, b) => {
-      const namePartsA = a.name.split(' ');
-      const namePartsB = b.name.split(' ');
-      const lastNameA = namePartsA.length >= 2 ? namePartsA[1] : namePartsA[0] || '';
-      const lastNameB = namePartsB.length >= 2 ? namePartsB[1] : namePartsB[0] || '';
-      return lastNameA.localeCompare(lastNameB);
-    })
+  return [...directors]
+    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
     .map(d => d.slug);
 }
 

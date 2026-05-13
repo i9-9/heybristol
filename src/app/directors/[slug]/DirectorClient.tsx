@@ -493,7 +493,7 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
                   onFullscreenToggle={toggleFullscreen}
                   isFullscreen={isFullscreen}
                   isMobile={isMobile}
-                  quality={director.slug === 'ali-ali' ? '2160p' : 'auto'}
+                  quality="auto"
                 />
               </div>
               

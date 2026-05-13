@@ -265,7 +265,7 @@ export default function VideoPlayerPage({
             onMouseLeave={handleMouseLeave}
             onMouseMove={handleMouseMove}
             showControls={showControls}
-            quality={director.slug === 'ali-ali' ? '2160p' : 'auto'}
+            quality="auto"
           />
         </div>
         

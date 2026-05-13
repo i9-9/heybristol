@@ -1,7 +1,12 @@
 import dynamicImport from 'next/dynamic';
+import type { Metadata } from 'next';
 import { getAllHeroVideos, getRandomAudioTrack } from '@/lib/contentful';
 
-// Dynamic imports for better code splitting (no loading screens)
+export const metadata: Metadata = {
+  title: 'Preview · Bristol',
+  robots: 'noindex, nofollow',
+};
+
 const Hero = dynamicImport(() => import('@/components/Hero'), {
   ssr: true
 });
@@ -14,9 +19,10 @@ const Contact = dynamicImport(() => import('@/components/Contact'), {
   ssr: true
 });
 
-// SSG - Static Site Generation
-export const dynamic = 'force-static';
-export const revalidate = false;
+// Vista previa interna (Hero + Directors + Contact). / redirige a /construction.
+//
+// ISR: igual que otras páginas con Contentful.
+export const revalidate = 3600;
 
 async function getStaticData() {
   try {
@@ -40,7 +46,7 @@ async function getStaticData() {
   }
 }
 
-export default async function DevPreview() {
+export default async function PreviewPage() {
   const staticData = await getStaticData();
 
   return (

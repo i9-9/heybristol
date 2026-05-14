@@ -13,63 +13,94 @@ interface VideoCardWithHoverProps {
   className?: string;
 }
 
-export default function VideoCardWithHover({ 
-  video, 
-  directorSlug, 
-  loadIndex = 0, 
-  className = "" 
+const PREVIEW_READY_EVENTS = new Set(['ready', 'play', 'playing', 'loaded']);
+
+function getPreviewUrl(video: VideoItem): string | null {
+  if (!video.thumbnailId) return null;
+
+  const params = new URLSearchParams({
+    api: '1',
+    title: '0',
+    byline: '0',
+    portrait: '0',
+    background: '1',
+    autoplay: '1',
+    loop: '1',
+    muted: '1',
+    dnt: '1',
+    controls: '0',
+    keyboard: '0',
+    pip: '0',
+    playsinline: '1',
+    color: '000000',
+    quality: '360p',
+    speed: '1',
+  });
+
+  return `https://player.vimeo.com/video/${video.thumbnailId}?${params.toString()}`;
+}
+
+export default function VideoCardWithHover({
+  video,
+  directorSlug,
+  loadIndex = 0,
+  className = "",
 }: VideoCardWithHoverProps) {
-  const [previewPlaying, setPreviewPlaying] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  
+  const [shouldLoadPreview, setShouldLoadPreview] = useState(loadIndex < 6);
+  const [previewActive, setPreviewActive] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const cardRef = useRef<HTMLAnchorElement>(null);
+  const loadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const readyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const videoSlug = generateVideoSlug(video.title);
   const videoUrl = `/directors/${directorSlug}/${videoSlug}`;
-  
-  // Thumbnail estático del video principal
+  const previewUrl = getPreviewUrl(video);
+
   const mainThumbnailUrl = video.thumb
+    || (video.thumbnailId ? `https://vumbnail.com/${video.thumbnailId}.jpg` : '')
     || (!video.hash && video.id ? `https://vumbnail.com/${video.id}.jpg` : '');
 
-  // URL del iframe para el preview/loop (thumbnailId) - SIEMPRE activo
-  const getPreviewUrl = () => {
-    if (!video.thumbnailId) return null;
-    
-    const params = new URLSearchParams({
-      title: '0',
-      byline: '0',
-      portrait: '0',
-      background: '1',
-      autoplay: '1',
-      loop: '1',
-      muted: '1',
-      dnt: '1',
-      controls: '0',
-      keyboard: '0',
-      pip: '0',
-      playsinline: '1',
-      color: '000000',
-      quality: '360p',
-      speed: '1',
-    });
-    
-    return `https://player.vimeo.com/video/${video.thumbnailId}?${params.toString()}`;
-  };
-
-  const previewUrl = getPreviewUrl();
-
-  // Escuchar mensaje del player de Vimeo para saber cuando está listo
   useEffect(() => {
-    if (!previewUrl) return;
+    if (!previewUrl || shouldLoadPreview || !cardRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          const delayMs = Math.min(Math.max(loadIndex - 6, 0) * 60, 360);
+          loadTimeoutRef.current = setTimeout(() => {
+            setShouldLoadPreview(true);
+          }, delayMs);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px', threshold: 0.01 }
+    );
+
+    observer.observe(cardRef.current);
+    return () => {
+      observer.disconnect();
+      if (loadTimeoutRef.current) clearTimeout(loadTimeoutRef.current);
+    };
+  }, [previewUrl, shouldLoadPreview, loadIndex]);
+
+  useEffect(() => {
+    if (!previewUrl || !shouldLoadPreview) return;
+
+    setIsLoadingPreview(true);
+
+    const markPreviewActive = () => {
+      setPreviewActive(true);
+      setIsLoadingPreview(false);
+    };
 
     const handleMessage = (event: MessageEvent) => {
-      // Verificar que el mensaje viene de Vimeo
       if (!event.origin.includes('vimeo.com')) return;
-      
+
       try {
-        const data = JSON.parse(event.data);
-        
-        // Solo ocultar thumbnail cuando el preview está reproduciendo frames reales
-        if (data.event === 'playing') {
-          setPreviewPlaying(true);
+        const data = JSON.parse(event.data as string);
+        if (PREVIEW_READY_EVENTS.has(data.event)) {
+          markPreviewActive();
         }
       } catch {
         // Ignorar errores de parsing
@@ -78,21 +109,33 @@ export default function VideoCardWithHover({
 
     window.addEventListener('message', handleMessage);
 
+    readyTimeoutRef.current = setTimeout(markPreviewActive, 3500);
+
     return () => {
       window.removeEventListener('message', handleMessage);
+      if (readyTimeoutRef.current) clearTimeout(readyTimeoutRef.current);
     };
-  }, [previewUrl]);
+  }, [previewUrl, shouldLoadPreview]);
+
+  const handleIframeLoad = () => {
+    setPreviewActive(true);
+    setIsLoadingPreview(false);
+    if (readyTimeoutRef.current) {
+      clearTimeout(readyTimeoutRef.current);
+      readyTimeoutRef.current = null;
+    }
+  };
 
   return (
     <Link
+      ref={cardRef}
       href={videoUrl}
       className={`relative w-full h-80 md:aspect-video md:h-auto bg-black overflow-hidden cursor-pointer group block ${className}`}
     >
-      {/* Thumbnail estático (fallback - solo visible mientras carga el iframe o si no hay thumbnailId) */}
       {mainThumbnailUrl && (
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
-            previewUrl && previewPlaying ? 'opacity-0' : 'opacity-100'
+            previewUrl && previewActive ? 'opacity-0' : 'opacity-100'
           }`}
         >
           <Image
@@ -101,31 +144,28 @@ export default function VideoCardWithHover({
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority={loadIndex < 3}
+            priority={loadIndex < 6}
           />
-          {!previewPlaying && previewUrl && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          {isLoadingPreview && (
+            <div className="absolute top-4 right-4 pointer-events-none">
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             </div>
           )}
         </div>
       )}
 
-      {/* Preview video (thumbnailId) - visible solo cuando reproduce */}
-      {previewUrl && (
+      {previewUrl && shouldLoadPreview && (
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
-            previewPlaying ? 'opacity-100' : 'opacity-0'
+            previewActive ? 'opacity-100' : 'opacity-0'
           }`}
         >
           <iframe
-            ref={iframeRef}
             src={previewUrl}
             className="absolute inset-0 w-full h-full"
             allow="autoplay; fullscreen; picture-in-picture"
             title={`${video.title} preview`}
-            frameBorder="0"
-            loading="eager"
+            onLoad={handleIframeLoad}
             style={{
               backgroundColor: '#000000',
               border: 'none',
@@ -136,13 +176,12 @@ export default function VideoCardWithHover({
         </div>
       )}
 
-      {!mainThumbnailUrl && !previewPlaying && previewUrl && (
+      {!mainThumbnailUrl && isLoadingPreview && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
         </div>
       )}
 
-      {/* Overlay con cliente y título - solo visible en hover */}
       <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">
         <span className="text-white text-center px-3 font-medium uppercase text-sm md:text-base">
           {formatVideoDisplayTitle(video)}
@@ -151,4 +190,3 @@ export default function VideoCardWithHover({
     </Link>
   );
 }
-

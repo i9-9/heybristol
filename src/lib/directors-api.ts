@@ -88,28 +88,24 @@ export async function getPublishedVideosByDirectorSlug(directorSlug: string): Pr
 export async function getVideosAsVideoItems(directorName: string): Promise<VideoItem[]> {
   const director = (await getDirectors()).find(d => d.name === directorName);
   if (!director) return [];
-  
+
   const publishedVideos = director.videos.filter(v => v.vimeoId);
-  
-  const videoItems = await Promise.all(
-    publishedVideos.map(async (video) => {
-      const item = await convertToVideoItem(video);
-      if (!video.vimeoId) return item;
 
-      const needsHash = !item.hash;
-      const needsThumb = !item.thumb;
-      if (!needsHash && !needsThumb) return item;
+  return Promise.all(publishedVideos.map(video => convertToVideoItem(video)));
+}
 
-      const meta = await getVimeoVideoMetadata(video.vimeoId);
-      return {
-        ...item,
-        hash: item.hash || meta.hash,
-        thumb: item.thumb || meta.thumbnailUrl || item.thumb,
-      };
-    })
-  );
+/** Enrich a single video with Vimeo playback metadata (hash). Call only on the video page. */
+export async function enrichVideoForPlayback(video: VideoItem): Promise<VideoItem> {
+  if (!video.id || video.hash) return video;
 
-  return videoItems;
+  const meta = await getVimeoVideoMetadata(video.id);
+  if (!meta.hash && !meta.thumbnailUrl) return video;
+
+  return {
+    ...video,
+    hash: video.hash || meta.hash,
+    thumb: video.thumb || meta.thumbnailUrl || video.thumb,
+  };
 }
 
 export async function getMigrationStats() {

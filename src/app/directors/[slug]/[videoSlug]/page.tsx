@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getDirectorBySlug, getDirectorSlugs, getVideosAsVideoItems } from '@/lib/directors-api';
+import { getDirectorBySlug, getDirectorSlugs, getVideosAsVideoItems, enrichVideoForPlayback } from '@/lib/directors-api';
 import { generateVideoSlug } from '@/lib/types';
 import { buildPageMetadata, videoJsonLd, vimeoThumbnailUrl } from '@/lib/seo';
 import { JsonLd } from '@/components/JsonLd';
@@ -109,6 +109,8 @@ export default async function VideoPage({ params }: VideoPageProps) {
       notFound();
     }
 
+    const selectedVideo = await enrichVideoForPlayback(video);
+
     return (
       <>
         <JsonLd
@@ -124,7 +126,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
         <VideoPlayerPage
           director={director}
           videos={videos}
-          selectedVideo={video}
+          selectedVideo={selectedVideo}
         />
       </>
     );

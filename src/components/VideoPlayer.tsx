@@ -125,7 +125,7 @@ export default function VideoPlayer({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
-          const delayMs = loadIndex * 300;
+          const delayMs = Math.min(loadIndex * 80, 400);
           loadTimeoutRef.current = setTimeout(() => {
             setPlayerEnabled(true);
           }, delayMs);
@@ -389,10 +389,10 @@ export default function VideoPlayer({
   }, [isMobile, onFullscreenToggle, handlePlayPause, scheduleAutoHide, clearAutoHideTimer, videoClickEnabled]);
 
   const handleUnmuteHintClick = useCallback(() => {
-    void handleMuteToggle();
+    void handleVolumeChange(0.75);
     setShowUnmuteHint(false);
     setUnmuteHintDismissed(true);
-  }, [handleMuteToggle]);
+  }, [handleVolumeChange]);
 
   const formatTime = (time: number | undefined) => {
     if (!time || isNaN(time)) return '0:00';
@@ -714,7 +714,7 @@ export default function VideoPlayer({
               e.stopPropagation();
               handleUnmuteHintClick();
             }}
-            className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-black/70 backdrop-blur-md text-white text-xs uppercase tracking-widest font-hagrid hover:bg-black/85 transition-colors pointer-events-auto"
+            className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-black/70 backdrop-blur-md text-white text-sm font-sans tracking-normal hover:bg-black/85 transition-colors pointer-events-auto"
           >
             Tap for sound
           </button>

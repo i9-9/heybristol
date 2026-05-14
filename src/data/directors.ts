@@ -466,8 +466,10 @@ export async function convertToVideoItem(directorVideo: DirectorVideo) {
     embedUrl: directorVideo.vimeoId ? getEmbedUrl(directorVideo.vimeoId) : '',
     // Usar thumbnailId para el grid
     thumbnailId: directorVideo.thumbnailId,
-    hash: directorVideo.hash, // Incluir hash si existe
-    thumb: null, // Ya no necesitamos thumbnails de la API
+    hash: directorVideo.hash,
+    thumb: directorVideo.thumbnailId
+      ? `https://vumbnail.com/${directorVideo.thumbnailId}.jpg`
+      : null,
     width: 1920,
     height: 1080,
     duration: 0,

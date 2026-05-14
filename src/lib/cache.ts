@@ -62,6 +62,8 @@ if (typeof window !== 'undefined') {
   }, 10 * 60 * 1000);
 }
 
+const inflightRequests = new Map<string, Promise<unknown>>();
+
 // Función helper para wrap funciones async con cache
 export function withCache<T extends unknown[], R>(
   fn: (...args: T) => Promise<R>,
@@ -77,11 +79,22 @@ export function withCache<T extends unknown[], R>(
       return cached;
     }
 
-    // Si no está en cache, ejecutar función y guardar resultado
-    const result = await fn(...args);
-    contentfulCache.set(cacheKey, result, ttl);
-    
-    return result;
+    const pending = inflightRequests.get(cacheKey);
+    if (pending) {
+      return pending as Promise<R>;
+    }
+
+    const request = fn(...args)
+      .then((result) => {
+        contentfulCache.set(cacheKey, result, ttl);
+        return result;
+      })
+      .finally(() => {
+        inflightRequests.delete(cacheKey);
+      });
+
+    inflightRequests.set(cacheKey, request);
+    return request;
   };
 }
 

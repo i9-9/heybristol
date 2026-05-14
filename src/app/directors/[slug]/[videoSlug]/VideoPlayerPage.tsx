@@ -8,6 +8,9 @@ import { useRouter } from "next/navigation";
 import VideoPlayer from "@/components/VideoPlayer";
 import VideoViewShell from "@/components/VideoViewShell";
 import { generateVideoSlug } from "@/lib/types";
+import { preloadVimeoPlayer } from "@/lib/vimeo-preload";
+
+void preloadVimeoPlayer();
 
 interface VideoPlayerPageProps {
   director: { name: string; slug: string };

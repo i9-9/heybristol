@@ -6,6 +6,7 @@ import {
   directors as localDirectors, 
   getDirectorBySlug as getLocalDirectorBySlug,
   convertToVideoItem,
+  toVideoItem,
   Director,
   DirectorVideo
 } from '../data/directors';
@@ -85,13 +86,17 @@ export async function getPublishedVideosByDirectorSlug(directorSlug: string): Pr
   return director ? director.videos.filter(v => v.vimeoId) : [];
 }
 
+export function getVideosAsVideoItemsFromDirector(director: Director): VideoItem[] {
+  return director.videos
+    .filter((v) => v.vimeoId)
+    .map((video) => toVideoItem(video));
+}
+
 export async function getVideosAsVideoItems(directorName: string): Promise<VideoItem[]> {
   const director = (await getDirectors()).find(d => d.name === directorName);
   if (!director) return [];
 
-  const publishedVideos = director.videos.filter(v => v.vimeoId);
-
-  return Promise.all(publishedVideos.map(video => convertToVideoItem(video)));
+  return getVideosAsVideoItemsFromDirector(director);
 }
 
 /** Enrich a single video with Vimeo playback metadata (hash). Call only on the video page. */

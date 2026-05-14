@@ -1,4 +1,4 @@
-import { getDirectorBySlug, getVideosAsVideoItems } from "@/lib/directors-api";
+import { getDirectorBySlug, getVideosAsVideoItemsFromDirector } from "@/lib/directors-api";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import DirectorClient from "@/app/directors/[slug]/DirectorClient";
@@ -78,7 +78,7 @@ export default async function DirectorPage({ params }: PageProps) {
     notFound();
   }
 
-  const videos = await getVideosAsVideoItems(director.name);
+  const videos = getVideosAsVideoItemsFromDirector(director);
   const featuredVideo = director.videos.find((v) => v.vimeoId);
 
   return (

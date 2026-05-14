@@ -441,7 +441,7 @@ export function titleWithoutRedundantClient(client: string, title: string): stri
   return stripped || t;
 }
 
-export async function convertToVideoItem(directorVideo: DirectorVideo) {
+export function toVideoItem(directorVideo: DirectorVideo) {
   const shortTitle = titleWithoutRedundantClient(
     directorVideo.client || '',
     directorVideo.title
@@ -464,7 +464,6 @@ export async function convertToVideoItem(directorVideo: DirectorVideo) {
         : directorVideo.title,
     pageUrl: getVimeoUrl(directorVideo.vimeoId),
     embedUrl: directorVideo.vimeoId ? getEmbedUrl(directorVideo.vimeoId) : '',
-    // Usar thumbnailId para el grid
     thumbnailId: directorVideo.thumbnailId,
     hash: directorVideo.hash,
     thumb: directorVideo.thumbnailId
@@ -475,6 +474,10 @@ export async function convertToVideoItem(directorVideo: DirectorVideo) {
     duration: 0,
     tags: tags
   };
+}
+
+export async function convertToVideoItem(directorVideo: DirectorVideo) {
+  return toVideoItem(directorVideo);
 }
 
 // Función optimizada que NO usa la API de Vimeo (ya que tenemos thumbnailId para todos)

@@ -1,11 +1,13 @@
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { getDirectorBySlug, getDirectorSlugs, getVideosAsVideoItems, enrichVideoForPlayback } from '@/lib/directors-api';
+import { getDirectorBySlug, getDirectorSlugs, getVideosAsVideoItemsFromDirector } from '@/lib/directors-api';
 import { generateVideoSlug } from '@/lib/types';
 import { buildPageMetadata, videoJsonLd, vimeoThumbnailUrl } from '@/lib/seo';
 import { JsonLd } from '@/components/JsonLd';
-import VideoPlayerPage from './VideoPlayerPage';
 import VimeoPreload from '@/components/VimeoPreload';
+import EnrichedVideoPlayerPage from './EnrichedVideoPlayerPage';
+import VideoPageLoadingFallback from './VideoPageLoadingFallback';
 
 // ISR - Incremental Static Regeneration
 // Pages are statically generated but can be regenerated on-demand via webhooks
@@ -87,7 +89,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
       notFound();
     }
 
-    const videos = await getVideosAsVideoItems(director.name);
+    const videos = getVideosAsVideoItemsFromDirector(director);
     
     if (!videos || videos.length === 0) {
       notFound();
@@ -109,8 +111,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
       notFound();
     }
 
-    const selectedVideo = await enrichVideoForPlayback(video);
-
     return (
       <>
         <JsonLd
@@ -123,11 +123,17 @@ export default async function VideoPage({ params }: VideoPageProps) {
           })}
         />
         <VimeoPreload />
-        <VideoPlayerPage
-          director={director}
-          videos={videos}
-          selectedVideo={selectedVideo}
-        />
+        <Suspense
+          fallback={
+            <VideoPageLoadingFallback director={director} video={video} />
+          }
+        >
+          <EnrichedVideoPlayerPage
+            director={director}
+            videos={videos}
+            video={video}
+          />
+        </Suspense>
       </>
     );
   } catch (error) {

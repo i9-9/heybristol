@@ -436,7 +436,7 @@ export function titleWithoutRedundantClient(client: string, title: string): stri
   if (!c || !t) return t;
 
   const escaped = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp(`^${escaped}\\s*-\\s*`, 'i');
+  const re = new RegExp(`^${escaped}\\s*[-|–]\\s*`, 'i');
   const stripped = t.replace(re, '').trim();
   return stripped || t;
 }

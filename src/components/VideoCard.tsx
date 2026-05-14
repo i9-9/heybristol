@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import type { VideoItem } from "@/lib/types";
-import { generateVideoSlug } from "@/lib/types";
-import CustomVimeoPlayer from "./CustomVimeoPlayer";
+import { formatVideoDisplayTitle, generateVideoSlug } from "@/lib/types";
+import VideoPlayer from "./VideoPlayer";
 
 interface VideoCardProps {
   video: VideoItem;
@@ -21,20 +21,21 @@ export default function VideoCard({ video, directorSlug, loadIndex = 0, classNam
       href={videoUrl}
       className={`relative w-full h-80 md:aspect-video md:h-auto bg-black overflow-hidden cursor-pointer group block ${className}`}
     >
-      {/* Usar CustomVimeoPlayer con thumbnails */}
-      <CustomVimeoPlayer
+      <VideoPlayer
         video={video}
         className="w-full h-full"
         autoPlay={false}
         loop={true}
         muted={true}
         loadIndex={loadIndex}
+        variant="minimal"
+        allowVideoClick={false}
       />
 
       {/* Overlay con título */}
       <div className="absolute inset-0 flex items-center justify-center bg-black/60 md:bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-10">
         <span className="text-white text-center px-3 font-medium uppercase text-sm md:text-base">
-          {video.tags && video.tags.length > 1 ? `${video.tags[0]} | ${video.tags[1]}` : video.title}
+          {formatVideoDisplayTitle(video)}
         </span>
       </div>
     </Link>

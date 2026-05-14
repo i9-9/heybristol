@@ -10,6 +10,8 @@ import {
   DirectorVideo
 } from '../data/directors';
 import type { VideoItem } from './types';
+import { compareDirectorsBySurname } from './director-sort';
+import { getVimeoVideoMetadata } from './vimeo-metadata';
 
 const USE_CONTENTFUL = process.env.NEXT_PUBLIC_USE_CONTENTFUL === 'true';
 
@@ -64,16 +66,12 @@ export async function getDirectorBySlug(slug: string): Promise<Director | null> 
 
 export async function getDirectorNames(): Promise<string[]> {
   const directors = await getDirectors();
-  return [...directors]
-    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
-    .map(d => d.name);
+  return [...directors].sort(compareDirectorsBySurname).map((d) => d.name);
 }
 
 export async function getDirectorSlugs(): Promise<string[]> {
   const directors = await getDirectors();
-  return [...directors]
-    .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
-    .map(d => d.slug);
+  return [...directors].sort(compareDirectorsBySurname).map((d) => d.slug);
 }
 
 export async function getPublishedVideosByDirectorName(directorName: string): Promise<DirectorVideo[]> {
@@ -94,9 +92,23 @@ export async function getVideosAsVideoItems(directorName: string): Promise<Video
   const publishedVideos = director.videos.filter(v => v.vimeoId);
   
   const videoItems = await Promise.all(
-    publishedVideos.map(video => convertToVideoItem(video))
+    publishedVideos.map(async (video) => {
+      const item = await convertToVideoItem(video);
+      if (!video.vimeoId) return item;
+
+      const needsHash = !item.hash;
+      const needsThumb = !item.thumb;
+      if (!needsHash && !needsThumb) return item;
+
+      const meta = await getVimeoVideoMetadata(video.vimeoId);
+      return {
+        ...item,
+        hash: item.hash || meta.hash,
+        thumb: item.thumb || meta.thumbnailUrl || item.thumb,
+      };
+    })
   );
-  
+
   return videoItems;
 }
 

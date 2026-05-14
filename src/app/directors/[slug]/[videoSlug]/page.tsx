@@ -1,7 +1,11 @@
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { getDirectorBySlug, getDirectorSlugs, getVideosAsVideoItems } from '@/lib/directors-api';
 import { generateVideoSlug } from '@/lib/types';
+import { buildPageMetadata, videoJsonLd, vimeoThumbnailUrl } from '@/lib/seo';
+import { JsonLd } from '@/components/JsonLd';
 import VideoPlayerPage from './VideoPlayerPage';
+import VimeoPreload from '@/components/VimeoPreload';
 
 // ISR - Incremental Static Regeneration
 // Pages are statically generated but can be regenerated on-demand via webhooks
@@ -13,6 +17,42 @@ interface VideoPageProps {
     slug: string;
     videoSlug: string;
   }>;
+}
+
+export async function generateMetadata({ params }: VideoPageProps): Promise<Metadata> {
+  const { slug, videoSlug } = await params;
+  const director = await getDirectorBySlug(slug);
+
+  if (!director) {
+    return buildPageMetadata({
+      title: 'Video not found',
+      path: `/directors/${slug}/${videoSlug}/`,
+      noIndex: true,
+    });
+  }
+
+  const video = director.videos.find(
+    (v) => generateVideoSlug(v.title) === videoSlug
+  );
+
+  if (!video) {
+    return buildPageMetadata({
+      title: 'Video not found',
+      path: `/directors/${slug}/${videoSlug}/`,
+      noIndex: true,
+    });
+  }
+
+  const title = `${video.title} — ${video.client}`;
+  const description = `Watch "${video.title}" for ${video.client}, directed by ${director.name} — a Bristol production.`;
+
+  return buildPageMetadata({
+    title,
+    description,
+    path: `/directors/${slug}/${videoSlug}/`,
+    image: vimeoThumbnailUrl(video.vimeoId),
+    imageAlt: `${video.title} — ${video.client} directed by ${director.name}`,
+  });
 }
 
 export async function generateStaticParams() {
@@ -53,7 +93,15 @@ export default async function VideoPage({ params }: VideoPageProps) {
       notFound();
     }
 
-    const video = videos.find(v => 
+    const directorVideo = director.videos.find(
+      (v) => generateVideoSlug(v.title) === videoSlug
+    );
+
+    if (!directorVideo) {
+      notFound();
+    }
+
+    const video = videos.find(v =>
       generateVideoSlug(v.title) === videoSlug
     );
 
@@ -62,11 +110,23 @@ export default async function VideoPage({ params }: VideoPageProps) {
     }
 
     return (
-      <VideoPlayerPage 
-        director={director} 
-        videos={videos}
-        selectedVideo={video}
-      />
+      <>
+        <JsonLd
+          data={videoJsonLd({
+            title: `${directorVideo.title} — ${directorVideo.client}`,
+            description: `Commercial film "${directorVideo.title}" for ${directorVideo.client}, directed by ${director.name}.`,
+            directorName: director.name,
+            vimeoId: directorVideo.vimeoId,
+            path: `/directors/${slug}/${videoSlug}/`,
+          })}
+        />
+        <VimeoPreload />
+        <VideoPlayerPage
+          director={director}
+          videos={videos}
+          selectedVideo={video}
+        />
+      </>
     );
   } catch (error) {
     console.error('Error loading video page:', error);

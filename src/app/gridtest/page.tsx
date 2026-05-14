@@ -1,5 +1,12 @@
 import { getDirectors, getVideosAsVideoItems } from "@/lib/directors-api";
+import { buildPageMetadata } from "@/lib/seo";
 import GridTestClient from "@/app/gridtest/GridTestClient";
+
+export const metadata = buildPageMetadata({
+  title: "Grid Test",
+  path: "/gridtest/",
+  noIndex: true,
+});
 
 // Configurar ISR - se regenera cada hora o cuando hay cambios
 export const revalidate = 3600; // 1 hora

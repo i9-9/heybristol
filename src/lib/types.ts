@@ -33,6 +33,18 @@ export interface VideoItem {
     tags?: string[];
 }
 
+/** Display label: `Client | Short title` without repeating the client in the title. */
+export function formatVideoDisplayTitle(video: VideoItem): string {
+    const tags = video.tags ?? [];
+    if (tags.length >= 2) {
+        return `${tags[0]} | ${tags[1]}`;
+    }
+    if (tags.length === 1) {
+        return tags[0];
+    }
+    return video.title;
+}
+
 // Utility function to generate video slugs
 export function generateVideoSlug(title: string): string {
     return title

@@ -59,11 +59,6 @@ export default function Contact() {
               </a>
             </div>
             <div>
-              <a href="mailto:jorge@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">JORGE LARRAIN
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
-              </a>
-            </div>
-            <div>
               <a href="mailto:blue@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">AZUL CRESPO
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>

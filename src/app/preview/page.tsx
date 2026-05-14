@@ -1,11 +1,12 @@
 import dynamicImport from 'next/dynamic';
-import type { Metadata } from 'next';
 import { getAllHeroVideos, getRandomAudioTrack } from '@/lib/contentful';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Preview · Bristol',
-  robots: 'noindex, nofollow',
-};
+export const metadata = buildPageMetadata({
+  title: 'Preview',
+  path: '/preview/',
+  noIndex: true,
+});
 
 const Hero = dynamicImport(() => import('@/components/Hero'), {
   ssr: true

@@ -1,5 +1,14 @@
 import { getAllHeroVideos, getRandomAudioTrack } from '@/lib/contentful';
+import { buildPageMetadata } from '@/lib/seo';
 import ConstructionClient from './ConstructionClient';
+
+export const metadata = {
+  ...buildPageMetadata({
+    title: 'Bristol — Production Company',
+    path: '/construction/',
+  }),
+  title: { absolute: 'Bristol — Production Company' },
+};
 
 export const revalidate = 3600;
 

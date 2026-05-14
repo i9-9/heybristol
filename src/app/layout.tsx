@@ -1,40 +1,56 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { JsonLd } from "@/components/JsonLd";
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_KEYWORDS,
+  SITE_NAME,
+  SITE_URL,
+  organizationJsonLd,
+} from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Bristol",
-  description: "Bristol is a production company. Our values are rooted in creativity, authenticity and collaboration that reflects a diverse range of voices and perspectives",
-  metadataBase: new URL('https://heybristol.com'),
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: DEFAULT_DESCRIPTION,
+  keywords: DEFAULT_KEYWORDS,
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   openGraph: {
-    title: "Bristol",
-    description: "Bristol is a production company. Our values are rooted in creativity, authenticity and collaboration that reflects a diverse range of voices and perspectives",
-    url: 'https://heybristol.com',
-    siteName: 'Bristol',
-    type: 'website',
+    title: SITE_NAME,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    type: "website",
+    locale: "es_AR",
     images: [
       {
-        url: '/opengraph-image.svg',
+        url: "/opengraph-image.svg",
         width: 1200,
         height: 630,
-        alt: 'Bristol - Production Company',
+        alt: `${SITE_NAME} — Production Company`,
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: "Bristol",
-    description: "Bristol - Production Company",
-    images: ['/opengraph-image.svg'],
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: DEFAULT_DESCRIPTION,
+    images: ["/opengraph-image.svg"],
   },
   icons: {
-    icon: [
-      {
-        url: '/favicon.png',
-        type: 'image/png',
-      },
-    ],
-    shortcut: '/favicon.png',
-    apple: '/favicon.png',
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
@@ -50,13 +66,24 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         
-        {/* DNS Prefetch y Preconnect para Vimeo - mejora velocidad de carga de videos */}
+        {/* DNS Prefetch y Preconnect para Vimeo */}
         <link rel="dns-prefetch" href="https://player.vimeo.com" />
         <link rel="preconnect" href="https://player.vimeo.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://i.vimeocdn.com" />
+        <link rel="preconnect" href="https://i.vimeocdn.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://f.vimeocdn.com" />
+        <link rel="preconnect" href="https://f.vimeocdn.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://vumbnail.com" />
         <link rel="preconnect" href="https://vumbnail.com" crossOrigin="anonymous" />
+        <link
+          rel="preload"
+          href="https://player.vimeo.com/api/player.js"
+          as="script"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className="w-full h-full m-0 p-0 overflow-hidden">
+        <JsonLd data={organizationJsonLd()} />
         {children}
       </body>
     </html>

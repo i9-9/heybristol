@@ -4,8 +4,9 @@ import Image from "next/image";
 import LogoB from "@/components/LogoB";
 import { useState, useCallback, useEffect, useRef } from "react";
 import type { VideoItem } from "@/lib/types";
+import { formatVideoDisplayTitle } from "@/lib/types";
 import { useRouter } from "next/navigation";
-import CustomVimeoPlayer from "@/components/CustomVimeoPlayer";
+import VideoPlayer from "@/components/VideoPlayer";
 
 interface GridTestClientProps {
   director: { name: string; slug: string };
@@ -133,7 +134,7 @@ function VideoGridCard({ video, onClick, loadIndex = 0, className = "" }: VideoG
       {/* Overlay con título - siempre visible en mobile, en desktop solo en hover */}
       <div className="absolute inset-0 flex items-center justify-center bg-black/60 md:bg-black/60 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">
         <span className="text-white text-center px-3 font-medium uppercase text-sm md:text-base">
-          {video.tags && video.tags.length > 1 ? `${video.tags[0]} | ${video.tags[1]}` : video.title}
+          {formatVideoDisplayTitle(video)}
         </span>
       </div>
     </div>
@@ -411,19 +412,20 @@ export default function GridTestClient({ director, videos }: GridTestClientProps
 
             <div className="w-full max-w-5xl mx-auto mt-8 md:-mt-4 animate-fadeIn px-4 md:px-0">
               <div className="aspect-video w-full bg-black overflow-hidden rounded-lg">
-                <CustomVimeoPlayer
+                <VideoPlayer
                   video={selectedVideo}
                   className="w-full h-full"
                   autoPlay={true}
                   loop={false}
                   muted={true}
+                  variant="full"
                 />
               </div>
               
               <div className="h-4"></div>
               
               <h3 className="text-white text-lg md:text-2xl font-medium text-center animate-slideUp uppercase px-2">
-                {selectedVideo.tags?.[0] || 'CLIENTE'} | {selectedVideo.title}
+                {formatVideoDisplayTitle(selectedVideo)}
               </h3>
             </div>
             

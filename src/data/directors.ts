@@ -24,8 +24,14 @@ export function getThumbnailUrl(thumbnailId: string): string {
   return `https://vimeo.com/${thumbnailId}`;
 }
 
-export function getEmbedUrl(vimeoId: string): string {
-  return `https://player.vimeo.com/video/${vimeoId}?h=hash&title=0&byline=0&portrait=0`;
+export function getEmbedUrl(vimeoId: string, hash?: string): string {
+  const params = new URLSearchParams({
+    title: '0',
+    byline: '0',
+    portrait: '0',
+  });
+  if (hash) params.set('h', hash);
+  return `https://player.vimeo.com/video/${vimeoId}?${params.toString()}`;
 }
 
 export const directors: Director[] = [

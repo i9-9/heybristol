@@ -67,7 +67,23 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
 
     let mounted = true;
 
-    const initializePlayerWithElement = async (element: HTMLElement) => {
+    const resolvePlaybackHash = async (): Promise<string | undefined> => {
+      if (hash) return hash;
+
+      try {
+        const response = await fetch(`/api/vimeo/${videoId}/`);
+        if (!response.ok) return undefined;
+        const data = (await response.json()) as { hash?: string };
+        return data.hash;
+      } catch {
+        return undefined;
+      }
+    };
+
+    const initializePlayerWithElement = async (
+      element: HTMLElement,
+      playbackHash?: string
+    ) => {
       if (!mounted) return;
 
       try {
@@ -75,12 +91,12 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
 
         let target: HTMLElement = element;
 
-        if (hash) {
+        if (playbackHash) {
           // Private/unlisted videos: pre-built iframe avoids a failing oEmbed lookup.
           element.innerHTML = '';
           const iframe = document.createElement('iframe');
           const params = new URLSearchParams({
-            h: hash,
+            h: playbackHash,
             autoplay: autoPlay ? '1' : '0',
             muted: muted ? '1' : '0',
             loop: loop ? '1' : '0',
@@ -122,7 +138,7 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
           controls: false
         };
 
-        if (!hash) {
+        if (!playbackHash) {
           playerOptions.id = parseInt(videoId);
         }
 
@@ -130,7 +146,7 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
           playerOptions.quality = quality;
         }
 
-        const vimeoPlayer = hash
+        const vimeoPlayer = playbackHash
           ? new Player(target)
           : new Player(element, playerOptions);
 
@@ -171,7 +187,7 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
 
         vimeoPlayer.on('error' as any, () => {
           if (!mounted) return;
-          if (hash) {
+          if (playbackHash) {
             setPlayerState(prev => ({ ...prev, isReady: true, isBuffering: false }));
             return;
           }
@@ -252,6 +268,9 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
     };
 
     const initializePlayer = async () => {
+      const playbackHash = await resolvePlaybackHash();
+      if (!mounted) return;
+
       // Wait for DOM element to be available
       const elementId = `vimeo_${videoId}`;
       
@@ -275,7 +294,7 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
 
       const element = await waitForElement();
       if (element && mounted) {
-        await initializePlayerWithElement(element);
+        await initializePlayerWithElement(element, playbackHash);
       }
     };
 

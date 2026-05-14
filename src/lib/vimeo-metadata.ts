@@ -15,7 +15,10 @@ function pickThumbnailUrl(sizes?: Array<{ width?: number; link?: string }>): str
 
 async function fetchVimeoMetadata(vimeoId: string): Promise<VimeoMetadata> {
   const token = process.env.VIMEO_TOKEN;
-  if (!token) return { hash: null, thumbnailUrl: null };
+  if (!token) {
+    console.warn('[vimeo-metadata] VIMEO_TOKEN is not set — private videos will not resolve playback hash');
+    return { hash: null, thumbnailUrl: null };
+  }
 
   try {
     const response = await fetch(`https://api.vimeo.com/videos/${vimeoId}`, {
@@ -42,11 +45,12 @@ async function fetchVimeoMetadata(vimeoId: string): Promise<VimeoMetadata> {
   }
 }
 
-const getCachedVimeoMetadata = unstable_cache(
-  async (vimeoId: string) => fetchVimeoMetadata(vimeoId),
-  ['vimeo-video-metadata'],
-  { revalidate: 86400 }
-);
+const getCachedVimeoMetadata = (vimeoId: string) =>
+  unstable_cache(
+    async () => fetchVimeoMetadata(vimeoId),
+    ['vimeo-video-metadata', vimeoId],
+    { revalidate: 86400 }
+  )();
 
 /** Resolves private hash + HD thumbnail via Vimeo API (server-only, cached 24h). */
 export async function getVimeoVideoMetadata(vimeoId: string): Promise<{

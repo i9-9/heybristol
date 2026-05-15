@@ -303,8 +303,9 @@ export function useVimeoPlayer(videoId: string, options: UseVimeoPlayerOptions =
     return () => {
       mounted = false;
       if (playerRef.current) {
-        playerRef.current.destroy();
+        const p = playerRef.current;
         playerRef.current = null;
+        p.destroy().catch(() => {});
       }
       if (timeUpdateIntervalRef.current) {
         clearInterval(timeUpdateIntervalRef.current);

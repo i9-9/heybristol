@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <main className="relative min-h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden">
       <div className="absolute top-6 left-6 md:top-8 md:left-8 z-10">
-        <Link href="/construction" className="block w-10 md:w-24 text-[#f31014]">
+        <Link href="/" className="block w-10 md:w-24 text-[#f31014]">
           <LogoB color="#f31014" />
         </Link>
       </div>
@@ -26,7 +26,7 @@ export default function NotFound() {
         </p>
 
         <Link
-          href="/construction"
+          href="/"
           className="mt-4 md:mt-6 font-hagrid uppercase text-xs md:text-sm tracking-wide text-[#f31014] border-b-2 border-[#f31014] pb-0.5 hover:text-white hover:border-white transition-colors duration-300 animate-slideUp"
         >
           Back to home

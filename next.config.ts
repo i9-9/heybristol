@@ -7,8 +7,10 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig: NextConfig = {
   async redirects() {
     return [
-      { source: '/devpreview', destination: '/preview/', permanent: true },
-      { source: '/devpreview/', destination: '/preview/', permanent: true },
+      { source: '/devpreview', destination: '/', permanent: true },
+      { source: '/devpreview/', destination: '/', permanent: true },
+      { source: '/construction', destination: '/', permanent: true },
+      { source: '/construction/', destination: '/', permanent: true },
     ];
   },
   trailingSlash: true,

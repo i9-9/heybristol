@@ -307,7 +307,7 @@ export default function GridTestClient({ director, videos }: GridTestClientProps
       <div className="absolute top-0 left-0 p-6 z-10">
         <button 
           onClick={() => {
-            router.push('/preview');
+            router.push('/');
             setTimeout(() => {
               const scrollToDirectors = () => {
                 const directorsSection = document.getElementById('directors');
@@ -334,7 +334,7 @@ export default function GridTestClient({ director, videos }: GridTestClientProps
         <div className="absolute bottom-6 left-6 z-50">
           <button
             onClick={() => {
-              router.push('/preview');
+              router.push('/');
             }}
             className="flex flex-col items-start space-y-2 text-white cursor-pointer"
           >
@@ -452,7 +452,7 @@ export default function GridTestClient({ director, videos }: GridTestClientProps
 
       <div className="absolute bottom-6 right-6 z-10">
         <button onClick={() => {
-          router.push('/preview');
+          router.push('/');
         }} className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer">
           <Image src="/images/icons/arrow.png" alt="Arrow Up" width={32} height={32} className="w-8 h-8" />
           <span className="font-ordinary text-sm md:text-xl uppercase leading-tight text-right whitespace-nowrap">

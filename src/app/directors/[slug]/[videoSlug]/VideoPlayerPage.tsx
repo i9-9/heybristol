@@ -74,7 +74,7 @@ export default function VideoPlayerPage({
         </button>
       </div>
 
-      <div className="flex flex-col items-center justify-start h-full px-6 pt-[140px] md:pt-[120px]">
+      <div className="flex flex-col items-center justify-center h-full px-6">
         <VideoViewShell
           director={director}
           selectedVideo={selectedVideo}

@@ -182,7 +182,7 @@ export default function VideoViewShell({
 
       {!isFullscreen && (
         <>
-          <div className="absolute left-6 top-1/4 md:top-1/2 transform -translate-y-1/2 z-20">
+          <div className="absolute left-6 top-[15%] md:top-1/2 transform -translate-y-1/2 z-20">
             <button
               type="button"
               onClick={onPreviousVideo}
@@ -198,7 +198,7 @@ export default function VideoViewShell({
             </button>
           </div>
 
-          <div className="absolute right-6 top-1/4 md:top-1/2 transform -translate-y-1/2 z-20">
+          <div className="absolute right-6 top-[15%] md:top-1/2 transform -translate-y-1/2 z-20">
             <button
               type="button"
               onClick={onNextVideo}

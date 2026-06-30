@@ -54,22 +54,22 @@ export default function Contact() {
         <div className="text-center">
           <div className="mt-4 md:mt-6 flex flex-col md:flex-row md:justify-center md:items-center gap-y-2 md:gap-y-0 md:gap-x-8 lg:gap-x-12 text-black">
             <div>
-              <a href="mailto:gabriela@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">GABRIELA ALFARO
+              <a href="mailto:gabriela@heybristol.com" className="font-extrabold text-sm md:text-base lg:text-lg mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">GABRIELA ALFARO
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>
             <div>
-              <a href="mailto:blue@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">AZUL CRESPO
+              <a href="mailto:blue@heybristol.com" className="font-extrabold text-sm md:text-base lg:text-lg mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">AZUL CRESPO
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>
             <div>
-              <a href="mailto:martin@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">MARTÍN GIUDICESSI
+              <a href="mailto:martin@heybristol.com" className="font-extrabold text-sm md:text-base lg:text-lg mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">MARTÍN GIUDICESSI
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>
             <div>
-              <a href="mailto:direccion@heybristol.com" className="font-extrabold text-[10px] md:text-xs lg:text-sm mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">ENRIQUE NAVA
+              <a href="mailto:direccion@heybristol.com" className="font-extrabold text-sm md:text-base lg:text-lg mb-1 md:mb-2 font-hagrid hover:opacity-80 transition-opacity inline-block relative group whitespace-nowrap">ENRIQUE NAVA
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-500 ease-out group-hover:w-full"></span>
               </a>
             </div>

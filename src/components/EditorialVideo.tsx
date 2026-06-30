@@ -52,7 +52,7 @@ export default function EditorialVideoComponent({
   const videoSource = getBestVideoSource(video, isMobile);
 
   useEffect(() => {
-    // Detect iOS devices
+    // Detect iOS devices and Safari
     const userAgent = navigator.userAgent.toLowerCase();
     const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
     setIsIOS(isIOSDevice);
@@ -65,6 +65,15 @@ export default function EditorialVideoComponent({
       const handleLoadedData = () => {
         setIsLoaded(true);
         setHasError(false);
+        
+        // Force play on Safari/iOS after video loads
+        const playPromise = videoElement.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            // Autoplay was prevented, likely on iOS
+            console.log('Autoplay prevented:', error);
+          });
+        }
       };
       
       const handleError = () => {
@@ -117,16 +126,21 @@ export default function EditorialVideoComponent({
     <div className={`relative bg-black overflow-hidden shadow-[0_4px_15px_rgba(0,0,0,0.15)] ${className}`}>
       <video
         ref={videoRef}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover [&::-webkit-media-controls]:hidden [&::-webkit-media-controls-enclosure]:hidden [&::-webkit-media-controls-panel]:hidden [&::-webkit-media-controls-play-button]:hidden [&::-webkit-media-controls-start-playback-button]:hidden"
         autoPlay
         loop
         muted
         playsInline
-        preload="metadata"
+        controls={false}
+        disablePictureInPicture
+        preload="auto"
         webkit-playsinline="true"
         x5-playsinline="true"
         x5-video-player-type="h5"
         x5-video-player-fullscreen="false"
+        style={{ 
+          pointerEvents: 'none',
+        }}
       >
         <source src={videoSource.src} type={`video/${videoSource.type}`} />
         Tu navegador no soporta el elemento de video.
@@ -145,6 +159,7 @@ export default function EditorialVideoComponent({
       {isIOS && !userInteracted && isLoaded && (
         <div 
           className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer"
+          style={{ pointerEvents: 'auto' }}
           onClick={() => {
             setUserInteracted(true);
             if (videoRef.current) {

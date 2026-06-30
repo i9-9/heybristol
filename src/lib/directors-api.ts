@@ -18,26 +18,12 @@ const USE_CONTENTFUL = process.env.NEXT_PUBLIC_USE_CONTENTFUL === 'true';
 
 /**
  * Normalizes director names to fix accent issues.
- * Temporary fix until Contentful is updated.
+ * Adds proper accents to CAMILA CORNELSEN.
  */
 function normalizeDirectorName(name: string): string {
-  // More aggressive normalization: replace any accented characters
-  // Check if the name contains CAMIL with any accent and CORNEL with any accent/variation
-  if (name.match(/CAMIL[AÀÁ]/i) && name.match(/CORN[EËÉ]LSEN/i)) {
-    return 'CAMILA CORNELSEN';
-  }
-  
-  // Handle various possible accent combinations as fallback
-  const namesToNormalize = [
-    'CAMILÀ CORNËLSEN',
-    'CAMILA CORNËLSEN',
-    'CAMILÀ CORNELSEN',
-    'CAMILÁ CORNELSEN',
-    'CAMILÁ CORNËLSEN',
-  ];
-  
-  if (namesToNormalize.includes(name)) {
-    return 'CAMILA CORNELSEN';
+  // Add accents to CAMILA CORNELSEN
+  if (name === 'CAMILA CORNELSEN' || name.match(/CAMIL[AÀÁ]?\s+CORN[EËÉ]?LSEN/i)) {
+    return 'CAMILÀ CORNËLSEN';
   }
   
   return name;

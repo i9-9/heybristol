@@ -57,7 +57,8 @@
     "hero-loading-analysis": "tsx scripts/hero-loading-removal-analysis.ts",
     "setup-webhook-filter": "node scripts/simple-setup-webhook.js",
     "monitor-webhook": "node scripts/monitor-webhook.js",
-    "test-webhook": "node test-webhook.js"
+    "test-webhook": "node test-webhook.js",
+    "update-camila-name": "tsx scripts/update-camila-name.ts"
   },
   "dependencies": {
     "@vercel/kv": "^1.0.1",

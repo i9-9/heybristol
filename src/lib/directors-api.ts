@@ -16,6 +16,37 @@ import { getVimeoVideoMetadata } from './vimeo-metadata';
 
 const USE_CONTENTFUL = process.env.NEXT_PUBLIC_USE_CONTENTFUL === 'true';
 
+/**
+ * Normalizes director names to fix accent issues.
+ * Temporary fix until Contentful is updated.
+ */
+function normalizeDirectorName(name: string): string {
+  // Handle various possible accent combinations for CAMILA CORNELSEN
+  const namesToNormalize = [
+    'CAMILÀ CORNËLSEN',
+    'CAMILA CORNËLSEN',
+    'CAMILÀ CORNELSEN',
+    'CAMILÁ CORNELSEN',
+    'CAMILÁ CORNËLSEN',
+  ];
+  
+  if (namesToNormalize.includes(name)) {
+    return 'CAMILA CORNELSEN';
+  }
+  
+  return name;
+}
+
+/**
+ * Normalizes a director object by fixing the name.
+ */
+function normalizeDirector(director: Director): Director {
+  return {
+    ...director,
+    name: normalizeDirectorName(director.name),
+  };
+}
+
 function sortVideosByOrder(videos: DirectorVideo[]): DirectorVideo[] {
   return [...videos].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
@@ -24,20 +55,20 @@ export async function getDirectors(): Promise<Director[]> {
   if (USE_CONTENTFUL) {
     try {
       const contentfulDirectors = await getDirectorsFromContentful();
-      return (contentfulDirectors as Director[]).map((d) => ({
+      return (contentfulDirectors as Director[]).map((d) => normalizeDirector({
         ...d,
         videos: sortVideosByOrder(d.videos),
       }));
     } catch (error) {
       console.error('Error fetching from Contentful, falling back to local data:', error);
-      return localDirectors.map((d) => ({
+      return localDirectors.map((d) => normalizeDirector({
         ...d,
         videos: sortVideosByOrder(d.videos),
       }));
     }
   }
 
-  return localDirectors.map((d) => ({
+  return localDirectors.map((d) => normalizeDirector({
     ...d,
     videos: sortVideosByOrder(d.videos),
   }));
@@ -48,21 +79,21 @@ export async function getDirectorBySlug(slug: string): Promise<Director | null> 
     try {
       const contentfulDirector = await getDirectorBySlugFromContentful(slug);
       if (contentfulDirector) {
-        return {
+        return normalizeDirector({
           ...contentfulDirector,
           videos: sortVideosByOrder(contentfulDirector.videos),
-        };
+        });
       }
       return null;
     } catch (error) {
       console.error('Error fetching from Contentful, falling back to local data:', error);
       const local = getLocalDirectorBySlug(slug);
-      return local ? { ...local, videos: sortVideosByOrder(local.videos) } : null;
+      return local ? normalizeDirector({ ...local, videos: sortVideosByOrder(local.videos) }) : null;
     }
   }
 
   const local = getLocalDirectorBySlug(slug);
-  return local ? { ...local, videos: sortVideosByOrder(local.videos) } : null;
+  return local ? normalizeDirector({ ...local, videos: sortVideosByOrder(local.videos) }) : null;
 }
 
 export async function getDirectorNames(): Promise<string[]> {

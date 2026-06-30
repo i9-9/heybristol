@@ -276,7 +276,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
 
 
   return (
-    <section className="relative z-10 h-screen">
+    <section className="relative z-10 h-dvh">
       {/* Audio track independiente */}
       {audioTrack && (
         <audio

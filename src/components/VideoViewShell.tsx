@@ -151,7 +151,7 @@ export default function VideoViewShell({
   return (
     <>
       <div className="absolute top-6 right-6 z-20">
-        <h2 className="uppercase font-hagrid text-xl md:text-2xl font-bold text-white text-right">
+        <h2 className="uppercase font-hagrid text-2xl md:text-2xl font-bold text-white text-right">
           {director.name}
         </h2>
       </div>

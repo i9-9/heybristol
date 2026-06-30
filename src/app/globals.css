@@ -242,24 +242,49 @@ html::-webkit-scrollbar {
 /* --- Hide Safari/WebKit native video controls --- */
 video::-webkit-media-controls {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 video::-webkit-media-controls-enclosure {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 video::-webkit-media-controls-panel {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 video::-webkit-media-controls-play-button {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 video::-webkit-media-controls-start-playback-button {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 video::-webkit-media-controls-overlay-play-button {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Additional Safari iOS specific hiding */
+video::-webkit-media-controls-container {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+video::-webkit-media-controls-background {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
 }

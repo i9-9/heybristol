@@ -295,43 +295,80 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
       {/* Video de fondo */}
       <div className="absolute inset-0 w-full h-full overflow-hidden bg-black pointer-events-none z-0">
         {videoSource && !isVimeoVideo && (
-          <video
-            ref={videoRef}
-            className="absolute inset-0 w-screen h-screen object-cover md:top-0 md:left-1/2 md:transform md:-translate-x-1/2 md:w-auto md:h-full md:min-w-full md:min-h-full cursor-pointer"
-            autoPlay
-            muted
-            playsInline
-            preload="metadata"
-            controls={false}
-            webkit-playsinline="true"
-            x5-playsinline="true"
-            x5-video-player-type="h5"
-            x5-video-player-fullscreen="false"
-            key={videoSource} // Forzar re-render cuando cambia el source
-            style={{
-              opacity: !isTransitioning ? 1 : 0,
-              transition: "opacity 0.3s ease-in-out"
-            }}
-            onLoadedData={() => setIsVideoLoaded(true)}
-            onCanPlay={() => setIsVideoLoaded(true)}
-            onClick={isIOS ? handleUserInteraction : undefined}
-            onTouchStart={isIOS ? handleUserInteraction : undefined}
-            onEnded={handleVideoEnded}
-            onError={(e) => {
-              console.error('Error en video:', e);
-              if (videoSource?.includes(".webm")) {
-                const fallbackFormat = detectVideoSupport();
-                setVideoSource(fallbackFormat);
-              }
-              setIsVideoLoaded(true);
-            }}
-          >
-            <source
-              src={videoSource}
-              type={videoSource.includes(".webm") ? "video/webm" : "video/mp4"}
+          <>
+            <video
+              ref={videoRef}
+              className="absolute inset-0 w-screen h-screen object-cover md:top-0 md:left-1/2 md:transform md:-translate-x-1/2 md:w-auto md:h-full md:min-w-full md:min-h-full"
+              autoPlay
+              muted
+              playsInline
+              preload="auto"
+              controls={false}
+              disablePictureInPicture
+              disableRemotePlayback
+              webkit-playsinline="true"
+              x5-playsinline="true"
+              x5-video-player-type="h5"
+              x5-video-player-fullscreen="false"
+              key={videoSource}
+              style={{
+                opacity: !isTransitioning ? 1 : 0,
+                transition: "opacity 0.3s ease-in-out",
+                pointerEvents: 'none',
+                WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+              }}
+              onLoadedData={() => setIsVideoLoaded(true)}
+              onCanPlay={() => setIsVideoLoaded(true)}
+              onClick={isIOS ? handleUserInteraction : undefined}
+              onTouchStart={isIOS ? handleUserInteraction : undefined}
+              onEnded={handleVideoEnded}
+              onError={(e) => {
+                console.error('Error en video:', e);
+                if (videoSource?.includes(".webm")) {
+                  const fallbackFormat = detectVideoSupport();
+                  setVideoSource(fallbackFormat);
+                }
+                setIsVideoLoaded(true);
+              }}
+            >
+              <source
+                src={videoSource}
+                type={videoSource.includes(".webm") ? "video/webm" : "video/mp4"}
+              />
+              Tu navegador no soporta el elemento de video.
+            </video>
+            
+            {/* Transparent overlay to block native controls and play button */}
+            <div 
+              className="absolute inset-0 z-5 bg-transparent"
+              style={{ 
+                pointerEvents: isIOS && !userInteracted ? 'auto' : 'none',
+                touchAction: 'none',
+                WebkitTapHighlightColor: 'transparent',
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                userSelect: 'none',
+              }}
+              onClick={(e) => {
+                if (isIOS && !userInteracted) {
+                  handleUserInteraction();
+                }
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onTouchStart={(e) => {
+                if (isIOS && !userInteracted) {
+                  handleUserInteraction();
+                }
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
             />
-            Tu navegador no soporta el elemento de video.
-          </video>
+          </>
         )}
 
         {videoSource && isVimeoVideo && (
@@ -363,20 +400,6 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
                 setIsVideoLoaded(true);
               }}
             />
-          </div>
-        )}
-        
-        {/* iOS-specific play button overlay when video is paused */}
-        {isIOS && !userInteracted && isVideoLoaded && !isVimeoVideo && (
-          <div 
-            className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer z-5"
-            onClick={handleUserInteraction}
-          >
-            <div className="w-20 h-20 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105">
-              <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-            </div>
           </div>
         )}
       </div>

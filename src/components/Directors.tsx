@@ -75,7 +75,7 @@ export default function Directors() {
   return (
     <section
       id="directors"
-      className="relative bg-[#e2e2e2] w-full min-h-screen pt-8 md:pt-12 z-10"
+      className="relative bg-[#e2e2e2] w-full min-h-dvh pt-8 md:pt-12 z-10"
     >
       <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-2 border-[#f31014] ">
         <button 

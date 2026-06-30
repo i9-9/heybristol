@@ -3,7 +3,7 @@ import LogoB from "@/components/LogoB";
 
 export default function NotFound() {
   return (
-    <main className="relative min-h-screen w-full bg-black flex flex-col items-center justify-center overflow-hidden">
+    <main className="relative min-h-dvh w-full bg-black flex flex-col items-center justify-center overflow-hidden">
       <div className="absolute top-6 left-6 md:top-8 md:left-8 z-10">
         <Link href="/" className="block w-10 md:w-24 text-[#f31014]">
           <LogoB color="#f31014" />

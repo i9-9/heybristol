@@ -94,9 +94,9 @@ export default function Contact() {
 
 
       {/* Footer Container */}
-      <div className="absolute bottom-8 left-2 right-2 md:bottom-12 md:left-8 md:right-8 z-30">
+      <div className="absolute bottom-8 left-0 right-0 md:bottom-12 md:left-8 md:right-8 z-30">
         {/* Mobile: Logo and Privacy Policy in a row with baseline alignment */}
-        <div className="flex flex-row items-baseline justify-between mb-4 md:hidden">
+        <div className="flex flex-row items-baseline justify-between mb-4 md:hidden px-2">
           {/* Footer - Bottom Left (BRISTOL Logo) */}
           <div className="flex items-baseline">
             <Image 
@@ -120,7 +120,7 @@ export default function Contact() {
         </div>
 
         {/* Mobile: Center Text below */}
-        <div className="md:hidden w-full">
+        <div className="md:hidden px-2">
           <div className="text-black font-raleway w-full">
             <p className="text-[9px] font-regular uppercase text-justify w-full">Prado Sur 265, Lomas - Virreyes, Lomas de Chapultepec,<br />Miguel Hidalgo, 11000 Ciudad de México, CDMX, México.</p>
           </div>

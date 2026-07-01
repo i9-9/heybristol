@@ -84,11 +84,11 @@ export default function Directors() {
             e.stopPropagation();
             scrollToTop();
           }}
-          className="ml-2 w-10 md:w-24 h-auto text-[#f31014] self-start mb-8 md:mb-24 cursor-pointer"
+          className="md:ml-2 w-10 md:w-24 h-auto text-[#f31014] self-start mb-8 md:mb-24 cursor-pointer"
         >
           <LogoB />
         </button>
-        <div className="mb-8 md:mb-24">
+        <div className="mb-8 md:mb-24 -mx-[20px] md:mx-0">
           <h2 className="text-[#f31014] font-tusker text-[clamp(1.5rem,33vw,14rem)] md:text-[clamp(2rem,22vw,14rem)] leading-none tracking-tight">
             DIRECTORS
           </h2>

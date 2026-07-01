@@ -94,7 +94,7 @@ export default function Contact() {
 
 
       {/* Footer Container */}
-      <div className="absolute bottom-8 left-4 right-4 md:bottom-12 md:left-8 md:right-8 z-30">
+      <div className="absolute bottom-8 left-2 right-2 md:bottom-12 md:left-8 md:right-8 z-30">
         {/* Mobile: Logo and Privacy Policy in a row with baseline alignment */}
         <div className="flex flex-row items-baseline justify-between mb-4 md:hidden">
           {/* Footer - Bottom Left (BRISTOL Logo) */}

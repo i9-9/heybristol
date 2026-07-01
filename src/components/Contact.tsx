@@ -122,7 +122,7 @@ export default function Contact() {
         {/* Mobile: Center Text below */}
         <div className="md:hidden">
           <div className="text-center text-black font-raleway">
-            <p className="text-[7px] font-regular uppercase">Prado Sur 265, Lomas - Virreyes, Lomas de Chapultepec, Miguel Hidalgo, 11000 Ciudad de México, CDMX, México.</p>
+            <p className="text-[7px] font-regular uppercase">Prado Sur 265, Lomas - Virreyes, Lomas de Chapultepec, Miguel Hidalgo, 11000 Ciudad de México, CDMX,&nbsp;México.</p>
           </div>
         </div>
 

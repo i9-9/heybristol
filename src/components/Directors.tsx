@@ -88,7 +88,7 @@ export default function Directors() {
         >
           <LogoB />
         </button>
-        <div>
+        <div className="mb-8 md:mb-24">
           <h2 className="text-[#f31014] font-tusker text-[clamp(1.5rem,33vw,14rem)] md:text-[clamp(2rem,22vw,14rem)] leading-none tracking-tight">
             DIRECTORS
           </h2>

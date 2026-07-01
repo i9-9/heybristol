@@ -120,9 +120,9 @@ export default function Contact() {
         </div>
 
         {/* Mobile: Center Text below */}
-        <div className="md:hidden">
-          <div className="text-center text-black font-raleway">
-            <p className="text-[7px] font-regular uppercase">Prado Sur 265, Lomas - Virreyes, Lomas de Chapultepec,<br />Miguel Hidalgo, 11000 Ciudad de México, CDMX, México.</p>
+        <div className="md:hidden w-full">
+          <div className="text-black font-raleway w-full">
+            <p className="text-[9px] font-regular uppercase text-justify w-full">Prado Sur 265, Lomas - Virreyes, Lomas de Chapultepec,<br />Miguel Hidalgo, 11000 Ciudad de México, CDMX, México.</p>
           </div>
         </div>
 

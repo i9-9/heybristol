@@ -7,6 +7,7 @@ import type { VideoItem } from "@/lib/types";
 import { formatVideoDisplayTitle } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import VideoPlayer from "@/components/VideoPlayer";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface GridTestClientProps {
   director: { name: string; slug: string };
@@ -139,22 +140,6 @@ function VideoGridCard({ video, onClick, loadIndex = 0, className = "" }: VideoG
       </div>
     </div>
   );
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-
-  return isMobile;
 }
 
 // Mapping completo de clases

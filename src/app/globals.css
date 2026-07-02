@@ -40,6 +40,18 @@ html::-webkit-scrollbar {
 :root {
   --background: #ffffff;
   --foreground: #000000;
+  --color-bristol-red: #f31014;
+  --color-bristol-red-contact: #fa1016;
+  --color-bristol-gray: #e2e2e2;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-bristol-red);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* --- Custom fonts --- */
@@ -112,6 +124,9 @@ html::-webkit-scrollbar {
   --font-ordinary: "Ordinary", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --font-raleway: "Raleway", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   --font-tusker: "Tusker Grotesk", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --color-bristol-red: #f31014;
+  --color-bristol-red-contact: #fa1016;
+  --color-bristol-gray: #e2e2e2;
 }
 
 @layer utilities {
@@ -184,6 +199,28 @@ html::-webkit-scrollbar {
 .animate-slideUp {
   animation: slideUp 0.5s ease-out 0.2s forwards;
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-fadeIn,
+  .animate-slideUp {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* --- Mobile video centering optimizations --- */

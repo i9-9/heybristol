@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import LogoB from "@/components/LogoB";
 import { useCallback, useState } from "react";
 import type { VideoItem } from "@/lib/types";
 import { useRouter } from "next/navigation";
@@ -9,6 +8,8 @@ import VideoPlayer from "@/components/VideoPlayer";
 import VideoViewShell from "@/components/VideoViewShell";
 import { generateVideoSlug } from "@/lib/types";
 import { preloadVimeoPlayer } from "@/lib/vimeo-preload";
+import HomeLogoButton from "@/components/HomeLogoButton";
+import { navigateHomeAndScrollToHero } from "@/lib/scroll-to-hero";
 
 void preloadVimeoPlayer();
 
@@ -16,19 +17,6 @@ interface VideoPlayerPageProps {
   director: { name: string; slug: string };
   videos: VideoItem[];
   selectedVideo: VideoItem;
-}
-
-function scrollToHero() {
-  const heroSection = document.querySelector('section');
-  if (heroSection) {
-    heroSection.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-      inline: 'nearest'
-    });
-  } else {
-    setTimeout(scrollToHero, 200);
-  }
 }
 
 export default function VideoPlayerPage({
@@ -58,20 +46,16 @@ export default function VideoPlayerPage({
   }, [selectedVideo.id, videos, director.slug, router]);
 
   const handleGoHome = useCallback(() => {
-    router.push('/');
-    setTimeout(scrollToHero, 300);
+    navigateHomeAndScrollToHero(router);
   }, [router]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
       <div className="absolute top-0 left-0 p-6 z-10">
-        <button
-          type="button"
+        <HomeLogoButton
           onClick={handleGoHome}
           className="w-10 md:w-24 h-auto text-white hover:opacity-80 transition-opacity cursor-pointer"
-        >
-          <LogoB />
-        </button>
+        />
       </div>
 
       <div className="flex flex-col items-center justify-center h-full px-6">
@@ -99,6 +83,7 @@ export default function VideoPlayerPage({
         <div className="absolute bottom-6 right-6 z-10">
         <button
           type="button"
+          aria-label="Volver al inicio"
           onClick={handleGoHome}
           className="flex flex-col items-end space-y-2 text-white hover:opacity-80 cursor-pointer"
         >

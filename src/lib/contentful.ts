@@ -403,23 +403,15 @@ export async function getAllHeroVideos(): Promise<HeroVideo[]> {
 // Función para obtener la mejor fuente de video
 export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = false): VideoSource | null {
   // Prioridad: WebM > MP4 > Vimeo (NUNCA Vimeo en móvil)
-  
-  // Detectar soporte de WebM
-  const video = document.createElement('video');
-  const supportsWebM = video.canPlayType('video/webm; codecs="vp9"').replace(/no/, '') !== '';
-  
-  console.log('🔍 getBestVideoSource - isMobile:', isMobile, 'supportsWebM:', supportsWebM);
-  console.log('🔍 Video fields:', {
-    mobileVideo: !!heroVideo.mobileVideo,
-    webmVideo: !!heroVideo.webmVideo,
-    mp4Video: !!heroVideo.mp4Video,
-    vimeoId: !!heroVideo.vimeoId
-  });
-  
+
+  const supportsWebM =
+    typeof document !== 'undefined'
+      ? document.createElement('video').canPlayType('video/webm; codecs="vp9"').replace(/no/, '') !== ''
+      : Boolean(heroVideo.webmVideo);
+
   // En móvil, usar mobileVideo si está disponible, sino usar WebM normal
   if (isMobile) {
     if (heroVideo.mobileVideo) {
-      console.log('📱 Usando mobileVideo');
       return {
         src: `https:${heroVideo.mobileVideo.fields.file.url}`,
         type: heroVideo.mobileVideo.fields.file.contentType.includes('webm') ? 'webm' : 'mp4'
@@ -427,7 +419,6 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
     }
     // Si no hay mobileVideo, usar WebM normal (mismo video que desktop)
     if (supportsWebM && heroVideo.webmVideo) {
-      console.log('📱 Usando webmVideo en móvil');
       return {
         src: `https:${heroVideo.webmVideo.fields.file.url}`,
         type: 'webm'
@@ -435,14 +426,12 @@ export function getBestVideoSource(heroVideo: HeroVideo, isMobile: boolean = fal
     }
     // Fallback a MP4 en móvil si no hay WebM
     if (heroVideo.mp4Video) {
-      console.log('📱 Usando mp4Video en móvil');
       return {
         src: `https:${heroVideo.mp4Video.fields.file.url}`,
         type: 'mp4'
       };
     }
     // NUNCA usar Vimeo en móvil
-    console.log('📱 No hay fuentes válidas para móvil');
     return null;
   }
   

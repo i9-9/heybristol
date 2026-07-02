@@ -20,32 +20,33 @@ export default function EditorialVideoComponent({
   const [userInteracted, setUserInteracted] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const getBestVideoSource = (editorialVideo: EditorialVideo, isMobile: boolean = false) => {
-    
-    if (isMobile && editorialVideo.mobileVideo) {
+  const getBestVideoSource = (editorialVideo: EditorialVideo, mobile: boolean = false) => {
+    if (mobile && editorialVideo.mobileVideo) {
       return {
         src: `https:${editorialVideo.mobileVideo.fields.file.url}`,
         type: editorialVideo.mobileVideo.fields.file.contentType.includes('webm') ? 'webm' : 'mp4'
       };
     }
-    
-    const video = document.createElement('video');
-    const supportsWebM = video.canPlayType('video/webm; codecs="vp9"').replace(/no/, '') !== '';
-    
+
+    const supportsWebM =
+      typeof document !== 'undefined'
+        ? document.createElement('video').canPlayType('video/webm; codecs="vp9"').replace(/no/, '') !== ''
+        : Boolean(editorialVideo.webmVideo);
+
     if (supportsWebM && editorialVideo.webmVideo) {
       return {
         src: `https:${editorialVideo.webmVideo.fields.file.url}`,
         type: 'webm'
       };
     }
-    
+
     if (editorialVideo.mp4Video) {
       return {
         src: `https:${editorialVideo.mp4Video.fields.file.url}`,
         type: 'mp4'
       };
     }
-    
+
     return null;
   };
 

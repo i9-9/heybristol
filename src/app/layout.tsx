@@ -66,8 +66,23 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         
-        {/* Disable Vimeo SEO metadata hook before any player.js loads (throws on null chapters) */}
+        {/* Disable Vimeo SEO metadata hook before the player SDK loads (throws on null chapters) */}
         <script dangerouslySetInnerHTML={{ __html: 'window.VimeoSeoMetadataAppended=true' }} />
+
+        <link
+          rel="preload"
+          href="/fonts/Hagrid-Text-Variable.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/TuskerGrotesk-7700Bold.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
         
         {/* DNS Prefetch y Preconnect para Vimeo */}
         <link rel="dns-prefetch" href="https://player.vimeo.com" />
@@ -78,12 +93,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://f.vimeocdn.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://vumbnail.com" />
         <link rel="preconnect" href="https://vumbnail.com" crossOrigin="anonymous" />
-        <link
-          rel="preload"
-          href="https://player.vimeo.com/api/player.js"
-          as="script"
-          crossOrigin="anonymous"
-        />
       </head>
       <body className="w-full h-full m-0 p-0 overflow-hidden">
         <JsonLd data={organizationJsonLd()} />

@@ -1,45 +1,18 @@
 "use client";
 
-import LogoB from "@/components/LogoB";
+import HomeLogoButton from "@/components/HomeLogoButton";
 import Image from "next/image";
 
 export default function Contact() {
-  const scrollToTop = () => {
-    // Usar la misma lógica que funciona en DirectorClient
-    const scrollToTop = () => {
-      const heroSection = document.querySelector('section');
-      if (heroSection) {
-        heroSection.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start',
-          inline: 'nearest'
-        });
-      } else {
-        // Si no encuentra la sección, intentar de nuevo
-        setTimeout(scrollToTop, 200);
-      }
-    };
-    scrollToTop();
-  };
-
   return (
-    <section id="contact" className="relative bg-[#fa1016] w-full py-32 min-h-dvh md:py-[600px] pb-48 md:pb-64">
-        <div className="absolute top-6 left-6 md:top-8 md:left-8 z-30">
-        <button 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            scrollToTop();
-          }}
+    <section id="contact" className="relative bg-bristol-red-contact w-full py-32 min-h-dvh md:py-[600px] pb-48 md:pb-64">
+      <div className="absolute top-6 left-6 md:top-8 md:left-8 z-30">
+        <HomeLogoButton
           className="cursor-pointer p-2 rounded z-50 relative"
-          style={{ zIndex: 9999 }}
-        >
-          <div className="w-10 md:w-24 h-auto text-[#e2e2e2]">
-            <LogoB />
-          </div>
-        </button>
-        </div>
-      
+          logoClassName="w-10 md:w-24 h-auto text-bristol-gray"
+        />
+      </div>
+
       {/* Título CONTACT */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 -translate-y-[4rem] md:translate-y-[2rem] z-100">
         <div className="text-center">
@@ -81,17 +54,16 @@ export default function Contact() {
       <div className="absolute top-1/2 left-1/2 transform -translate-x-[44%] -translate-y-1/2 -translate-y-[18rem] md:-translate-y-[22.5rem] z-20">
         <div className="text-center">
           <div className="relative w-[16rem] h-[16rem] md:w-[28rem] md:h-[28rem] mb-0 mx-auto transition-all duration-500 ease-in-out">
-            <Image 
-              src="/images/galgoweb.png" 
-              alt="Galgo" 
-              fill 
-              sizes="(max-width: 768px) 288px, 576px" 
+            <Image
+              src="/images/galgoweb.png"
+              alt="Galgo"
+              fill
+              sizes="(max-width: 768px) 288px, 576px"
               className="object-contain"
             />
           </div>
         </div>
       </div>
-
 
       {/* Footer Container */}
       <div className="absolute bottom-8 left-4 right-4 md:bottom-12 md:left-8 md:right-8 z-30">
@@ -99,11 +71,11 @@ export default function Contact() {
         <div className="flex flex-row items-baseline justify-between mb-4 md:hidden">
           {/* Footer - Bottom Left (BRISTOL Logo) */}
           <div className="flex items-baseline">
-            <Image 
-              src="/logo/bristol_2.png" 
-              alt="Bristol Logo" 
-              width={120} 
-              height={40} 
+            <Image
+              src="/logo/bristol_2.png"
+              alt="Bristol Logo"
+              width={120}
+              height={40}
               className="h-6 w-auto"
             />
           </div>
@@ -130,11 +102,11 @@ export default function Contact() {
         <div className="hidden md:flex md:flex-row md:items-baseline md:justify-between">
           {/* Footer - Bottom Left (BRISTOL Logo) */}
           <div className="flex items-baseline">
-            <Image 
-              src="/logo/bristol_2.png" 
-              alt="Bristol Logo" 
-              width={120} 
-              height={40} 
+            <Image
+              src="/logo/bristol_2.png"
+              alt="Bristol Logo"
+              width={120}
+              height={40}
               className="h-10 w-auto"
             />
           </div>

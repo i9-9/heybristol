@@ -35,7 +35,7 @@ const Firmas = () => {
             priority={false}
             loading="lazy"
             sizes="(max-width: 768px) 150px, 200px"
-            quality={100}
+            quality={85}
           />
         </a>
       ))}

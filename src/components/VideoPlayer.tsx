@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import type { VideoItem } from '@/lib/types';
 import { useVimeoPlayer } from '@/hooks/useVimeoPlayer';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface VideoPlayerProps {
   video: VideoItem;
@@ -21,19 +22,6 @@ interface VideoPlayerProps {
   variant?: 'full' | 'minimal';
   loadIndex?: number;
   allowVideoClick?: boolean;
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  return isMobile;
 }
 
 function isInteractiveTarget(target: EventTarget | null) {
@@ -443,7 +431,7 @@ export default function VideoPlayer({
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: #ff0000;
+          background: var(--color-bristol-red);
           cursor: pointer;
           border: 2px solid #ffffff;
           box-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -453,7 +441,7 @@ export default function VideoPlayer({
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: #ff0000;
+          background: var(--color-bristol-red);
           cursor: pointer;
           border: 2px solid #ffffff;
           box-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -511,6 +499,7 @@ export default function VideoPlayer({
             <div className="flex items-center space-x-3">
               <button
                 type="button"
+                aria-label={playerState.isPlaying ? 'Pausar video' : 'Reproducir video'}
                 data-player-control
                 onClick={(e) => {
                   e.stopPropagation();
@@ -533,6 +522,7 @@ export default function VideoPlayer({
 
               <button
                 type="button"
+                aria-label={playerState.isMuted ? 'Activar sonido' : 'Silenciar video'}
                 data-player-control
                 onClick={(e) => {
                   e.stopPropagation();
@@ -573,6 +563,7 @@ export default function VideoPlayer({
             {onFullscreenToggle && (
               <button
                 type="button"
+                aria-label={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
                 data-player-control
                 onClick={(e) => {
                   e.stopPropagation();
@@ -683,14 +674,14 @@ export default function VideoPlayer({
           </>
           ) : (
             <div className="absolute bottom-4 left-4 flex space-x-2 pointer-events-auto">
-              <button type="button" data-player-control onClick={(e) => { e.stopPropagation(); void handlePlayPause(); }} className="w-12 h-12 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded flex items-center justify-center">
+              <button type="button" aria-label={playerState.isPlaying ? 'Pausar video' : 'Reproducir video'} data-player-control onClick={(e) => { e.stopPropagation(); void handlePlayPause(); }} className="w-12 h-12 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded flex items-center justify-center">
                 {playerState.isBuffering ? <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : playerState.isPlaying ? (
                   <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" /></svg>
                 ) : (
                   <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                 )}
               </button>
-              <button type="button" data-player-control onClick={(e) => { e.stopPropagation(); void handleMuteToggle(); }} className="w-12 h-12 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded flex items-center justify-center">
+              <button type="button" aria-label={playerState.isMuted ? 'Activar sonido' : 'Silenciar video'} data-player-control onClick={(e) => { e.stopPropagation(); void handleMuteToggle(); }} className="w-12 h-12 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded flex items-center justify-center">
                 {playerState.isMuted ? (
                   <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" /></svg>
                 ) : (
@@ -698,7 +689,7 @@ export default function VideoPlayer({
                 )}
               </button>
               {onFullscreenToggle && !isMobile && (
-                <button type="button" data-player-control onClick={(e) => { e.stopPropagation(); onFullscreenToggle(); }} className="w-12 h-12 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded flex items-center justify-center">
+                <button type="button" aria-label={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'} data-player-control onClick={(e) => { e.stopPropagation(); onFullscreenToggle(); }} className="w-12 h-12 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded flex items-center justify-center">
                   <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" /></svg>
                 </button>
               )}
@@ -750,6 +741,7 @@ export default function VideoPlayer({
               <p className="text-sm text-white/60 mb-6">{video.title}</p>
               <button
                 type="button"
+                aria-label="Reintentar reproducción"
                 data-player-control
                 onClick={(e) => {
                   e.stopPropagation();

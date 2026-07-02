@@ -4,30 +4,10 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import LogoMain from "@/components/LogoMain";
 import { getBestVideoSource, getRandomAudioTrack, type HeroVideo, type AudioTrack } from "@/lib/contentful";
-
-// Optimized mobile detection using CSS media queries
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    // Use CSS media query for better performance
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsMobile(e.matches);
-    };
-
-    // Set initial value
-    setIsMobile(mediaQuery.matches);
-    
-    // Listen for changes
-    mediaQuery.addEventListener('change', handleChange);
-    
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
-  return isMobile;
-}
+import { preloadVimeoPlayer } from "@/lib/vimeo-preload";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { scrollToSection } from "@/lib/scroll-to-hero";
+import type Player from "@vimeo/player";
 
 interface HeroProps {
   allHeroVideos?: HeroVideo[];
@@ -53,7 +33,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
   
   // Ref para evitar múltiples llamadas al handleVideoEnded
   const isHandlingVideoEnd = useRef(false);
-  const vimeoPlayerRef = useRef<unknown>(null);
+  const vimeoPlayerRef = useRef<Player | null>(null);
 
   const detectVideoSupport = () => {
     const video = document.createElement("video");
@@ -167,15 +147,42 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
     }
   };
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  };
+  // Configurar Vimeo player cuando sea necesario (via @vimeo/player npm package)
+  useEffect(() => {
+    if (!isVimeoVideo || !videoSource || isTransitioning) return;
+
+    let cancelled = false;
+    let player: Player | null = null;
+
+    const setupVimeoPlayer = async () => {
+      try {
+        const iframe = document.querySelector('iframe[src*="vimeo"]') as HTMLIFrameElement | null;
+        if (!iframe || cancelled) return;
+
+        const { default: PlayerCtor } = await preloadVimeoPlayer();
+        if (cancelled) return;
+
+        player = new PlayerCtor(iframe);
+        vimeoPlayerRef.current = player;
+
+        player.on('ended', handleVideoEnded);
+        await player.play();
+      } catch (error) {
+        console.error('Error setting up Vimeo hero player:', error);
+      }
+    };
+
+    void setupVimeoPlayer();
+
+    return () => {
+      cancelled = true;
+      if (player) {
+        player.off('ended', handleVideoEnded);
+        void player.destroy();
+      }
+      vimeoPlayerRef.current = null;
+    };
+  }, [isVimeoVideo, videoSource, isTransitioning, handleVideoEnded]);
 
   const handleUserInteraction = () => {
     setUserInteracted(true);
@@ -189,47 +196,6 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
       audioRef.current.play().catch(console.error);
     }
   };
-
-
-  // Configurar Vimeo player cuando sea necesario
-  useEffect(() => {
-    if (isVimeoVideo && videoSource && !isTransitioning) {
-      // Configurar el player de Vimeo con la API
-      const setupVimeoPlayer = () => {
-        const iframe = document.querySelector('iframe[src*="vimeo"]') as HTMLIFrameElement;
-        const VimeoPlayer = (window as { Vimeo?: { Player: new (iframe: HTMLIFrameElement) => unknown } }).Vimeo;
-        
-        if (iframe && VimeoPlayer) {
-          const player = new VimeoPlayer.Player(iframe);
-          vimeoPlayerRef.current = player;
-          
-          // Configurar eventos del player
-          if (player && typeof player === 'object' && 'on' in player) {
-            (player as { on: (event: string, callback: () => void) => void }).on('ended', () => {
-              handleVideoEnded();
-            });
-            
-            if ('play' in player) {
-              (player as { play: () => Promise<unknown> }).play().catch((error: unknown) => {
-                console.error('Error playing Vimeo video:', error);
-              });
-            }
-          }
-        }
-      };
-
-      // Cargar script de Vimeo si no está disponible
-      const VimeoPlayer = (window as { Vimeo?: unknown }).Vimeo;
-      if (!VimeoPlayer) {
-        const script = document.createElement('script');
-        script.src = 'https://player.vimeo.com/api/player.js';
-        script.onload = setupVimeoPlayer;
-        document.head.appendChild(script);
-      } else {
-        setupVimeoPlayer();
-      }
-    }
-  }, [isVimeoVideo, videoSource, isTransitioning, handleVideoEnded]);
 
   // Cargar contenido inicial
   useEffect(() => {
@@ -276,7 +242,7 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
 
 
   return (
-    <section className="relative z-10 h-dvh">
+    <section id="hero" className="relative z-10 h-dvh">
       {/* Audio track independiente */}
       {audioTrack && (
         <audio
@@ -415,12 +381,16 @@ export default function Hero({ allHeroVideos, fixedAudioTrack }: HeroProps) {
       <div className="absolute inset-0 flex items-center justify-center z-10">
         <div className="w-full px-[20px] md:px-[50px] mt-[clamp(12rem,34vh,22rem)] flex justify-center gap-x-[clamp(8rem,45vw,16rem)] lg:gap-x-[clamp(52rem,40vw,56rem)] xl:gap-x-[clamp(44rem,38vw,64rem)] font-hagrid-text font-medium text-white text-[clamp(1rem,2.2vw,1.125rem)]">
           <button
+            type="button"
+            aria-label="Ir a directores"
             onClick={() => scrollToSection("directors")}
             className="cursor-pointer hover:opacity-80 transition-opacity"
           >
             DIRECTORS
           </button>
           <button
+            type="button"
+            aria-label="Ir a contacto"
             onClick={() => scrollToSection("contact")}
             className="cursor-pointer hover:opacity-80 transition-opacity"
           >

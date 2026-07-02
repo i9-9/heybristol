@@ -1,130 +1,81 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Image from "next/image";
-import LogoB from "@/components/LogoB";
+import Link from "next/link";
+import HomeLogoButton from "@/components/HomeLogoButton";
 import EditorialVideoComponent from "@/components/EditorialVideo";
-import { useRouter } from "next/navigation";
-import { getDirectorNames, getDirectorSlugs } from "@/lib/directors-api";
-import { getEditorialVideosFromContentful, EditorialVideo } from "@/lib/contentful";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import type { EditorialVideo } from "@/lib/contentful";
 
-export default function Directors() {
-  const [selectedDirector, setSelectedDirector] = useState<string | undefined>();
-  const [directors, setDirectors] = useState<string[]>([]);
-  const [directorSlugs, setDirectorSlugs] = useState<string[]>([]);
-  const [editorialVideos, setEditorialVideos] = useState<EditorialVideo[]>([]);
-  const [isMobile, setIsMobile] = useState(false);
-  const router = useRouter();
+export interface DirectorListItem {
+  name: string;
+  slug: string;
+}
 
-  const scrollToTop = () => {
-    // Usar la misma lógica que funciona en DirectorClient
-    const scrollToTop = () => {
-      const heroSection = document.querySelector('section');
-      if (heroSection) {
-        heroSection.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start',
-          inline: 'nearest'
-        });
-      } else {
-        // Si no encuentra la sección, intentar de nuevo
-        setTimeout(scrollToTop, 200);
-      }
-    };
-    scrollToTop();
-  };
+interface DirectorsProps {
+  directors: DirectorListItem[];
+  editorialVideos: EditorialVideo[];
+}
 
-  useEffect(() => {
-    const fetchDirectors = async () => {
-      try {
-        const [names, slugs, videos] = await Promise.all([
-          getDirectorNames(),
-          getDirectorSlugs(),
-          getEditorialVideosFromContentful()
-        ]);
-        setDirectors(names);
-        setDirectorSlugs(slugs);
-        setEditorialVideos(videos);
-      } catch (error) {
-        console.error('Error fetching directors:', error);
-      }
-    };
+const directorLinkClassName =
+  "block font-normal hover:font-bold focus-visible:font-bold transition-all duration-500";
 
-    fetchDirectors();
-  }, []);
+function DirectorList({
+  directors,
+  className,
+  itemClassName,
+}: {
+  directors: DirectorListItem[];
+  className: string;
+  itemClassName?: string;
+}) {
+  return (
+    <ul className={className}>
+      {directors.map((director) => (
+        <li key={director.slug} className={itemClassName}>
+          <Link
+            href={`/directors/${director.slug}/`}
+            className={directorLinkClassName}
+          >
+            {director.name}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const handleDirectorClick = (director: string) => {
-    const directorIndex = directors.indexOf(director);
-    const slug = directorSlugs[directorIndex];
-    if (slug) {
-      router.push(`/directors/${slug}`);
-    }
-  };
+export default function Directors({ directors, editorialVideos }: DirectorsProps) {
+  const isMobile = useIsMobile();
 
   return (
     <section
       id="directors"
-      className="relative bg-[#e2e2e2] w-full min-h-dvh pt-8 md:pt-12 z-10"
+      className="relative bg-bristol-gray w-full min-h-dvh pt-8 md:pt-12 z-10"
     >
-      <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-2 border-[#f31014] ">
-        <button 
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            scrollToTop();
-          }}
-          className="md:ml-2 w-10 md:w-24 h-auto text-[#f31014] self-start mb-8 md:mb-24 cursor-pointer"
-        >
-          <LogoB />
-        </button>
+      <div className="mx-app flex-col flex md:flex-row md:justify-between items-center md:items-start border-b-2 border-bristol-red">
+        <HomeLogoButton
+          className="md:ml-2 w-10 md:w-24 h-auto text-bristol-red self-start mb-8 md:mb-24 cursor-pointer"
+          logoClassName="w-full h-auto"
+        />
         <div className="mb-8 md:mb-0 w-full md:w-auto">
-          <h2 className="text-[#f31014] font-tusker text-[clamp(2rem,36vw,14rem)] md:text-[clamp(2rem,22vw,14rem)] leading-none tracking-[-0.04em] md:tracking-tight w-full md:w-auto">
+          <h2 className="text-bristol-red font-tusker text-[clamp(2rem,36vw,14rem)] md:text-[clamp(2rem,22vw,14rem)] leading-none tracking-[-0.04em] md:tracking-tight w-full md:w-auto">
             DIRECTORS
           </h2>
         </div>
       </div>
-      
+
       <div className="mx-app py-4 md:py-6">
-        {/* Mobile: Layout optimizado para videos landscape */}
         <div className="md:hidden">
-          {/* Layout horizontal: directores a la izquierda, videos a la derecha */}
           <div className="flex gap-3">
-            {/* Lista de directores (izquierda) */}
             <div className="w-1/2">
-              <ul className="text-[#f31014] text-xs font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-1000 ease-in-out">
-                {directors.map((director, index) => (
-                  <li
-                    className={`${
-                      director === selectedDirector
-                        ? "font-bold"
-                        : "font-normal cursor-pointer"
-                    } hover:font-bold transition-all duration-1000`}
-                    onClick={() => {
-                      setSelectedDirector(director);
-                      handleDirectorClick(director);
-                    }}
-                    key={index}
-                  >
-                    {director}
-                  </li>
-                ))}
-              </ul>
+              <DirectorList
+                directors={directors}
+                className="text-bristol-red text-xs font-hagrid-text flex flex-col font-normal uppercase gap-y-1"
+              />
             </div>
 
-            {/* Videos editoriales (derecha) - mitad del ancho de pantalla */}
             <div className="w-1/2 grid grid-cols-1 gap-1">
-              {/* Video 1 */}
               {editorialVideos[0] ? (
                 <EditorialVideoComponent
                   video={editorialVideos[0]}
@@ -142,8 +93,7 @@ export default function Directors() {
                   />
                 </div>
               )}
-              
-              {/* Video 2 */}
+
               {editorialVideos[1] ? (
                 <EditorialVideoComponent
                   video={editorialVideos[1]}
@@ -161,8 +111,7 @@ export default function Directors() {
                   />
                 </div>
               )}
-              
-              {/* Video 3 */}
+
               {editorialVideos[2] ? (
                 <EditorialVideoComponent
                   video={editorialVideos[2]}
@@ -184,33 +133,14 @@ export default function Directors() {
           </div>
         </div>
 
-        {/* Desktop: Layout original */}
         <div className="hidden md:grid md:grid-cols-12 md:gap-4 md:items-start">
-          {/* Lista de directores (izquierda) */}
-          <ul className="col-span-4 text-[#f31014] text-xs font-hagrid-text flex flex-col font-normal uppercase gap-y-1 transition-all duration-300 ease-in-out">
-            {directors.map((director, index) => (
-              <li
-                className={`${
-                  director === selectedDirector
-                    ? "font-bold"
-                    : "font-normal cursor-pointer"
-                } hover:font-bold transition-all duration-500`}
-                onClick={() => {
-                  setSelectedDirector(director);
-                  handleDirectorClick(director);
-                }}
-                key={index}
-              >
-                {director}
-              </li>
-            ))}
-          </ul>
+          <DirectorList
+            directors={directors}
+            className="col-span-4 text-bristol-red text-xs font-hagrid-text flex flex-col font-normal uppercase gap-y-1"
+          />
 
-          {/* Contenedor de imágenes (derecha) */}
           <div className="col-span-8">
-            {/* Desktop: composición absoluta */}
             <div className="hidden md:block relative h-[520px] lg:h-[600px]">
-              {/* Video 1: alto a la derecha */}
               <div className="absolute top-0 right-0 w-[28%] lg:w-[28%] h-[78%]">
                 {editorialVideos[0] ? (
                   <EditorialVideoComponent
@@ -230,8 +160,7 @@ export default function Directors() {
                   </div>
                 )}
               </div>
-              
-              {/* Video 2: centro-derecha */}
+
               <div className="absolute top-0 right-[32%] w-[28%] lg:w-[28%] h-[78%]">
                 {editorialVideos[1] ? (
                   <EditorialVideoComponent
@@ -251,8 +180,7 @@ export default function Directors() {
                   </div>
                 )}
               </div>
-              
-              {/* Video 3: centro-izquierda */}
+
               <div className="absolute top-0 right-[64%] w-[28%] lg:w-[28%] h-[78%]">
                 {editorialVideos[2] ? (
                   <EditorialVideoComponent
@@ -277,8 +205,7 @@ export default function Directors() {
         </div>
       </div>
 
-      <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10 pointer-events-none">
-      </div>
+      <div className="absolute bottom-4 right-4 md:bottom-6 md:right-8 z-10 pointer-events-none" />
     </section>
   );
 }

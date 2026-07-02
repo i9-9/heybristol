@@ -1,5 +1,7 @@
 import dynamicImport from 'next/dynamic';
-import { getAllHeroVideos, getRandomAudioTrack } from '@/lib/contentful';
+import { getAllHeroVideos, getRandomAudioTrack, getEditorialVideosFromContentful } from '@/lib/contentful';
+import { getDirectors } from '@/lib/directors-api';
+import { compareDirectorsBySurname } from '@/lib/director-sort';
 import { buildPageMetadata } from '@/lib/seo';
 
 export const metadata = {
@@ -24,16 +26,43 @@ const Contact = dynamicImport(() => import('@/components/Contact'), {
 
 export const revalidate = 3600;
 
+async function getDirectorsSectionData() {
+  try {
+    const [directors, editorialVideos] = await Promise.all([
+      getDirectors(),
+      getEditorialVideosFromContentful(),
+    ]);
+
+    const sorted = [...directors].sort(compareDirectorsBySurname);
+
+    return {
+      directors: sorted.map((director) => ({
+        name: director.name,
+        slug: director.slug,
+      })),
+      editorialVideos,
+    };
+  } catch (error) {
+    console.error('Error fetching directors section data:', error);
+    return {
+      directors: [],
+      editorialVideos: [],
+    };
+  }
+}
+
 async function getStaticData() {
   try {
-    const [allHeroVideos, fixedAudioTrack] = await Promise.all([
+    const [allHeroVideos, fixedAudioTrack, directorsSection] = await Promise.all([
       getAllHeroVideos(),
       getRandomAudioTrack(),
+      getDirectorsSectionData(),
     ]);
 
     return {
       allHeroVideos,
       fixedAudioTrack,
+      directorsSection,
       timestamp: new Date().toISOString(),
     };
   } catch (error) {
@@ -41,6 +70,7 @@ async function getStaticData() {
     return {
       allHeroVideos: [],
       fixedAudioTrack: null,
+      directorsSection: { directors: [], editorialVideos: [] },
       timestamp: new Date().toISOString(),
     };
   }
@@ -55,7 +85,10 @@ export default async function HomePage() {
         allHeroVideos={staticData.allHeroVideos}
         fixedAudioTrack={staticData.fixedAudioTrack}
       />
-      <Directors />
+      <Directors
+        directors={staticData.directorsSection.directors}
+        editorialVideos={staticData.directorsSection.editorialVideos}
+      />
       <Contact />
     </>
   );

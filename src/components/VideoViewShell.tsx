@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState, useRef, useCallback, useEffect, type ReactNode } from 'react';
 import type { VideoItem } from '@/lib/types';
 import { formatVideoDisplayTitle } from '@/lib/types';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface VideoViewShellProps {
   director: { name: string; slug: string };
@@ -18,19 +19,6 @@ interface VideoViewShellProps {
     toggleFullscreen: () => void;
     isMobile: boolean;
   }) => ReactNode;
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  return isMobile;
 }
 
 function useIsIOS() {
@@ -185,12 +173,14 @@ export default function VideoViewShell({
           <div className="absolute left-6 top-[15%] md:top-1/2 transform -translate-y-1/2 z-20">
             <button
               type="button"
+              aria-label="Video anterior"
               onClick={onPreviousVideo}
               className="flex flex-col items-center space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
             >
               <Image
                 src="/images/icons/arrow.png"
-                alt="Previous Video"
+                alt=""
+                aria-hidden="true"
                 width={32}
                 height={32}
                 className="w-8 h-8 -rotate-135 transition-transform"
@@ -201,12 +191,14 @@ export default function VideoViewShell({
           <div className="absolute right-6 top-[15%] md:top-1/2 transform -translate-y-1/2 z-20">
             <button
               type="button"
+              aria-label="Video siguiente"
               onClick={onNextVideo}
               className="flex flex-col items-center space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
             >
               <Image
                 src="/images/icons/arrow.png"
-                alt="Next Video"
+                alt=""
+                aria-hidden="true"
                 width={32}
                 height={32}
                 className="w-8 h-8 transition-transform rotate-45"
@@ -217,12 +209,14 @@ export default function VideoViewShell({
           <div className="absolute bottom-6 left-6 z-50">
             <button
               type="button"
+              aria-label={`Volver a ${director.name}`}
               onClick={onBack}
               className="flex flex-col items-start space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
             >
               <Image
                 src="/images/icons/arrow.png"
-                alt="Back to Videos"
+                alt=""
+                aria-hidden="true"
                 width={32}
                 height={32}
                 className="w-8 h-8 rotate-180 hover:opacity-80 transition-opacity"

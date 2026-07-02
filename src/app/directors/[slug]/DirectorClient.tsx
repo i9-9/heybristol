@@ -1,31 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import LogoB from "@/components/LogoB";
-import { useState, useEffect } from "react";
 import type { VideoItem } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import VideoCardWithHover from "@/components/VideoCardWithHover";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { navigateHomeAndScrollToHero, navigateHomeAndScrollToSection } from "@/lib/scroll-to-hero";
+import HomeLogoButton from "@/components/HomeLogoButton";
 
 interface DirectorClientProps {
   director: { name: string; slug: string };
   videos: VideoItem[];
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-
-  return isMobile;
 }
 
 const SPAN_CLASSES: Record<number, string> = {
@@ -162,52 +147,18 @@ export default function DirectorClient({ director, videos }: DirectorClientProps
   return (
     <div className="fixed inset-0 z-50 bg-black">
       <div className="absolute top-0 left-0 p-6 z-10">
-        <button
-          onClick={() => {
-            router.push('/');
-            setTimeout(() => {
-              const scrollToHero = () => {
-                const heroSection = document.querySelector('section');
-                if (heroSection) {
-                  heroSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start',
-                    inline: 'nearest',
-                  });
-                } else {
-                  setTimeout(scrollToHero, 200);
-                }
-              };
-              scrollToHero();
-            }, 300);
-          }}
+        <HomeLogoButton
+          onClick={() => navigateHomeAndScrollToHero(router)}
           className="w-10 md:w-24 h-auto text-white hover:opacity-80 transition-opacity cursor-pointer"
-        >
-          <LogoB />
-        </button>
+        />
       </div>
 
       <div className="absolute bottom-6 left-6 z-50">
         <button
-          onClick={() => {
-            router.push('/');
-            setTimeout(() => {
-              const scrollToDirectors = () => {
-                const directorsSection = document.getElementById('directors');
-                if (directorsSection) {
-                  directorsSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start',
-                    inline: 'nearest',
-                  });
-                } else {
-                  setTimeout(scrollToDirectors, 200);
-                }
-              };
-              scrollToDirectors();
-            }, 300);
-          }}
-          className="flex flex-col items-start space-y-2 text-white cursor-pointer"
+          type="button"
+          aria-label="Volver a directores"
+          onClick={() => navigateHomeAndScrollToSection(router, 'directors')}
+          className="flex flex-col items-start space-y-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
         >
           <Image
             src="/images/icons/arrow.png"

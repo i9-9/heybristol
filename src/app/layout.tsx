@@ -66,6 +66,9 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         
+        {/* Disable Vimeo SEO metadata hook before any player.js loads (throws on null chapters) */}
+        <script dangerouslySetInnerHTML={{ __html: 'window.VimeoSeoMetadataAppended=true' }} />
+        
         {/* DNS Prefetch y Preconnect para Vimeo */}
         <link rel="dns-prefetch" href="https://player.vimeo.com" />
         <link rel="preconnect" href="https://player.vimeo.com" crossOrigin="anonymous" />
